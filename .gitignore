@@ -1,0 +1,5 @@
+#ignore compiled files
+*.pyc
+
+#ignore MacOSX directory cache
+.DS_Store

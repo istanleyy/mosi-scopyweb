@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'scope_core.apps.ScopeCoreConfig'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -76,12 +77,8 @@ WSGI_APPLICATION = 'scopy.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'mysql.connector.django',
-        'NAME': 'scopyweb',
-        'USER': 'Sniper',
-        'PASSWORD': 'MOSi0916',
-        'HOST': '127.0.0.1',
-        'PORT': '3307',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'scopyweb.db'),
     }
 }
 
