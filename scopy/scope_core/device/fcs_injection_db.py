@@ -38,6 +38,7 @@ class FCSInjectionDevice_db(AbstractDevice):
     ##############################################
 
     id = 'not_set'
+    isConnected = False
 
     def connect(self):
         return self._connectionManager.connect()
@@ -53,6 +54,26 @@ class FCSInjectionDevice_db(AbstractDevice):
         else:
             return False
 
+    def getDeviceStatus(self):
+        query = ("SELECT alarmstatus,alarmid FROM a_alarm A INNER JOIN cal_data2 C ON A.injid=C.injid WHERE C.colmachinenum='{}'".format(self.id))
+        result = self._connectionManager.query(query)
+        if result is not None:
+            print result
+            return result
+        else:
+            return "fail"
+
     def __init__(self, id):
         self.id = id
+        if self.connect():
+            print("Connection success! Check device ID={}...".format(id))
+            if self.checkDeviceExists():
+                print("Device found. Ready to proceed...")
+                print 'Device is {}, Module version {}\n'.format(self.name, self.version)
+                self.disconnect()
+            else:
+                print("Device doesn't exist!")
+                self.disconnect()
+        else:
+            print("Connection failed!")
         

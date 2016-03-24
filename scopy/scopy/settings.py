@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'scope_core.apps.ScopeCoreConfig',
     'rest_framework',
+    'djcelery',
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -83,7 +84,13 @@ REST_FRAMEWORK = {
 
 # Celery settings
 
-# BROKER_URL = ''
+BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
+CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Asia/Taipei'
 
 
 # Database
@@ -134,3 +141,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+import djcelery
+djcelery.setup_loader()

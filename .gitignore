@@ -1,5 +1,9 @@
-#ignore compiled files
+# ignore compiled files
 *.pyc
 
-#ignore MacOSX directory cache
+# ignore local files
+celerybeat-schedule
+scopyweb.db
+
+# ignore MacOSX directory cache
 .DS_Store
