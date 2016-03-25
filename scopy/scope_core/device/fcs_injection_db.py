@@ -1,6 +1,7 @@
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 
+
 class FCSInjectionDevice_db(AbstractDevice):
 
     ##############################################
@@ -39,12 +40,14 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     id = 'not_set'
     isConnected = False
+    activeDevice = None
 
     def connect(self):
         return self._connectionManager.connect()
     
     def disconnect(self):
         self._connectionManager.disconnect()
+        self.isConnected = False
         
     def checkDeviceExists(self):
         query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self.id))
@@ -55,7 +58,9 @@ class FCSInjectionDevice_db(AbstractDevice):
             return False
 
     def getDeviceStatus(self):
-        query = ("SELECT alarmstatus,alarmid FROM a_alarm A INNER JOIN cal_data2 C ON A.injid=C.injid WHERE C.colmachinenum='{}'".format(self.id))
+        query = (
+            "SELECT strtime,alarmstatus,alarmid FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
+            )
         result = self._connectionManager.query(query)
         if result is not None:
             print result
@@ -68,9 +73,10 @@ class FCSInjectionDevice_db(AbstractDevice):
         if self.connect():
             print("Connection success! Check device ID={}...".format(id))
             if self.checkDeviceExists():
+                self.isConnected = True
+                FCSInjectionDevice_db.activeDevice = self
                 print("Device found. Ready to proceed...")
                 print 'Device is {}, Module version {}\n'.format(self.name, self.version)
-                self.disconnect()
             else:
                 print("Device doesn't exist!")
                 self.disconnect()
