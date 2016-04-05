@@ -71,7 +71,7 @@ class FCSInjectionDevice_db(AbstractDevice):
     def __init__(self, id):
         self.id = id
         if self.connect():
-            print("Connection success! Check device ID={}...".format(id))
+            print("DB connected. Check device ID={}...".format(id))
             if self.checkDeviceExists():
                 self.isConnected = True
                 FCSInjectionDevice_db.activeDevice = self

@@ -6,7 +6,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
     config = {
         'user': 'Sniper',
         'password': 'MOSi0916',
-        'host': '192.168.2.210',
+        'host': '192.168.1.102',
         'port': '3307',
         'database': 'FCSTEST',
         'connection_timeout': 30,
