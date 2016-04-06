@@ -12,7 +12,6 @@ class ScopeCoreConfig(AppConfig):
     
     def ready(self):
         simpleMsgServer = SimpleMsgServer()
-        simpleMsgServer.setName('msg_handle_thread')
         simpleMsgServer.start()
         fcsDevice = FCSInjectionDevice_db('B0750018')
         if fcsDevice.isConnected:

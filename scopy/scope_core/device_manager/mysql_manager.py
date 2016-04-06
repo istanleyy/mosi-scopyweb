@@ -1,24 +1,16 @@
 import mysql.connector
 from mysql.connector import errorcode
 from abstract_manager import AbstractConnectionManager
+from scope_core.config import settings
 
 class MySqlConnectionManager(AbstractConnectionManager):
-    config = {
-        'user': 'Sniper',
-        'password': 'MOSi0916',
-        'host': '192.168.1.102',
-        'port': '3307',
-        'database': 'FCSTEST',
-        'connection_timeout': 30,
-        'raise_on_warnings': True,
-    }
 
     def connect(self):
         result = False
         try:
             global _connection
             global _cursor
-            _connection = mysql.connector.connect(**self.config)
+            _connection = mysql.connector.connect(**settings.MYSQL_CONFIG)
             _cursor = _connection.cursor()
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
