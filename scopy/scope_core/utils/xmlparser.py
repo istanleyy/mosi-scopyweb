@@ -2,20 +2,21 @@
 Simple XML parser to handle Scope XML messages
 """
 
-import xml.dom.minidom
+from lxml import etree
+from scope_core.config import settings
 
 def isScopeXml(str):
     try:
-        dom = xml.dom.minidom.parseString(str)
-    except xml.parsers.expat.ExpatError:
+        dom = etree.fromstring(str)
+    except etree.XMLSyntaxError:
         print "[Exception] Bad XML format."
         return False
         
-    if dom.documentElement.tagName == 'scope_job':
+    if dom.tag == 'scope_job':
         return True
-    elif dom.documentElement.tagName == 'scope_config':
-        file = open("../config/scope_config.xml", "wb")
-        dom.writexml(file)
+    elif dom.tag == 'scope_config':
+        file = open(settings.CONFIG_PATH, "w")
+        file.write(etree.tostring(dom, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()
         return True
     else:

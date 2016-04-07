@@ -13,20 +13,31 @@ class SimpleMsgServer(Thread):
  
     # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
-        # Sending message to connected client
-        conn.send('\nScopy Socket Test. Type something and hit enter:\n') #send only takes string
-
         # Infinite loop so that function do not terminate and thread do not end.
         while True: 
             # Receiving from client
-            data = conn.recv(1024)
-            reply = 'OK...' + data
-            if xmlparser.isScopeXml(data.strip(' \t\n\r')):
-                reply = 'false:ok'
-            if data.strip(' \t\n\r') == 'bye':
+            data = conn.recv(2048)
+            msg = data.strip(' \t\n\r')
+            reply = 'true:unknown message'
+            if not data:
+                break
+            elif msg == 'bye':
                 print 'Magic word received, closing connection...'
                 break
-            if not data: 
+            elif msg[0] != '<':
+                msgContent = msg.split(':', 1)
+                if msgContent[0] == 'ServerError':
+                    print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
+                    reply = 'false:errorAck'
+                elif msgContent[0] == 'ServerMsg':
+                    print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
+                    reply = 'false:ok'
+                else:
+                    print 'Received unknown message: ' + msg
+            elif xmlparser.isScopeXml(msg):
+                print 'Received Scope message.'
+                reply = 'false:ok'
+            else:
                 break
      
             conn.sendall(reply)

@@ -8,6 +8,7 @@ migrations/
 # ignore local files
 celerybeat-schedule
 scopyweb.db
+scope_config.xml
 
 # ignore MacOSX directory cache
 .DS_Store
