@@ -40,3 +40,7 @@ class ProductionDataTS(models.Model):
     eventtime = models.DateTimeField(auto_now_add=True)
     output = models.IntegerField(default=0)
     mct = models.IntegerField(default=0)
+
+class SessionManagement(models.Model):
+    job = models.ForeignKey(Job, on_delete=models.PROTECT)
+    msgid = models.IntegerField(default=0)
