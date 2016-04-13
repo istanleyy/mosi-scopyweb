@@ -42,5 +42,6 @@ class ProductionDataTS(models.Model):
     mct = models.IntegerField(default=0)
 
 class SessionManagement(models.Model):
+    modified = models.DateField(auto_now=True)
     job = models.ForeignKey(Job, on_delete=models.PROTECT)
     msgid = models.IntegerField(default=0)

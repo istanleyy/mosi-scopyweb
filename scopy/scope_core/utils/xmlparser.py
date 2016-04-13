@@ -3,6 +3,7 @@ Simple XML parser to handle Scope XML messages
 """
 
 import time
+from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
@@ -51,10 +52,14 @@ def getJobEventXml():
     pass
     
 def getXmlTimeVal():
-    timeText = time.strftime("%Y%m%d%H%M%S")
+    today = date.today()
     session = SessionManagement.objects.first()
-    mid = session.msgid
-    session.msgid += 1
+    if today > session.modified:
+        session.msgid = 0
+    else:
+        session.msgid += 1
     session.save()
-    msgIdText = timeText[2:-6] + "-" + str(mid)
+    
+    timeText = time.strftime("%Y%m%d%H%M%S")
+    msgIdText = timeText[2:-6] + "-" + str(session.msgid)
     return (msgIdText, timeText)
