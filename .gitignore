@@ -1,6 +1,6 @@
 # folders to ignore
-config/
-migrations/
+config/*
+scopy/scope_core/migrations/*
 
 # ignore compiled files
 *.pyc
