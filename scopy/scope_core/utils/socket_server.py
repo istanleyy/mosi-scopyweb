@@ -9,7 +9,7 @@ from threading import Thread
 from scope_core.config import settings
 from scope_core.utils import xmlparser
 
-class SimpleMsgServer(Thread):
+class SocketServer(Thread):
  
     # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
@@ -63,7 +63,7 @@ class SimpleMsgServer(Thread):
         self.cancelled = True
 
     def __init__(self):
-        super(SimpleMsgServer, self).__init__()
+        super(SocketServer, self).__init__()
         self.daemon = True
         self.cancelled = False
         
@@ -73,10 +73,11 @@ class SimpleMsgServer(Thread):
         #Bind socket to local host and port
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            self.s.bind((settings.SIMPLE_MSG_SERVER['HOST'], settings.SIMPLE_MSG_SERVER['PORT']))
+            self.s.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
         except socket.error as msg:
-            print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
-            sys.exit()
+            if msg[0] != 48:
+                print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
+                sys.exit()
      
         print 'Socket bind complete!'
  

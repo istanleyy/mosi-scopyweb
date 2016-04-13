@@ -52,5 +52,9 @@ def getJobEventXml():
     
 def getXmlTimeVal():
     timeText = time.strftime("%Y%m%d%H%M%S")
-    msgIdText = timeText[2:-6] + "-" + str(SessionManagement.objects.first().msgid)
+    session = SessionManagement.objects.first()
+    mid = session.msgid
+    session.msgid += 1
+    session.save()
+    msgIdText = timeText[2:-6] + "-" + str(mid)
     return (msgIdText, timeText)
