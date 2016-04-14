@@ -27,7 +27,7 @@ SCOPE_SERVER = {
 MYSQL_CONFIG = {
     'user': 'Sniper',
     'password': 'MOSi0916',
-    'host': '172.19.16.66',
+    'host': '192.168.2.210',
     'port': '3307',
     'database': 'FCSTEST',
     'connection_timeout': 30,

@@ -28,7 +28,7 @@ def isScopeXml(str):
     else:
         return False
         
-def getJobUpdateXml(jobId, actualPcs, mct):
+def getJobUpdateXml(actualPcs, mct):
     msgId, timeText = getXmlTimeVal()
     docRoot = etree.Element("scope_job")
     jobUpdate = etree.SubElement(docRoot, "job_update", msg_id=msgId)
@@ -41,15 +41,29 @@ def getJobUpdateXml(jobId, actualPcs, mct):
     
     # Get planned pcs (quantity) from models.Job
     doneTag.text = '1' if actualPcs >= Job.objects.get(jobid=jobId).quantity else '0'
-    jobIdTag.text = str(jobId)
+    session = SessionManagement.objects.first()
+    jobIdTag.text = str(session.job.jobid)
     stationTag.text = settings.DEVICE_INFO['ID']
     timeTag.text = timeText
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
-def getJobEventXml():
-    pass
+def getJobEventXml(eventType, eventCode):
+    msgId, timeText = getXmlTimeVal()
+    docRoot = etree.Element("scope_job")
+    jobEvent = etree.SubElement(docRoot, "job_event", msg_id=msgId)
+    jobIdTag = etree.SubElement(jobEvent, "job_id")
+    stationTag = etree.SubElement(jobEvent, "station")
+    timeTag = etree.SubElement(jobEvent, "time")
+    typeTag = etree.SubElement(jobEvent, "type", code=eventCode)
+    
+    session = SessionManagement.objects.first()
+    jobIdTag.text = str(session.job.jobid)
+    stationTag.text = settings.DEVICE_INFO['ID']
+    timeTag.text = timeText
+    typeTag.text = str(eventType)
+    return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
     
 def getXmlTimeVal():
     today = date.today()

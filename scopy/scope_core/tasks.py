@@ -15,7 +15,6 @@ def pollDeviceStatus():
     logger.info("Polling device data (p={})...".format(__dPeriod))
     #ptask = PeriodicTask.objects.filter(name='scope_core.tasks.pollDeviceStatus')[0]
     result = FCSInjectionDevice_db.activeDevice.getDeviceStatus()
-    jobupdatemsg = xmlparser.getJobUpdateXml(0,100,200)
-    request_sender.sendHttpRequest(jobupdatemsg)
-    logger.info("Result: %s" % result)
-    logger.info("MSG: %s" % jobupdatemsg)
+    scopemsg = xmlparser.getJobEventXml(1,"")
+    request_sender.sendHttpRequest(scopemsg)
+    logger.info("MSG: %s" % scopemsg)
