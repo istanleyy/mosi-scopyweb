@@ -8,7 +8,7 @@ class ScopeCoreConfig(AppConfig):
     verbose_name = 'Scope Device Adapter'
     
     def ready(self):
-        from utils.socket_server import SocketServer
+        from core.socket_server import SocketServer
         from .tasks import pollDeviceStatus
         from device.fcs_injection_db import FCSInjectionDevice_db
 

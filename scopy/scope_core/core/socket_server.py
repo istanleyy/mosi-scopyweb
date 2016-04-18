@@ -7,7 +7,7 @@ import sys
 from thread import *
 from threading import Thread
 from scope_core.config import settings
-from scope_core.utils import xmlparser
+from . import xmlparser
 
 class SocketServer(Thread):
  

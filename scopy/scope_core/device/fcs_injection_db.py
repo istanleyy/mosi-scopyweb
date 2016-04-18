@@ -67,6 +67,17 @@ class FCSInjectionDevice_db(AbstractDevice):
             return result
         else:
             return "fail"
+            
+    def getProductionStatus(self):
+        query = (
+            "SELECT CycleTime,CurrBoxNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            )
+        result = self._connectionManager.query(query)
+        if result is not None:
+            print result
+            return result
+        else:
+            return "fail"
 
     def __init__(self, id):
         self.id = id

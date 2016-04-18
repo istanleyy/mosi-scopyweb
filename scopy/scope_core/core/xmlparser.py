@@ -40,8 +40,8 @@ def getJobUpdateXml(actualPcs, mct):
     mctTag = etree.SubElement(jobUpdate, "mct")
     
     # Get planned pcs (quantity) from models.Job
-    doneTag.text = '1' if actualPcs >= Job.objects.get(jobid=jobId).quantity else '0'
     session = SessionManagement.objects.first()
+    doneTag.text = '1' if actualPcs >= Job.objects.get(jobid=session.job.jobid).quantity else '0'
     jobIdTag.text = str(session.job.jobid)
     stationTag.text = settings.DEVICE_INFO['ID']
     timeTag.text = timeText
