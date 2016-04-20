@@ -1,0 +1,30 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scope_job>
+  <job_item>
+    <job_id>58</job_id>
+    <urgent>yes</urgent>
+    <product>EK101010-3</product>
+    <plan_pcs>3000</plan_pcs>
+    <ct>80</ct>
+    <multiplier>1</multiplier>
+    <mold_id>ABC12345</mold_id>
+  </job_item>
+  <job_item>
+    <job_id>59</job_id>
+    <urgent>no</urgent>
+    <product>GJ102030-1/3412</product>
+    <plan_pcs>1000</plan_pcs>
+    <ct>60</ct>
+    <multiplier>2</multiplier>
+    <mold_id>DEF98765</mold_id>
+  </job_item>
+  <job_item>
+    <job_id>61</job_id>
+    <urgent>no</urgent>
+    <product>KK490851-2</product>
+    <plan_pcs>1000</plan_pcs>
+    <ct>120</ct>
+    <multiplier>1</multiplier>
+    <mold_id>GHI00000</mold_id>
+  </job_item>
+</scope_job>

@@ -4,19 +4,25 @@ to the server
 """
 
 from djcelery.models import IntervalSchedule
+from lxml import etree
+from scope_core.models import Job, ProductionDataTS, SessionManagement
 from . import xmlparser
 from . import request_sender
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
-        scopemsg = xmlparser.getJobEventXml(1,"")
-        request_sender.sendHttpRequest(scopemsg)
+        pass
         
     elif source == 'opMetrics':
         mct = data[0][0]
         pcs = data[0][1]
         scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
         request_sender.sendHttpRequest(scopemsg)
+        
+        dataEntry = ProductionDataTS.objects.create(job=SessionManagement.objects.first().job)
+        dataEntry.output = pcs
+        dataEntry.mct = mct
+        dataEntry.save()
         
         if task is None:
             print '!!! Unable to update task period due to missing argument !!!'
@@ -32,5 +38,6 @@ def processQueryResult(source, data, task=None):
     else:
         pass
 
-def performChangeOver():
-    pass
+def sendEventMsg(type, code):
+    scopemsg = xmlparser.getJobEventXml(type, code)
+    request_sender.sendHttpRequest(scopemsg)

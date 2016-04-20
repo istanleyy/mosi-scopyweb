@@ -30,7 +30,9 @@ class Job(models.Model):
     quantity = models.IntegerField(default=0)
     ct = models.IntegerField(default=0)
     multiplier = models.IntegerField(default=1)
-    urgent = models.BooleanField()
+    moldid = models.CharField(max_length=50)
+    urgent = models.BooleanField(default=False)
+    active = models.BooleanField(default=True)
     
     def __str__(self):
         return self.productid
@@ -40,6 +42,9 @@ class ProductionDataTS(models.Model):
     eventtime = models.DateTimeField(auto_now_add=True)
     output = models.IntegerField(default=0)
     mct = models.IntegerField(default=0)
+    
+    def __str__(self):
+        return self.eventtime
 
 class SessionManagement(models.Model):
     modified = models.DateField(auto_now=True)
