@@ -59,7 +59,18 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getDeviceStatus(self):
         query = (
-            "SELECT strtime,alarmstatus,alarmid FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
+            "SELECT MachineStatus FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            )
+        result = self._connectionManager.query(query)
+        if result is not None:
+            print result
+            return result
+        else:
+            return "fail"
+    
+    def getAlarmStatus(self):
+        query = (
+            "SELECT strtime,alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:

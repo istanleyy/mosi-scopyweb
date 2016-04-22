@@ -3,25 +3,22 @@ from __future__ import unicode_literals
 from django.db import models
 from django.utils.encoding import python_2_unicode_compatible
 
-@python_2_unicode_compatible
 class Machine(models.Model):
-    BAG_MODE = 'B'
-    QUEUE_MODE = 'Q'
-    JOB_MODE_CHOICES = (
-        (BAG_MODE, 'Bag'),
-        (QUEUE_MODE, 'Queue'),
+    OFFLINE = 0
+    MANUAL_OP = 1
+    SEMI_OP = 2
+    AUTO_OP = 3
+    OP_MODE_CHOICES = (
+        (OFFLINE, 'Offline'),
+        (MANUAL_OP, 'Manual'),
+        (SEMI_OP, 'Semi-auto'),
+        (AUTO_OP, 'Auto'),
     )
-    name = models.CharField(max_length=25)
-    type = models.CharField(max_length=10)
-    ipaddress = models.CharField(max_length=15)
-    queuemode = models.CharField(max_length=1,
-                                    choices=JOB_MODE_CHOICES,
-                                    default=BAG_MODE)
-    ownership = models.CharField(max_length=10)
-    description = models.CharField(max_length=200)
-    
-    def __str__(self):
-        return self.name
+    opmode = models.IntegerField(choices=OP_MODE_CHOICES,
+                                    default=OFFLINE)
+    motorOnOffStatus = models.BooleanField(default=False)
+    moldAdjustStatus = models.BooleanField(default=False)
+    cleaningStatus = models.BooleanField(default=False)
 
 @python_2_unicode_compatible    
 class Job(models.Model):
@@ -48,5 +45,7 @@ class ProductionDataTS(models.Model):
 
 class SessionManagement(models.Model):
     modified = models.DateField(auto_now=True)
-    job = models.ForeignKey(Job, on_delete=models.PROTECT)
+    job = models.ForeignKey(Job, on_delete=models.SET_NULL, blank=True, null=True)
     msgid = models.IntegerField(default=0)
+    errid = models.IntegerField(default=0)
+    errflag = models.BooleanField(default=False)

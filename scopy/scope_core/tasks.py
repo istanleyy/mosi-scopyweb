@@ -18,6 +18,9 @@ def pollDeviceStatus():
     result = FCSInjectionDevice_db.activeDevice.getDeviceStatus()
     if result is not None:
         job_control.processQueryResult('opStatus', result)
+    result = FCSInjectionDevice_db.activeDevice.getAlarmStatus()
+    if result is not None:
+        job_control.processQueryResult('alarmStatus', result)
     
 @periodic_task(run_every=timedelta(seconds=__dPeriod))
 def pollProdStatus():

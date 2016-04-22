@@ -10,7 +10,7 @@ CONFIG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_config.xml')
 JOBLIST_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_joblist.xml')
 
 DEVICE_INFO = {
-    'ID': 'XYZ000000',
+    'ID': 'CCBRCS05',
     'NAME': 'Test Device'
 }
 
@@ -30,6 +30,8 @@ MYSQL_CONFIG = {
     'host': '192.168.2.210',
     'port': '3307',
     'database': 'FCSTEST',
+    'charset': 'utf8',
+    'use_unicode': False,
     'connection_timeout': 30,
     'raise_on_warnings': True,
 }

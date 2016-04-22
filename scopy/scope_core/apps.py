@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 
 from thread import *
 from django.apps import AppConfig
+from scope_core.config import settings
 
 class ScopeCoreConfig(AppConfig):
     name = 'scope_core'
@@ -14,7 +15,7 @@ class ScopeCoreConfig(AppConfig):
 
         socketServer = SocketServer()
         socketServer.start()
-        fcsDevice = FCSInjectionDevice_db('B0750018')
+        fcsDevice = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
         if fcsDevice.isConnected:
             pollDeviceStatus.delay()
         else:
