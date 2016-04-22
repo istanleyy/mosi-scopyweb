@@ -132,6 +132,16 @@ def getJobStartXml():
     #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
+def getStartupXml():
+    docRoot = etree.Element("scope_job")
+    jobQueue = etree.SubElement(docRoot, "job_queue", mode=settings.QUEUE_MODE)
+    slot1 = etree.SubElement(jobQueue, "slot1")
+    slot2 = etree.SubElement(jobQueue, "slot2") # For list mode use
+    slot1.text = str(SessionManagement.objects.first().job.jobid)
+    slot2.text = '0'
+    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
+    return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
+
 def getXmlTimeVal():
     today = date.today()
     session = SessionManagement.objects.first()

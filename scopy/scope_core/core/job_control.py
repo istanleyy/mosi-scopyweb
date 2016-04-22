@@ -79,3 +79,6 @@ def processQueryResult(source, data, task=None):
 def sendEventMsg(type, code=""):
     scopemsg = xmlparser.getJobEventXml(type, code)
     request_sender.sendHttpRequest(scopemsg)
+    
+def sendStartupMsg():
+    request_sender.sendHttpRequest(xmlparser.getStartupXml())

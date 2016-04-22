@@ -9,14 +9,17 @@ class ScopeCoreConfig(AppConfig):
     verbose_name = 'Scope Device Adapter'
     
     def ready(self):
-        from core.socket_server import SocketServer
         from .tasks import pollDeviceStatus
+        from core import job_control
+        from core.socket_server import SocketServer
         from device.fcs_injection_db import FCSInjectionDevice_db
 
         socketServer = SocketServer()
         socketServer.start()
         fcsDevice = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
         if fcsDevice.isConnected:
+            job_control.sendStartupMsg()
             pollDeviceStatus.delay()
         else:
             print "!!! Unable to connect to device {} !!!".format(fcsDevice.id)
+            sys.exit(1)

@@ -9,6 +9,8 @@ CONFIG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_config.xml')
 
 JOBLIST_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_joblist.xml')
 
+QUEUE_MODE = 'bag'
+
 DEVICE_INFO = {
     'ID': 'CCBRCS05',
     'NAME': 'Test Device'
@@ -21,13 +23,13 @@ SOCKET_SERVER = {
 
 SCOPE_SERVER = {
     'IP': 'http://requestb.in/',
-    'PATH': '14nmkql1'
+    'PATH': '1kmeiw61'
 }
 
 MYSQL_CONFIG = {
     'user': 'Sniper',
     'password': 'MOSi0916',
-    'host': '192.168.2.210',
+    'host': '192.168.1.111',
     'port': '3307',
     'database': 'FCSTEST',
     'charset': 'utf8',
