@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import sys
 from thread import *
 from django.apps import AppConfig
 from scope_core.config import settings

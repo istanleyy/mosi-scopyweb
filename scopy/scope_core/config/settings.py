@@ -23,17 +23,15 @@ SOCKET_SERVER = {
 
 SCOPE_SERVER = {
     'IP': 'http://requestb.in/',
-    'PATH': '1kmeiw61'
+    'PATH': '1hcyntr1'
 }
 
 MYSQL_CONFIG = {
     'user': 'Sniper',
     'password': 'MOSi0916',
-    'host': '192.168.1.111',
+    'host': '127.0.0.1',
     'port': '3307',
     'database': 'FCSTEST',
     'charset': 'utf8',
-    'use_unicode': False,
     'connection_timeout': 30,
-    'raise_on_warnings': True,
 }

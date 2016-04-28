@@ -81,7 +81,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,CurrBoxNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT CycleTime,CurrBoxNum,ModName FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:

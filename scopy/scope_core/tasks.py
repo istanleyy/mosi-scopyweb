@@ -1,6 +1,7 @@
 from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
+from django.core.cache import cache
 from datetime import timedelta
 from device.fcs_injection_db import FCSInjectionDevice_db
 from core import xmlparser
@@ -9,23 +10,59 @@ from core import job_control
 
 
 logger = get_task_logger(__name__)
-__fPeriod = 10      # fixed period of 10s
-__dPeriod = 15      # dynamic period, default to 15s
+P_PRIOR_HIGH = 10
+P_PRIOR_MID = 12
+P_PRIOR_LOW = 15
+LOCK_EXPIRE = 60
 
-@periodic_task(run_every=timedelta(seconds=__fPeriod))
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
 def pollDeviceStatus():
-    logger.info("Polling device status (p={})...".format(__fPeriod))
-    result = FCSInjectionDevice_db.activeDevice.getDeviceStatus()
-    if result is not None:
-        job_control.processQueryResult('opStatus', result)
-    result = FCSInjectionDevice_db.activeDevice.getAlarmStatus()
-    if result is not None:
-        job_control.processQueryResult('alarmStatus', result)
+    lock_id = '{0}-lock'.format('statustask')
+    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(lock_id)
     
-@periodic_task(run_every=timedelta(seconds=__dPeriod))
+    if acquire_lock():
+        logger.info("Polling device status (p={})...".format(P_PRIOR_MID))
+        try:
+            result = FCSInjectionDevice_db.activeDevice.getDeviceStatus()
+            if result is not None:
+                job_control.processQueryResult('opStatus', result)
+        finally:
+            release_lock()
+    else:
+        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))
+
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_HIGH))
+def pollAlarmStatus():
+    lock_id = '{0}-lock'.format('alarmtask')
+    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(lock_id)
+    
+    if acquire_lock():
+        logger.info("Polling device status (p={})...".format(P_PRIOR_HIGH))
+        try:
+            result = FCSInjectionDevice_db.activeDevice.getAlarmStatus()
+            if result is not None:
+                job_control.processQueryResult('alarmStatus', result)
+        finally:
+            release_lock()
+    else:
+        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))
+
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
 def pollProdStatus():
-    pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
-    logger.info("Polling production data (p={})...".format(pTask.interval.every))
-    result = FCSInjectionDevice_db.activeDevice.getProductionStatus()
-    if result is not None:    
-        job_control.processQueryResult('opMetrics', result, pTask)
+    lock_id = '{0}-lock'.format('prodtask')
+    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(lock_id)
+    
+    if acquire_lock():
+        pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
+        logger.info("Polling production data (p={})...".format(pTask.interval.every))
+        try:
+            result = FCSInjectionDevice_db.activeDevice.getProductionStatus()
+            if result is not None:    
+                job_control.processQueryResult('opMetrics', result, pTask)
+        finally:
+            release_lock()
+    else:
+        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))

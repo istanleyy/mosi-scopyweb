@@ -4,14 +4,13 @@ from abstract_manager import AbstractConnectionManager
 from scope_core.config import settings
 
 class MySqlConnectionManager(AbstractConnectionManager):
-
+    
+    connection = None
+    
     def connect(self):
         result = False
         try:
-            global _connection
-            global _cursor
-            _connection = mysql.connector.connect(**settings.MYSQL_CONFIG)
-            _cursor = _connection.cursor()
+            self.connection = mysql.connector.connect(**settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Invalid username or password!")
@@ -24,11 +23,17 @@ class MySqlConnectionManager(AbstractConnectionManager):
             return result
             
     def disconnect(self):
-        _cursor.close()
-        _connection.close()
+        self.connection.close()
         
     def query(self, queryString):
-        _cursor.execute(queryString)
-        result = _cursor.fetchall()
+        try:
+            cursor = self.connection.cursor()
+        except mysql.connector.Error:
+            self.connection = mysql.connector.connect(**settings.MYSQL_CONFIG)
+            cursor = self.connection.cursor()
+        
+        cursor.execute(queryString)
+        result = cursor.fetchall()
+        cursor.close()
         return result
         

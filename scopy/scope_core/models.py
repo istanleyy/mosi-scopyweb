@@ -20,7 +20,7 @@ class Machine(models.Model):
     moldAdjustStatus = models.BooleanField(default=False)
     cleaningStatus = models.BooleanField(default=False)
 
-@python_2_unicode_compatible    
+@python_2_unicode_compatible
 class Job(models.Model):
     jobid = models.IntegerField(default=0)
     productid = models.CharField(max_length=50)
@@ -41,7 +41,7 @@ class ProductionDataTS(models.Model):
     mct = models.IntegerField(default=0)
     
     def __str__(self):
-        return self.eventtime
+        return self.eventtime.strftime('%Y-%m-%d %H:%M:%S')
 
 class SessionManagement(models.Model):
     modified = models.DateField(auto_now=True)

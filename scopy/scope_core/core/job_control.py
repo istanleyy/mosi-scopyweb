@@ -15,7 +15,7 @@ from . import request_sender
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
         machine = Machine.objects.first()
-        if data[0][0] == '離線':
+        if data[0][0] == u'離線':
             print 'Device is offline!'
             if machine.opmode != 0:
                 machine.opmode = 0
@@ -42,24 +42,18 @@ def processQueryResult(source, data, task=None):
     elif source == 'opMetrics':
         mct = data[0][0]
         pcs = data[0][1]
-        scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-        request_sender.sendHttpRequest(scopemsg)
-        
+        moldSerial = str(data[0][2])
+
+        if evalCOCondition() == 'mold':
+            performChangeOver(task, moldSerial)
+            
         dataEntry = ProductionDataTS.objects.create(job=SessionManagement.objects.first().job)
         dataEntry.output = pcs
         dataEntry.mct = mct
         dataEntry.save()
         
-        if task is None:
-            print '!!! Unable to update task period due to missing argument !!!'
-        else:
-            # Compare polling period with retrieved mct value
-            if mct != task.interval.every:
-                intv, created = IntervalSchedule.objects.get_or_create(
-                    every=mct, period='seconds'
-                )
-                task.interval_id = intv.id
-                task.save()
+        scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
+        request_sender.sendHttpRequest(scopemsg)
         
     elif source == 'alarmStatus':
         session = SessionManagement.objects.first()
@@ -82,3 +76,25 @@ def sendEventMsg(type, code=""):
     
 def sendStartupMsg():
     request_sender.sendHttpRequest(xmlparser.getStartupXml())
+
+def evalCOCondition():
+    return 'mold'
+
+def performChangeOver(task, moldserial):
+    session = SessionManagement.objects.first()
+    if moldserial != session.job.moldid:
+        # if the mold id of the production data has changed, 
+        # need to update session reference to the job using the new mold.
+        session.job = Job.objects.get(moldid=moldserial)
+        session.save()
+            
+        if task is None:
+            print '!!! Unable to update task period due to missing argument !!!'
+        else:
+            # Compare polling period with retrieved mct value
+            if session.job.ct != task.interval.every:
+                intv, created = IntervalSchedule.objects.get_or_create(
+                    every=session.job.ct, period='seconds'
+                )
+                task.interval_id = intv.id
+                task.save()
