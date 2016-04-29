@@ -10,9 +10,9 @@ from core import job_control
 
 
 logger = get_task_logger(__name__)
-P_PRIOR_HIGH = 10
-P_PRIOR_MID = 12
-P_PRIOR_LOW = 15
+P_PRIOR_HIGH = 9
+P_PRIOR_MID = 11
+P_PRIOR_LOW = 17
 LOCK_EXPIRE = 60
 
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
@@ -51,7 +51,7 @@ def pollAlarmStatus():
 
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
 def pollProdStatus():
-    lock_id = '{0}-lock'.format('prodtask')
+    lock_id = '{0}-lock'.format('infotask')
     acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(lock_id)
     

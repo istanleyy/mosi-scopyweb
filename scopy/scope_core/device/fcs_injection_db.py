@@ -52,7 +52,7 @@ class FCSInjectionDevice_db(AbstractDevice):
     def checkDeviceExists(self):
         query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self.id))
         result = self._connectionManager.query(query)
-        if result is not None and result[0][0] > 0:
+        if result is not None and result[0] > 0:
             return True
         else:
             return False

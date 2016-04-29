@@ -30,6 +30,7 @@ class Job(models.Model):
     moldid = models.CharField(max_length=50)
     urgent = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
+    inprogress = models.BooleanField(default=False)
     
     def __str__(self):
         return self.productid

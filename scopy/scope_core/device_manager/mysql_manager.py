@@ -1,10 +1,12 @@
 import mysql.connector
+import mysql.connector.pooling
 from mysql.connector import errorcode
 from abstract_manager import AbstractConnectionManager
 from scope_core.config import settings
 
 class MySqlConnectionManager(AbstractConnectionManager):
     
+    cnxpool = None
     connection = None
     
     def connect(self):
@@ -23,17 +25,21 @@ class MySqlConnectionManager(AbstractConnectionManager):
             return result
             
     def disconnect(self):
-        self.connection.close()
+        #self.connection.close()
+        pass
         
     def query(self, queryString):
         try:
             cursor = self.connection.cursor()
         except mysql.connector.Error:
-            self.connection = mysql.connector.connect(**settings.MYSQL_CONFIG)
+            self.connection = self.cnxpool.get_connection()
             cursor = self.connection.cursor()
-        
+            
         cursor.execute(queryString)
-        result = cursor.fetchall()
+        result = cursor.fetchone()
         cursor.close()
         return result
-        
+    
+    def __init__(self):
+        self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", **settings.MYSQL_CONFIG)
+    
