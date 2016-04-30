@@ -9,6 +9,8 @@ CONFIG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_config.xml')
 
 JOBLIST_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_joblist.xml')
 
+UNSYNC_MSG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_msglog.xml')
+
 QUEUE_MODE = 'bag'
 
 DEVICE_INFO = {

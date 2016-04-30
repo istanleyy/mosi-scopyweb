@@ -1,12 +1,14 @@
 """
 Simple XML parser to handle Scope XML messages
 """
-
+import threading
 import time
 from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
+
+LOCK = threading.Lock()
 
 def isScopeXml(str):
     try:
@@ -143,16 +145,20 @@ def getStartupXml():
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
 def getXmlTimeVal():
-    today = date.today()
-    session = SessionManagement.objects.first()
-    if today > session.modified:
-        session.msgid = 0
-    else:
-        session.msgid += 1
-    session.save()
-    
-    timeText = time.strftime("%Y%m%d%H%M%S")
-    msgIdText = timeText[2:-6] + "-" + str(session.msgid)
+    LOCK.acquire()
+    try:
+        today = date.today()
+        session = SessionManagement.objects.first()
+        if today > session.modified:
+            session.msgid = 0
+        else:
+            session.msgid += 1
+        session.save()
+        
+        timeText = time.strftime("%Y%m%d%H%M%S")
+        msgIdText = timeText[2:-6] + "-" + str(session.msgid)
+    finally:
+        LOCK.release()
     return (msgIdText, timeText)
     
 def createJobList(xmldom):
@@ -173,4 +179,14 @@ def createJobList(xmldom):
         return True
     except etree.XMLSyntaxError:
         print '\033[91m' + '[Scopy] Cannot add new job. Check message format!' + msgContent[1] + '\033[0m'
+        return False
+        
+def logUnsyncMsg(xmldom):
+    try:
+        pass
+    except etree.XMLSyntaxError:
+        print '\033[91m' + '[Scopy] Cannot write unsync message to log!' + msgContent[1] + '\033[0m'
+        return False
+    except IOError:
+        print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + msgContent[1] + '\033[0m'
         return False
