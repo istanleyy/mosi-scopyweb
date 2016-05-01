@@ -8,9 +8,13 @@ from thread import *
 from threading import Thread
 from scope_core.config import settings
 from . import xmlparser
+from . import job_control
 
 class SocketServer(Thread):
- 
+    # For testing
+    isCO = False
+    isDT = False
+    
     # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
         # Infinite loop so that function do not terminate and thread do not end.
@@ -32,6 +36,31 @@ class SocketServer(Thread):
                 elif msgContent[0] == 'ServerMsg':
                     print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
                     reply = 'false:ok'
+                elif msgContent[0] == 'test-toggleco':
+                    # For testing, should remove this elif block in production!
+                    if not self.isCO:
+                        # Begin change-over
+                        job_control.sendEventMsg(6, 'BG')
+                    else:
+                        # Change-over ends
+                        job_control.sendEventMsg(6, 'ED')
+                    self.isCO = not self.isCO
+                    reply = 'false:test'
+                elif msgContent[0] == 'test-toggledt':
+                    # For testing, should remove this elif block in production!
+                    if not self.isDT:
+                        # Downtime begins
+                        job_control.sendEventMsg(4)
+                    else:
+                        # Downtime ends
+                        job_control.sendEventMsg(1, 'X2')
+                    self.isDT = not self.isDT
+                    reply = 'false:test'
+                elif msgContent[0] == 'test-jobstart':
+                    # For testing, should remove this elif block in production!
+                    # Send job start message
+                    job_control.sendEventMsg(1)
+                    reply = 'false:test'
                 else:
                     print 'Received unknown message: ' + msg
             elif xmlparser.isScopeXml(msg):
@@ -41,6 +70,7 @@ class SocketServer(Thread):
                 break
      
             conn.sendall(reply)
+            print 'Local reply: ' + reply
      
         # Close socket when done
         conn.close()

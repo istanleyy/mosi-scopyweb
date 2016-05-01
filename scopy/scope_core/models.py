@@ -14,8 +14,7 @@ class Machine(models.Model):
         (SEMI_OP, 'Semi-auto'),
         (AUTO_OP, 'Auto'),
     )
-    opmode = models.IntegerField(choices=OP_MODE_CHOICES,
-                                    default=OFFLINE)
+    opmode = models.IntegerField(choices=OP_MODE_CHOICES, default=OFFLINE)
     motorOnOffStatus = models.BooleanField(default=False)
     moldAdjustStatus = models.BooleanField(default=False)
     cleaningStatus = models.BooleanField(default=False)

@@ -49,6 +49,8 @@ def getJobUpdateXml(actualPcs, mct):
     timeTag.text = timeText
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
+    
+    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
 def getJobEventXml(eventType, eventCode):
@@ -65,6 +67,8 @@ def getJobEventXml(eventType, eventCode):
     stationTag.text = settings.DEVICE_INFO['ID']
     timeTag.text = timeText
     typeTag.text = str(eventType)
+    
+    print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
     
 # Job start message follows B2MML JobOrder schema

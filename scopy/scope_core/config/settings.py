@@ -25,7 +25,7 @@ SOCKET_SERVER = {
 
 SCOPE_SERVER = {
     'IP': 'http://requestb.in/',
-    'PATH': '1hcyntr1'
+    'PATH': '1n8wlw31'
 }
 
 MYSQL_CONFIG = {
