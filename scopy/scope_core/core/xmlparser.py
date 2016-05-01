@@ -1,8 +1,10 @@
 """
 Simple XML parser to handle Scope XML messages
 """
+import os.path
 import threading
 import time
+from io import BytesIO
 from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
@@ -68,7 +70,7 @@ def getJobEventXml(eventType, eventCode):
     timeTag.text = timeText
     typeTag.text = str(eventType)
     
-    print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
+    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
     
 # Job start message follows B2MML JobOrder schema
@@ -184,13 +186,45 @@ def createJobList(xmldom):
     except etree.XMLSyntaxError:
         print '\033[91m' + '[Scopy] Cannot add new job. Check message format!' + msgContent[1] + '\033[0m'
         return False
-        
-def logUnsyncMsg(xmldom):
+
+def logUnsyncMsg(xmlstring):
     try:
-        pass
+        dom = etree.fromstring(xmlstring)
+        parser = etree.XMLParser(remove_blank_text=True)
+        if not os.path.isfile(settings.UNSYNC_MSG_PATH):
+            msgTemp = BytesIO('''\
+            <scope_job>
+                <unsync_messages>
+                    <event_list></event_list>
+                    <update_list></update_list>
+                </unsync_messages>
+            </scope_job>''')
+            xmltree = etree.parse(msgTemp, parser)
+            file = open(settings.UNSYNC_MSG_PATH, "w")
+            file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+            file.close()
+        else:
+            xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
+        
+        if dom[0].tag == 'job_event':
+            insertpos = xmltree.find(".//event_list")
+        elif dom[0].tag == 'job_update':
+            insertpos = xmltree.find(".//update_list")
+        else:
+            print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
+            return False
+        
+        insertmsg = insertpos.append(dom[0])
+        print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
+        
+        file = open(settings.UNSYNC_MSG_PATH, "w")
+        file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+        file.close()
+        return True
+        
     except etree.XMLSyntaxError:
-        print '\033[91m' + '[Scopy] Cannot write unsync message to log!' + msgContent[1] + '\033[0m'
+        print '\033[91m' + '[Scopy] XML syntax error in logUnsyncMsg()' + '\033[0m'
         return False
     except IOError:
-        print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + msgContent[1] + '\033[0m'
+        print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return False
