@@ -19,7 +19,7 @@ class ScopeCoreConfig(AppConfig):
         socketServer.start()
         fcsDevice = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
         if fcsDevice.isConnected:
-            job_control.sendStartupMsg()
+            job_control.init()
             pollDeviceStatus.delay()
         else:
             print "!!! Unable to connect to device {} !!!".format(fcsDevice.id)

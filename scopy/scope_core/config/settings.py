@@ -24,8 +24,8 @@ SOCKET_SERVER = {
 };
 
 SCOPE_SERVER = {
-    'IP': 'http://requestb.in/',
-    'PATH': '1n8wlw31'
+    'IP': 'http://192.168.2.28:3001/',
+    'PATH': 'hmi-connection/hmi-messages'
 }
 
 MYSQL_CONFIG = {
@@ -35,5 +35,5 @@ MYSQL_CONFIG = {
     'port': '3307',
     'database': 'FCSTEST',
     'charset': 'utf8',
-    'connection_timeout': 30,
+    'connection_timeout': 30
 }

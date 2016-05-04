@@ -20,7 +20,7 @@ def processQueryResult(source, data, task=None):
             if machine.opmode != 0:
                 machine.opmode = 0
                 machine.save()
-                request_sender.sendHttpRequest('false:bye', 'text')
+                request_sender.sendPostRequest('false:bye', 'text')
         elif str(data[0])[0] == '1':
             if machine.opmode != 1:
                 machine.opmode = 1
@@ -62,7 +62,7 @@ def processQueryResult(source, data, task=None):
             dataEntry.save()
         
             scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-            request_sender.sendHttpRequest(scopemsg)
+            request_sender.sendPostRequest(scopemsg)
 
     elif source == 'alarmStatus':
         session = SessionManagement.objects.first()
@@ -85,10 +85,16 @@ def processQueryResult(source, data, task=None):
 
 def sendEventMsg(type, code=""):
     scopemsg = xmlparser.getJobEventXml(type, code)
-    request_sender.sendHttpRequest(scopemsg)
+    request_sender.sendPostRequest(scopemsg)
     
-def sendStartupMsg():
-    request_sender.sendHttpRequest(xmlparser.getStartupXml())
+def init():
+    request_sender.sendPostRequest('false:up')
+    activeJobs = Job.objects.filter(active=True)
+    if not activeJobs:
+        getJobsFromServer()
+    
+def getJobsFromServer():
+    request_sender.sendGetRequest()
 
 def evalCOCondition():
     return 'mold'

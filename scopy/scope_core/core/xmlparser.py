@@ -148,7 +148,7 @@ def getStartupXml():
     slot1.text = str(SessionManagement.objects.first().job.jobid)
     slot2.text = '0'
     #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
-    return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
+    return etree.tostring(docRoot, encoding='utf-8', xml_declaration=False)
 
 def getXmlTimeVal():
     LOCK.acquire()
@@ -215,7 +215,7 @@ def logUnsyncMsg(xmlstring):
             return False
         
         insertmsg = insertpos.append(dom[0])
-        print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
+        #print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
         
         file = open(settings.UNSYNC_MSG_PATH, "w")
         file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
