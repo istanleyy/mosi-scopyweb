@@ -22,11 +22,11 @@ class Machine(models.Model):
 @python_2_unicode_compatible
 class Job(models.Model):
     jobid = models.IntegerField(default=0)
-    productid = models.CharField(max_length=50)
+    productid = models.CharField(max_length=50, default='TESTPRODUCT')
     quantity = models.IntegerField(default=0)
     ct = models.IntegerField(default=0)
     multiplier = models.IntegerField(default=1)
-    moldid = models.CharField(max_length=50)
+    moldid = models.CharField(max_length=50, default='TESTMOLD')
     urgent = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     inprogress = models.BooleanField(default=False)

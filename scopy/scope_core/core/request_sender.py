@@ -21,5 +21,7 @@ def sendGetRequest():
         print '-----> sending request...'
         r = requests.get(url)
         print '<----- remote response: ' + r.content
+        return r.content
     except requests.exceptions.RequestException as e:
         print e
+        return None

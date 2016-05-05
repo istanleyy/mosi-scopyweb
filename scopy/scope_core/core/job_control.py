@@ -91,10 +91,12 @@ def init():
     request_sender.sendPostRequest('false:up')
     activeJobs = Job.objects.filter(active=True)
     if not activeJobs:
-        getJobsFromServer()
+        jobxml = getJobsFromServer()
+        if jobxml is not None:
+            xmlparser.isScopeXml(jobxml)
     
 def getJobsFromServer():
-    request_sender.sendGetRequest()
+    return request_sender.sendGetRequest()
 
 def evalCOCondition():
     return 'mold'

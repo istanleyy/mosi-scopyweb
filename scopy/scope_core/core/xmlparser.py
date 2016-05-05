@@ -170,16 +170,17 @@ def getXmlTimeVal():
 def createJobList(xmldom):
     try:
         for element in xmldom.iter("job_item"):
-            newJob = Job.objects.create()
-            newJob.jobid = int(element[0].text)
-            newJob.productid = element[2].text
-            newJob.quantity = int(element[3].text)
-            newJob.ct = int(element[4].text)
-            newJob.multiplier = int(element[5].text)
-            newJob.moldid = element[6].text
-            if element[1].text == 'yes':
-                newJob.urgent = True
-            newJob.save()
+            if not Job.objects.filter(jobid=int(element[0].text)):
+                newJob = Job.objects.create()
+                newJob.jobid = int(element[0].text)
+                newJob.productid = element[3].text
+                newJob.quantity = int(element[2].text)
+                newJob.ct = int(element[4].text)
+                newJob.multiplier = int(element[5].text)
+                newJob.moldid = element[6].text
+                if element[1].text == 'yes':
+                    newJob.urgent = True
+                newJob.save()
             
         print '\033[93m' + '[Scopy] New jobs added.' + '\033[0m'
         return True

@@ -63,7 +63,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            print result
+            print(result)
             return result
         else:
             return "fail"
@@ -74,7 +74,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            print result
+            print(result)
             return result
         else:
             return "fail"
@@ -85,7 +85,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            print result
+            print(result)
             return result
         else:
             return "fail"
@@ -98,7 +98,7 @@ class FCSInjectionDevice_db(AbstractDevice):
                 self.isConnected = True
                 FCSInjectionDevice_db.activeDevice = self
                 print("Device found. Ready to proceed...")
-                print 'Device is {}, Module version {}\n'.format(self.name, self.version)
+                print('Device is {}, Module version {}\n'.format(self.name, self.version))
             else:
                 print("Device doesn't exist!")
                 self.disconnect()
