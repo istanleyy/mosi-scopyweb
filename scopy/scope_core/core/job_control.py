@@ -99,7 +99,36 @@ def getJobsFromServer():
     return request_sender.sendGetRequest()
 
 def evalCOCondition():
-    return 'mold'
+    # Evaluate CO condition only if machine is not offline nor in auto mode
+    if (0 < Machine.objects.first().opmode < 3):
+    
+        # Conditions for the machine to enter mold change status:
+        #   - current job's demanded quantity has been made
+        #   - machine is not having erronous downtime
+        #   - motor of the machine is switched OFF
+        if (ProductionDataTS.objects.last().output >= SessionManagement.objects.first().job.quantity and
+            not SessionManagement.objects.first().errflag and
+            not Machine.objects.first().motorOnOffStatus):
+            return 'mold'
+        
+        # Conditions for the machine to enter material pipe cleaning status:
+        #   - machine is not having erronous downtime
+        #   - machine's mold adjustment switch is ON
+        elif (not SessionManagement.objects.first().errflag and  
+                Machine.objects.first().moldAdjustStatus):
+            return 'moldadjust'
+        
+        # Conditions for the machine to enter material pipe cleaning status:
+        #   - machine is not having erronous downtime
+        #   - machine's material pipe cleaning switch is ON
+        elif (not SessionManagement.objects.first().errflag and  
+                Machine.objects.first().cleaningStatus):
+            return 'material'
+        
+        else:
+            pass
+    
+    return 'nochange'
 
 def performChangeOver(session, task, moldserial):
     if moldserial != session.job.moldid:
