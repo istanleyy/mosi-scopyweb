@@ -21,8 +21,8 @@ class ModbusManagerTestCase(TestCase):
     def test_read(self):
         mbconn = ModbusConnectionManager('tcp')
         mbconn.connect()
-        self.assertEqual(mbconn.readHoldingReg(4001, 2), True)
-        self.assertEqual(mbconn.readCoil(11, 2), True)
+        self.assertEqual(mbconn.readHoldingReg(4001, 2), (100,200))
+        self.assertEqual(mbconn.readCoil(11, 2), (1,0))
 
 class JobControlTestCase(TestCase):
 

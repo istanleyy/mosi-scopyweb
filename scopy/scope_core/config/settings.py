@@ -13,7 +13,7 @@ UNSYNC_MSG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_msglog.xml')
 
 QUEUE_MODE = 'bag'
 
-# Valid connector types: mysql, modbus
+# Valid connector types: fcsmysql, modbus
 CONNECTOR = 'modbus'
 
 DEVICE_INFO = {

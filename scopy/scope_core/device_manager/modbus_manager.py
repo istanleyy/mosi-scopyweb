@@ -6,16 +6,19 @@ from scope_core.config import settings
 
 class ModbusConnectionManager(AbstractConnectionManager):
     logger = None
+    protocol = None
     mbmaster = None
 
-    # Valid types are 'tcp', 'rtu'
-    def __init__(self, type):
+    # Valid protocol are 'tcp', 'rtu'
+    def __init__(self, prtcl):
         self.logger = modbus_tk.utils.create_logger("console")
+        self.protocol = prtcl
         
     def connect(self):
         try:
             self.mbmaster = modbus_tcp.TcpMaster(port=settings.MODBUS_CONFIG['port'])
             self.mbmaster.set_timeout(5.0)
+            return True
         except modbus_tk.modbus.ModbusError as error:
             logger.error("%s- Code=%d", error, error.get_exception_code())
             
@@ -25,16 +28,14 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def readHoldingReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(1, const.READ_HOLDING_REGISTERS, startadd, quantity)
-            print result
-            return True
+            return result
         except modbus_tk.modbus.ModbusError as error:
             logger.error("%s- Code=%d", error, error.get_exception_code())
     
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(1, const.READ_COILS, startadd, quantity)
-            print result
-            return True
+            return result
         except modbus_tk.modbus.ModbusError as error:
             logger.error("%s- Code=%d", error, error.get_exception_code())
     
