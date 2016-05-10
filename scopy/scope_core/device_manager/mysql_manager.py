@@ -4,7 +4,6 @@ from mysql.connector import errorcode
 from abstract_manager import AbstractConnectionManager
 from scope_core.config import settings
 
-
 class MySqlConnectionManager(AbstractConnectionManager):
     cnxpool = None
     connection = None    
@@ -29,7 +28,6 @@ class MySqlConnectionManager(AbstractConnectionManager):
             
     def disconnect(self):
         self.connection.close()
-        pass
         
     def query(self, queryString):
         try:

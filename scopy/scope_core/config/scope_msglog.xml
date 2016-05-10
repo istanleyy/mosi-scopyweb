@@ -2,8 +2,36 @@
 <scope_job>
   <unsync_messages>
     <event_list>
+      <job_event msg_id="160510-2">
+        <job_id>0</job_id>
+        <station>CCBRCS05</station>
+        <time>20160510120716</time>
+        <type code="NJ">1</type>
+      </job_event>
+      <job_event msg_id="160510-2">
+        <job_id>0</job_id>
+        <station>CCBRCS05</station>
+        <time>20160510120752</time>
+        <type code="NJ">1</type>
+      </job_event>
     </event_list>
     <update_list>
+      <job_update msg_id="160510-1">
+        <done>0</done>
+        <job_id>0</job_id>
+        <station>CCBRCS05</station>
+        <time>20160510120716</time>
+        <actual_pcs>0</actual_pcs>
+        <mct>10</mct>
+      </job_update>
+      <job_update msg_id="160510-1">
+        <done>0</done>
+        <job_id>0</job_id>
+        <station>CCBRCS05</station>
+        <time>20160510120752</time>
+        <actual_pcs>0</actual_pcs>
+        <mct>10</mct>
+      </job_update>
     </update_list>
   </unsync_messages>
 </scope_job>

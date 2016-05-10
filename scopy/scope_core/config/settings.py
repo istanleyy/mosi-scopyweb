@@ -13,6 +13,9 @@ UNSYNC_MSG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_msglog.xml')
 
 QUEUE_MODE = 'bag'
 
+# Valid connector types: mysql, modbus
+CONNECTOR = 'modbus'
+
 DEVICE_INFO = {
     'ID': 'CCBRCS05',
     'NAME': 'Test Device'
@@ -36,4 +39,10 @@ MYSQL_CONFIG = {
     'database': 'FCSTEST',
     'charset': 'utf8',
     'connection_timeout': 30
+}
+
+MODBUS_CONFIG = {
+    'protocol': 'tcp',
+    'slaveAddr': '127.0.0.1',
+    'port': 1502
 }

@@ -2,6 +2,7 @@ from django.test import TestCase
 from .models import Job, SessionManagement, Machine, ProductionDataTS
 from .core import xmlparser
 from .core import job_control
+from .device_manager.modbus_manager import ModbusConnectionManager
 
 class XmlParserTestCase(TestCase):
 
@@ -15,6 +16,14 @@ class XmlParserTestCase(TestCase):
         self.assertEqual(xmlparser.logUnsyncMsg(updatemsg), True)
         self.assertEqual(xmlparser.logUnsyncMsg(eventmsg), True)
         
+class ModbusManagerTestCase(TestCase):
+
+    def test_read(self):
+        mbconn = ModbusConnectionManager('tcp')
+        mbconn.connect()
+        self.assertEqual(mbconn.readHoldingReg(4001, 2), True)
+        self.assertEqual(mbconn.readCoil(11, 2), True)
+
 class JobControlTestCase(TestCase):
 
     def test_co_condition(self):
