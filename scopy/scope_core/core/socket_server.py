@@ -1,5 +1,13 @@
 """
-Simple socket server using threads
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+socket_server.py
+    Simple socket server using threads to communicate with Scope server
 """
  
 import socket
@@ -35,6 +43,8 @@ class SocketServer(Thread):
                     reply = 'false:errorAck'
                 elif msgContent[0] == 'ServerMsg':
                     print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
+                    if msgContent[1] == 'alive check':
+                        job_control.sendUpdateMsg()
                     reply = 'false:ok'
                 elif msgContent[0] == 'test-toggleco':
                     # For testing, should remove this elif block in production!

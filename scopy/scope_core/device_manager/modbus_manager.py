@@ -1,3 +1,15 @@
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+modbus_manager.py
+    A connection manager for the Modbus protocol implemented using Modbus-tk project
+"""
+
 import modbus_tk
 import modbus_tk.defines as const
 from modbus_tk import modbus_tcp

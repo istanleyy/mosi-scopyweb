@@ -1,3 +1,16 @@
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+abstract_device.py
+    Any device implementation for Scope must extend from this class to provide
+    required methods
+"""
+
 import abc
 
 class AbstractDevice(object):

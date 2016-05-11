@@ -1,5 +1,13 @@
 """
-Settings for the Scope_Core modules
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+settings.py
+    Settings for the Scope_Core modules
 """
 
 import os
@@ -14,7 +22,7 @@ UNSYNC_MSG_PATH = os.path.join(BASE_DIR, 'scope_core/config/scope_msglog.xml')
 QUEUE_MODE = 'bag'
 
 # Valid connector types: fcsmysql, modbus
-CONNECTOR = 'modbus'
+CONNECTOR = 'fcsmysql'
 
 DEVICE_INFO = {
     'ID': 'CCBRCS05',

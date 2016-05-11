@@ -1,3 +1,15 @@
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+mysql_manager.py
+    A connection manager to query a MySQL server using Oracle's python connector
+"""
+
 import mysql.connector
 import mysql.connector.pooling
 from mysql.connector import errorcode

@@ -1,3 +1,16 @@
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+modbus_device.py
+    Implements a Modbus device to communicate with Scope server using a
+    ModbusConnectionManager
+"""
+
 from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 
@@ -5,7 +18,7 @@ from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 class ModbusDevice(AbstractDevice):
 
     ##############################################
-    # Define inherit properties and moethods
+    # Define inherit properties and methods
     ##############################################
 
     @property
@@ -35,12 +48,11 @@ class ModbusDevice(AbstractDevice):
         self._connectionManager = newObj
 
     ##############################################
-    # Module specific properties and moethods
+    # Module specific properties and methods
     ##############################################
 
     id = 'not_set'
     isConnected = False
-    activeDevice = None
 
     def connect(self):
         return self._connectionManager.connect()
@@ -83,7 +95,6 @@ class ModbusDevice(AbstractDevice):
             print("Host connected. Check device ID={}...".format(id))
             if self.checkDeviceExists():
                 self.isConnected = True
-                self.activeDevice = self
                 print("Device found. Ready to proceed...")
                 print('Device is {}, Module version {}\n'.format(self.name, self.version))
             else:

@@ -2,40 +2,28 @@
 # -*- coding: utf-8 -*-
 
 """
-Manage Job activities and send corresponding Scope message
-to the server
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+job_control.py
+    Manage Job activities and send corresponding Scope message to the server
 """
 
 from djcelery.models import IntervalSchedule
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement
+from scope_core.device import device_definition as const
 from . import xmlparser
 from . import request_sender
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
-        machine = Machine.objects.first()
-        if data[0] == u'離線':
-            print 'Device is offline!'
-            if machine.opmode != 0:
-                machine.opmode = 0
-                machine.save()
-                request_sender.sendPostRequest('false:bye', 'text')
-        elif str(data[0])[0] == '1':
-            if machine.opmode != 1:
-                machine.opmode = 1
-                machine.save()
-                print 'Device in manual mode.'
-        elif str(data[0])[0] == '2':
-            if machine.opmode != 2:
-                machine.opmode = 2
-                machine.save()
-                print 'Device in semi-auto mode.'
-        elif str(data[0])[0] == '3':
-            if machine.opmode != 3:
-                machine.opmode = 3
-                machine.save()
-                print 'Device in auto mode.'
+        if data == const.OFFLINE:
+            request_sender.sendPostRequest('false:bye', 'text')
         else:
             pass
         
@@ -57,13 +45,8 @@ def processQueryResult(source, data, task=None):
             task.save()
         
         if session.job.inprogress:
-            dataEntry = ProductionDataTS.objects.create(job=session.job)
-            dataEntry.output = pcs
-            dataEntry.mct = mct
-            dataEntry.save()
-        
-            scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-            request_sender.sendPostRequest(scopemsg)
+            dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
+            sendUpdateMsg(pcs, mct)
 
     elif source == 'alarmStatus':
         session = SessionManagement.objects.first()
@@ -86,6 +69,14 @@ def processQueryResult(source, data, task=None):
 
 def sendEventMsg(type, code=""):
     scopemsg = xmlparser.getJobEventXml(type, code)
+    request_sender.sendPostRequest(scopemsg)
+
+def sendUpdateMsg(pcs=None, mct=None):
+    if pcs is None:
+        pcs = ProductionDataTS.objects.last().output
+    if mct is None:
+        mct = ProductionDataTS.objects.last().mct
+    scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
     request_sender.sendPostRequest(scopemsg)
     
 def init():

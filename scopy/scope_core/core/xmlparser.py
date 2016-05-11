@@ -1,6 +1,15 @@
 """
-Simple XML parser to handle Scope XML messages
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+xmlparser.py
+    Simple XML parser to manipulate Scope XML messages
 """
+
 import os.path
 import threading
 import time

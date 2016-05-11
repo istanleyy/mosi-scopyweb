@@ -1,11 +1,30 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
+
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+fcs_injection_db.py
+    This module implements Scope's abstract device, and uses MySqlConnectionManager
+    to connect to FCS's injection mold machine data collector to query the production
+    status/data of the machine with the machine ID given to the instance of a
+    FCSInjectionDevice_db class
+"""
+
+import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
-
+from scope_core.models import Machine
 
 class FCSInjectionDevice_db(AbstractDevice):
 
     ##############################################
-    # Define inherit properties and moethods
+    # Define inherit properties and methods
     ##############################################
 
     @property
@@ -35,12 +54,11 @@ class FCSInjectionDevice_db(AbstractDevice):
         self._connectionManager = newObj
 
     ##############################################
-    # Module specific properties and moethods
+    # Module specific properties and methods
     ##############################################
 
     id = 'not_set'
     isConnected = False
-    activeDevice = None
 
     def connect(self):
         return self._connectionManager.connect()
@@ -63,8 +81,34 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            print(result)
-            return result
+            #print(result)
+            machine = Machine.objects.first()
+            if result[0] == u'離線':
+                print('Device is offline!')
+                if machine.opmode != 0:
+                    machine.opmode = 0
+                    machine.save()
+                    return const.OFFLINE
+            elif str(result[0])[0] == '1':
+                if machine.opmode != 1:
+                    machine.opmode = 1
+                    machine.save()
+                    print('Device in manual mode.')
+                    return const.MANUAL_MODE
+            elif str(result[0])[0] == '2':
+                if machine.opmode != 2:
+                    machine.opmode = 2
+                    machine.save()
+                    print('Device in semi-auto mode.')
+                    return const.SEMI_AUTO_MODE
+            elif str(result[0])[0] == '3':
+                if machine.opmode != 3:
+                    machine.opmode = 3
+                    machine.save()
+                    print('Device in auto mode.')
+                    return const.AUTO_MODE
+            else:
+                pass
         else:
             return "fail"
     
@@ -96,7 +140,6 @@ class FCSInjectionDevice_db(AbstractDevice):
             print("DB connected. Check device ID={}...".format(id))
             if self.checkDeviceExists():
                 self.isConnected = True
-                FCSInjectionDevice_db.activeDevice = self
                 print("Device found. Ready to proceed...")
                 print('Device is {}, Module version {}\n'.format(self.name, self.version))
             else:

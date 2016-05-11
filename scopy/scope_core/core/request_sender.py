@@ -1,3 +1,15 @@
+"""
+MOSi Scope Device Framework:
+Make real world manufacturing machines highly interoperable with different IT 
+solutions. Implemented using python and django framework.
+
+(C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
+(C) 2016 - MOSi Technologies, LLC - http://www.mosi.com.tw
+
+request_sender.py
+    Handles http reqeusts using the request module
+"""
+
 import requests
 from scope_core.config import settings
 

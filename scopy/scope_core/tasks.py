@@ -7,6 +7,7 @@ from device.fcs_injection_db import FCSInjectionDevice_db
 from core import xmlparser
 from core import request_sender
 from core import job_control
+from core import device_manager as device
 
 
 logger = get_task_logger(__name__)
