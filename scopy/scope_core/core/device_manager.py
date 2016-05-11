@@ -18,6 +18,7 @@ from scope_core.device.fcs_injection_db import FCSInjectionDevice_db
 deviceInstance = None
 
 def getDeviceInstance():
+    global deviceInstance
     if deviceInstance is None:
         if settings.CONNECTOR == 'modbus':
             deviceInstance = ModbusDevice(settings.DEVICE_INFO['ID'])

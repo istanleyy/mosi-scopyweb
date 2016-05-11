@@ -11,8 +11,10 @@ modbus_device.py
     ModbusConnectionManager
 """
 
+import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
+from scope_core.models import Machine
 
 
 class ModbusDevice(AbstractDevice):
@@ -71,7 +73,34 @@ class ModbusDevice(AbstractDevice):
     def getDeviceStatus(self):
         result = self._connectionManager.readHoldingReg(40001, 1)
         if result is not None:
-            return '3'
+            #print(result)
+            machine = Machine.objects.first()
+            if result[0] == 0:
+                print('Device is offline!')
+                if machine.opmode != 0:
+                    machine.opmode = 0
+                    machine.save()
+                    return const.OFFLINE
+            elif result[0] == 1:
+                if machine.opmode != 1:
+                    machine.opmode = 1
+                    machine.save()
+                    print('Device in manual mode.')
+                    return const.MANUAL_MODE
+            elif result[0] == 2:
+                if machine.opmode != 2:
+                    machine.opmode = 2
+                    machine.save()
+                    print('Device in semi-auto mode.')
+                    return const.SEMI_AUTO_MODE
+            elif result[0] == 3:
+                if machine.opmode != 3:
+                    machine.opmode = 3
+                    machine.save()
+                    print('Device in auto mode.')
+                    return const.AUTO_MODE
+            else:
+                pass
         else:
             return "fail"
     

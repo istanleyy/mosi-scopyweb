@@ -3,7 +3,6 @@ from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
 from django.core.cache import cache
 from datetime import timedelta
-from device.fcs_injection_db import FCSInjectionDevice_db
 from core import xmlparser
 from core import request_sender
 from core import job_control
@@ -25,7 +24,7 @@ def pollDeviceStatus():
     if acquire_lock():
         logger.info("Polling device status (p={})...".format(P_PRIOR_MID))
         try:
-            result = FCSInjectionDevice_db.activeDevice.getDeviceStatus()
+            result = device.getDeviceInstance().getDeviceStatus()
             if result is not None:
                 job_control.processQueryResult('opStatus', result)
         finally:
@@ -42,7 +41,7 @@ def pollAlarmStatus():
     if acquire_lock():
         logger.info("Polling device status (p={})...".format(P_PRIOR_HIGH))
         try:
-            result = FCSInjectionDevice_db.activeDevice.getAlarmStatus()
+            result = device.getDeviceInstance().getAlarmStatus()
             if result is not None:
                 job_control.processQueryResult('alarmStatus', result)
         finally:
@@ -60,7 +59,7 @@ def pollProdStatus():
         pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
         logger.info("Polling production data (p={})...".format(pTask.interval.every))
         try:
-            result = FCSInjectionDevice_db.activeDevice.getProductionStatus()
+            result = device.getDeviceInstance().getProductionStatus()
             if result is not None:    
                 job_control.processQueryResult('opMetrics', result, pTask)
         finally:

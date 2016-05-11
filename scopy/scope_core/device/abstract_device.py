@@ -45,3 +45,18 @@ class AbstractDevice(object):
     def connectionManager(self, newObj):
         # Sets the connection manager for the concrete device
         return
+
+    @abc.abstractmethod
+    def getDeviceStatus(self):
+        # Retrieve device's operating status
+        return
+    
+    @abc.abstractmethod
+    def getAlarmStatus(self):
+        # Retrieve device's alarm status
+        return
+        
+    @abc.abstractmethod
+    def getProductionStatus(self):
+        # Retrieve device's production status
+        return
