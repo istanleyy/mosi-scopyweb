@@ -24,6 +24,12 @@ def processQueryResult(source, data, task=None):
     if source == 'opStatus':
         if data == const.OFFLINE:
             request_sender.sendPostRequest('false:bye', 'text')
+        elif data == const.AUTO_MODE:
+            job = SessionManagement.objects.first().job
+            if not job.inprogress:
+                job.inprogress = True
+                job.save()
+                sendEventMsg(1)
         else:
             pass
         
@@ -57,7 +63,8 @@ def processQueryResult(source, data, task=None):
                     session.errid = data[1]
                 session.errflag = True
                 session.save()
-                sendEventMsg(4, session.errid)
+                #sendEventMsg(4, session.errid)
+                sendEventMsg(4, "X2")
         else:
             if session.errflag:
                 session.errflag = False
@@ -67,8 +74,14 @@ def processQueryResult(source, data, task=None):
     else:
         pass
 
-def sendEventMsg(type, code=""):
-    scopemsg = xmlparser.getJobEventXml(type, code)
+def sendEventMsg(evttype, code=""):
+    """
+    if type == 1:
+        scopemsg = xmlparser.getJobStartXml()
+    else:
+        scopemsg = xmlparser.getJobEventXml(evttype, code)
+    """
+    scopemsg = xmlparser.getJobEventXml(evttype, code)
     request_sender.sendPostRequest(scopemsg)
 
 def sendUpdateMsg(pcs=None, mct=None):

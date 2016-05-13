@@ -114,7 +114,7 @@ class ModbusDevice(AbstractDevice):
     def getProductionStatus(self):
         result = self._connectionManager.readHoldingReg(40009, 5)
         if result is not None:
-            return (18, 101, 'TESTMOLD')
+            return (result[0], result[1], '20150823ABC')
         else:
             return "fail"
 

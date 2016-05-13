@@ -61,7 +61,7 @@ def getJobUpdateXml(actualPcs, mct):
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
     
-    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
+    print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
 def getJobEventXml(eventType, eventCode):
@@ -79,7 +79,7 @@ def getJobEventXml(eventType, eventCode):
     timeTag.text = timeText
     typeTag.text = str(eventType)
     
-    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
+    print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
     
 # Job start message follows B2MML JobOrder schema
@@ -146,7 +146,7 @@ def getJobStartXml():
     key2.text = 'CycleTime'
     equipId.text = settings.DEVICE_INFO['NAME']
     
-    #print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
+    print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
 def getStartupXml():
@@ -165,7 +165,7 @@ def getXmlTimeVal():
         today = date.today()
         session = SessionManagement.objects.first()
         if today > session.modified:
-            session.msgid = 0
+            session.msgid = 1
         else:
             session.msgid += 1
         session.save()
