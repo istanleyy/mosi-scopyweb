@@ -92,6 +92,10 @@ def sendUpdateMsg(pcs=None, mct=None):
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
     request_sender.sendPostRequest(scopemsg)
     
+def sendMsgBuffer():
+    # getUnsyncMsgStr() returns None if there's an error getting the xml string
+    request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr())
+    
 def init():
     request_sender.sendPostRequest('false:up')
     activeJobs = Job.objects.filter(active=True)

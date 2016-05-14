@@ -16,7 +16,6 @@ from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
 
-
 class ModbusDevice(AbstractDevice):
 
     ##############################################

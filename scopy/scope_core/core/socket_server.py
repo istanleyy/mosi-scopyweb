@@ -40,6 +40,8 @@ class SocketServer(Thread):
                 msgContent = msg.split(':', 1)
                 if msgContent[0] == 'ServerError':
                     print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
+                    if msgContent[1] == 'msg sync':
+                        job_control.sendMsgBuffer()
                     reply = 'false:errorAck'
                 elif msgContent[0] == 'ServerMsg':
                     print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'

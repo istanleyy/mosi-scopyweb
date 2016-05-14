@@ -238,3 +238,31 @@ def logUnsyncMsg(xmlstring):
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return False
+        
+def getUnsyncMsgStr():
+    try:
+        parser = etree.XMLParser(remove_blank_text=True)
+        if not os.path.isfile(settings.UNSYNC_MSG_PATH):
+            msgTemp = BytesIO('''\
+            <scope_job>
+                <unsync_messages>
+                    <event_list></event_list>
+                    <update_list></update_list>
+                </unsync_messages>
+            </scope_job>''')
+            xmltree = etree.parse(msgTemp, parser)
+            file = open(settings.UNSYNC_MSG_PATH, "w")
+            file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+            file.close()
+        else:
+            xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
+        
+        print etree.tostring(xmltree, encoding='utf-8', pretty_print=True)    
+        return etree.tostring(xmltree, xml_declaration=True, encoding='utf-8')
+    
+    except etree.XMLSyntaxError:
+        print '\033[91m' + '[Scopy] XML syntax error in getUnsyncMsgStr()' + '\033[0m'
+        return None
+    except IOError:
+        print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
+        return None
