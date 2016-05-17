@@ -11,10 +11,12 @@ modbus_device.py
     ModbusConnectionManager
 """
 
+import random
 import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
+from scope_core.config import settings
 
 class ModbusDevice(AbstractDevice):
 
@@ -54,6 +56,9 @@ class ModbusDevice(AbstractDevice):
 
     id = 'not_set'
     isConnected = False
+    
+    # For testing purpose
+    outpcs = 5
 
     def connect(self):
         return self._connectionManager.connect()
@@ -63,14 +68,15 @@ class ModbusDevice(AbstractDevice):
         self.isConnected = False
         
     def checkDeviceExists(self):
-        result = self._connectionManager.readHoldingReg(40000, 1)
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
         if result is not None:
             return True
         else:
             return False
 
     def getDeviceStatus(self):
-        result = self._connectionManager.readHoldingReg(40001, 1)
+        # Control registers map: [opmode, chovrsw, chmatsw] 
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 3)
         if result is not None:
             #print(result)
             machine = Machine.objects.first()
@@ -104,16 +110,22 @@ class ModbusDevice(AbstractDevice):
             return "fail"
     
     def getAlarmStatus(self):
-        result = self._connectionManager.readCoil(0, 5)
+        result = self._connectionManager.readCoil(settings.MODBUS_CONFIG['alarmRegAddr'], 5)
         if result is not None:
-            return ('timestamp', 999, result[0])
+            return (999, result[0])
         else:
             return "fail"
             
     def getProductionStatus(self):
-        result = self._connectionManager.readHoldingReg(40009, 5)
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 5)
+        
+        # For testing purpose
+        #self.outpcs = random.randint(self.outpcs, self.outpcs+1)
+        self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
+        
         if result is not None:
-            return (result[0], result[1], '20150823ABC')
+            #return (result[0], result[1], '20150823ABC')
+            return (result[0], self.outpcs, '20150823ABC')
         else:
             return "fail"
 

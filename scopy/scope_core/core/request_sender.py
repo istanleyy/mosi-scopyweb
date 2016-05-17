@@ -24,8 +24,11 @@ def sendPostRequest(msg, contenttype='xml'):
         print '-----> sending request...'
         r = requests.post(url, data=msg, headers=headers)
         print '<----- remote response: ' + r.content
+        return True
     except requests.exceptions.RequestException as e:
         print e
+        print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
+        return False
 
 def sendGetRequest():
     url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']

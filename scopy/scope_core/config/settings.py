@@ -52,5 +52,8 @@ MYSQL_CONFIG = {
 MODBUS_CONFIG = {
     'protocol': 'tcp',
     'slaveAddr': '127.0.0.1',
-    'port': 1502
+    'port': 1502,
+    'ctrlRegAddr': 40001,
+    'alarmRegAddr': 0,
+    'dataRegAddr': 40011
 }

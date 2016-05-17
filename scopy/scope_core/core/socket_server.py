@@ -51,11 +51,8 @@ class SocketServer(Thread):
                 elif msgContent[0] == 'test-toggleco':
                     # For testing, should remove this elif block in production!
                     if not self.isCO:
-                        # Begin change-over
-                        job_control.sendEventMsg(6, 'BG')
-                    else:
-                        # Change-over ends
-                        job_control.sendEventMsg(6, 'ED')
+                        # Send job-terminating change-over msg
+                        job_control.sendEventMsg(6, 'NJ')
                     self.isCO = not self.isCO
                     reply = 'false:test'
                 elif msgContent[0] == 'test-toggledt':

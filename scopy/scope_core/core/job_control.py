@@ -22,10 +22,14 @@ from . import request_sender
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
-        if data == const.OFFLINE:
+        job = SessionManagement.objects.first().job
+        if data[0] == const.OFFLINE:
+            if job.inprogress:
+                job.inprogress = False
+                job.save()
             request_sender.sendPostRequest('false:bye', 'text')
-        elif data == const.AUTO_MODE:
-            job = SessionManagement.objects.first().job
+            
+        elif data[0] == const.AUTO_MODE:
             if not job.inprogress:
                 job.inprogress = True
                 job.save()
@@ -56,20 +60,22 @@ def processQueryResult(source, data, task=None):
 
     elif source == 'alarmStatus':
         session = SessionManagement.objects.first()
+        errlatch = 'X2'
         
-        if str(data[2]) == '1':
+        if str(data[1]) == '1':
             if not session.errflag:
-                if session.errid != data[1]:
-                    session.errid = data[1]
+                if session.errid != data[0]:
+                    session.errid = data[0]
+                    errlatch = data[0]
                 session.errflag = True
                 session.save()
-                #sendEventMsg(4, session.errid)
-                sendEventMsg(4, "X2")
+                sendEventMsg(4)
         else:
             if session.errflag:
                 session.errflag = False
                 session.save()
-                sendEventMsg(1)
+                #sendEventMsg(1, errlatch)
+                sendEventMsg(1, "X2")
     
     else:
         pass
@@ -82,7 +88,8 @@ def sendEventMsg(evttype, code=""):
         scopemsg = xmlparser.getJobEventXml(evttype, code)
     """
     scopemsg = xmlparser.getJobEventXml(evttype, code)
-    request_sender.sendPostRequest(scopemsg)
+    if not request_sender.sendPostRequest(scopemsg):
+        xmlparser.logUnsyncMsg(scopemsg)
 
 def sendUpdateMsg(pcs=None, mct=None):
     if pcs is None:
@@ -90,7 +97,8 @@ def sendUpdateMsg(pcs=None, mct=None):
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-    request_sender.sendPostRequest(scopemsg)
+    if not request_sender.sendPostRequest(scopemsg):
+        xmlparser.logUnsyncMsg(scopemsg)
     
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
