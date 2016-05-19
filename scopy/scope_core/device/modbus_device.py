@@ -75,35 +75,44 @@ class ModbusDevice(AbstractDevice):
             return False
 
     def getDeviceStatus(self):
-        # Control registers map: [opmode, chovrsw, chmatsw] 
+        # Control registers map: [opmode, chovrsw, chmatsw, moldid] 
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 3)
         if result is not None:
             #print(result)
             machine = Machine.objects.first()
+            status = const.RUNNING
+            moldid = str(result[3])
+            
+            if result[1] == 1:
+                status = const.CHG_MOLD
+            else:
+                if result[2] == 1:
+                    status = const.CHG_MATERIAL
+            
             if result[0] == 0:
                 print('Device is offline!')
                 if machine.opmode != 0:
                     machine.opmode = 0
                     machine.save()
-                    return const.OFFLINE
+                    return (const.OFFLINE, status, moldid)
             elif result[0] == 1:
                 if machine.opmode != 1:
                     machine.opmode = 1
                     machine.save()
                     print('Device in manual mode.')
-                    return const.MANUAL_MODE
+                    return (const.MANUAL_MODE, status, moldid)
             elif result[0] == 2:
                 if machine.opmode != 2:
                     machine.opmode = 2
                     machine.save()
                     print('Device in semi-auto mode.')
-                    return const.SEMI_AUTO_MODE
+                    return (const.SEMI_AUTO_MODE, status, moldid)
             elif result[0] == 3:
                 if machine.opmode != 3:
                     machine.opmode = 3
                     machine.save()
                     print('Device in auto mode.')
-                    return const.AUTO_MODE
+                    return (const.AUTO_MODE, status, moldid)
             else:
                 pass
         else:
@@ -125,7 +134,7 @@ class ModbusDevice(AbstractDevice):
         
         if result is not None:
             #return (result[0], result[1], '20150823ABC')
-            return (result[0], self.outpcs, '20150823ABC')
+            return (result[0], self.outpcs)
         else:
             return "fail"
 

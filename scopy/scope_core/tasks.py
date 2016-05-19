@@ -26,7 +26,8 @@ def pollDeviceStatus():
         try:
             result = device.getDeviceInstance().getDeviceStatus()
             if result is not None:
-                job_control.processQueryResult('opStatus', result)
+                pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
+                job_control.processQueryResult('opStatus', result, pTask)
         finally:
             release_lock()
     else:

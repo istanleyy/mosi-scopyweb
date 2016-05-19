@@ -20,32 +20,63 @@ from scope_core.device import device_definition as const
 from . import xmlparser
 from . import request_sender
 
+OPSTATUS = const.RUNNING
+
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
+        global OPSTATUS
         job = SessionManagement.objects.first().job
-        if data[0] == const.OFFLINE:
+        
+        if data[1] == const.RUNNING:
+            if data[0] == const.OFFLINE:
+                if job.inprogress:
+                    job.inprogress = False
+                    job.save()
+                    request_sender.sendPostRequest('false:bye', 'text')
+                
+            elif data[0] == const.AUTO_MODE:
+                if not job.inprogress:
+                    job.inprogress = True
+                    job.save()
+                    
+                    if OPSTATUS == const.CHG_MOLD:
+                        sendEventMsg(6, 'ED')
+                    elif OPSTATUS == const.CHG_MATERIAL:
+                        sendEventMsg(1, 'X1')
+                    else:
+                        sendEventMsg(1)
+                        
+                    OPSTATUS = const.RUNNING
+            else:
+                pass
+                
+        elif data[1] == const.CHG_MOLD:
+            if job.inprogress:
+                OPSTATUS = const.CHG_MOLD
+                session = SessionManagement.objects.first()
+                if performChangeOver(session, task, str(data[2])):
+                    sendEventMsg(6, 'BG')
+                else:
+                    sendEventMsg(6, 'NJ')
+        
+        elif data[1] == const.CHG_MATERIAL:
             if job.inprogress:
                 job.inprogress = False
                 job.save()
-            request_sender.sendPostRequest('false:bye', 'text')
-            
-        elif data[0] == const.AUTO_MODE:
-            if not job.inprogress:
-                job.inprogress = True
-                job.save()
-                sendEventMsg(1)
+                OPSTATUS = const.CHG_MATERIAL
+                sendEventMsg(4)
         else:
             pass
         
     elif source == 'opMetrics':
         mct = data[0]
         pcs = data[1]
-        moldSerial = str(data[2])
+        #moldSerial = str(data[2])
         
-        machine = Machine.objects.first()
-        session = SessionManagement.objects.first()
-        if evalCOCondition(machine, session) == 'mold':
-            performChangeOver(session, task, moldSerial)
+        #machine = Machine.objects.first()
+        #session = SessionManagement.objects.first()
+        #if evalCOCondition(machine, session) == 'mold':
+        #    performChangeOver(session, task, moldSerial)
         
         if task.interval.every != session.job.ct:
             intv, created = IntervalSchedule.objects.get_or_create(
@@ -148,19 +179,32 @@ def evalCOCondition(machine, session):
     return 'nochange'
 
 def performChangeOver(session, task, moldserial):
-    if moldserial != session.job.moldid:
-        # if the mold id of the production data has changed, 
-        # need to update session reference to the job using the new mold.
-        session.job = Job.objects.get(moldid=moldserial)
+    # Set current job inactive
+    oldJob = session.job
+    oldJob.inprogress = False
+    oldJob.active = False
+    oldJob.save()
+    
+    # If the mold id of the production data has changed, 
+    # need to update session reference to the job using the new mold.
+    newJob = Job.objects.filter(moldid=moldserial, active=True)[0]
+    if newJob:
+        session.job = newJob
         session.save()
+        if task is None:
+            print '!!! Unable to update task period due to missing argument !!!'
+        else:
+            # Compare polling period with retrieved mct value
+            if session.job.ct != task.interval.every:
+                intv, created = IntervalSchedule.objects.get_or_create(
+                    every=session.job.ct, period='seconds'
+                    )
+                task.interval_id = intv.id
+                task.save()
+                    
+        return True
             
-    if task is None:
-        print '!!! Unable to update task period due to missing argument !!!'
+    # Warn unable to find new job
     else:
-        # Compare polling period with retrieved mct value
-        if session.job.ct != task.interval.every:
-            intv, created = IntervalSchedule.objects.get_or_create(
-                every=session.job.ct, period='seconds'
-                )
-            task.interval_id = intv.id
-            task.save()
+        print '\033[91m' + '[Scopy] Unable to find next job in CO process!' + '\033[0m'
+        return False

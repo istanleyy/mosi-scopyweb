@@ -39,6 +39,11 @@ SCOPE_SERVER = {
     'PATH': 'hmi-connection/hmi-messages'
 }
 
+DEBUG_SERVER = {
+    'IP': 'http://requestb.in/',
+    'PATH': '1fia5ul1'
+}
+
 MYSQL_CONFIG = {
     'user': 'Sniper',
     'password': 'MOSi0916',
