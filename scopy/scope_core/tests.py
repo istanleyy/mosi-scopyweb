@@ -29,7 +29,7 @@ class ModbusManagerTestCase(TestCase):
         print '#####################################'
         mbconn = ModbusConnectionManager('tcp')
         mbconn.connect()
-        self.assertEqual(mbconn.readHoldingReg(4001, 2), (0,0))
+        self.assertEqual(mbconn.readHoldingReg(40001, 2), (0,0))
         self.assertEqual(mbconn.readCoil(11, 2), (0,0))
 
 class JobControlTestCase(TestCase):
@@ -39,44 +39,53 @@ class JobControlTestCase(TestCase):
         print '# running job control CO flow test'
         print '#####################################'
         # Setup test DB entries
-        job1 = Job.objects.create(productid="TESTJOB1", moldid="TESTMOLD1", quantity=100, ct=30)
-        job2 = Job.objects.create(productid="TESTJOB2", moldid="TESTMOLD2", quantity=100, ct=45)
-        job3 = Job.objects.create(productid="TESTJOB3", moldid="TESTMOLD2", quantity=100, ct=50)
+        job0 = Job.objects.create(productid="TESTJOB0", moldid="TESTMOLD0", active=False)
+        job1 = Job.objects.create(productid="TESTJOB1", moldid="T139113062", jobid=1, ct=30)
+        job2 = Job.objects.create(productid="TESTJOB2", moldid="T139113064", jobid=2, ct=45)
+        job3 = Job.objects.create(productid="TESTJOB3", moldid="T139113064", jobid=3, ct=50)
         session = SessionManagement.objects.create(job=Job.objects.first())
         intv, created = IntervalSchedule.objects.get_or_create(every=60, period='seconds')
         task = PeriodicTask.objects.create(name='scope_core.tasks.pollProdStatus', interval=intv)
-        # Starting job1
-        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'TESTMOLD1'))
+        # Session is associated with inactive job (job0),
+        # job_control should perform change-over to find and start job1
+        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'T139113062'), task)
         self.assertEqual(Job.objects.get(productid="TESTJOB1").inprogress, True)
+        self.assertEqual(PeriodicTask.objects.first().interval.every, job1.ct)
         # Change job1 running mode, inprogress state should remain unchanged
-        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.RUNNING, 'TESTMOLD1'))
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.RUNNING, 'T139113062'))
         self.assertEqual(Job.objects.get(productid="TESTJOB1").inprogress, True)
         # Change status of job1 to CHG_MATERIAL, inprogress state should become FALSE
-        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MATERIAL, 'TESTMOLD1'))
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MATERIAL, 'T139113062'))
         self.assertEqual(Job.objects.get(productid="TESTJOB1").inprogress, False)
         # Resume job1, inprogress should be TRUE
-        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'TESTMOLD1'))
+        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'T139113062'))
         self.assertEqual(Job.objects.get(productid="TESTJOB1").inprogress, True)
         # Change mold, select 'TESTMOLD2' should pick job2 as next job, and change job1 to inactive
-        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MOLD, 'TESTMOLD2'), task)
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MOLD, 'T139113064'), task)
         self.assertEqual(SessionManagement.objects.first().job.productid, 'TESTJOB2')
         self.assertEqual(Job.objects.get(productid="TESTJOB1").active, False)
         # Change mold complete, resume operation, job2 inprogres should be TRUE
-        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'TESTMOLD2'))
+        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'T139113064'))
         self.assertEqual(Job.objects.get(productid="TESTJOB2").inprogress, True)
+        self.assertEqual(PeriodicTask.objects.first().interval.every, job2.ct)
         # Change status of job2 to CHG_MATERIAL, inprogress state should become FALSE
-        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MATERIAL, 'TESTMOLD2'))
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MATERIAL, 'T139113064'))
         self.assertEqual(Job.objects.get(productid="TESTJOB2").inprogress, False)
         # Resume job2, inprogress should be TRUE
-        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'TESTMOLD2'))
+        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'T139113064'))
         self.assertEqual(Job.objects.get(productid="TESTJOB2").inprogress, True)
         # Change mold, select 'TESTMOLD2' should pick job3 as next job, and change job2 to inactive
-        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MOLD, 'TESTMOLD2'), task)
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MOLD, 'T139113064'), task)
         self.assertEqual(SessionManagement.objects.first().job.productid, 'TESTJOB3')
         self.assertEqual(Job.objects.get(productid="TESTJOB2").active, False)
         # Change mold complete, resume operation, job3 inprogres should be TRUE
-        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'TESTMOLD2'))
+        job_control.processQueryResult('opStatus', (const.AUTO_MODE, const.RUNNING, 'T139113064'))
         self.assertEqual(Job.objects.get(productid="TESTJOB3").inprogress, True)
+        self.assertEqual(PeriodicTask.objects.first().interval.every, job3.ct)
+        # Change mold, select no job should send terminate message, and change job3 to inactive
+        job_control.processQueryResult('opStatus', (const.MANUAL_MODE, const.CHG_MOLD, ''), task)
+        self.assertEqual(SessionManagement.objects.first().job.productid, 'TESTJOB3')
+        self.assertEqual(Job.objects.get(productid="TESTJOB3").active, False)
     
     """
     def test_co_condition(self):

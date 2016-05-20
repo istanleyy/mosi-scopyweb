@@ -20,52 +20,78 @@ from scope_core.device import device_definition as const
 from . import xmlparser
 from . import request_sender
 
+# OPSTATUS maintains the state of current machine status
 OPSTATUS = const.RUNNING
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
         global OPSTATUS
+        session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
+        # Machine is in ready-to -produce status (RUNNING)
         if data[1] == const.RUNNING:
+            # If the machine is detected to be OFFLINE, send corresponding message to server
             if data[0] == const.OFFLINE:
                 if job.inprogress:
                     job.inprogress = False
                     job.save()
                     request_sender.sendPostRequest('false:bye', 'text')
-                
+            
+            # If the machine has been switched to AUTO_MODE
             elif data[0] == const.AUTO_MODE:
+                # Check job status for current session
+                if not job.active:
+                    # If current job is completed or removed from work (not active),
+                    # should get the correct job to run
+                    if performChangeOver(session, task, str(data[2])):
+                        # Update job reference
+                        job = SessionManagement.objects.first().job
+                        
+                # Start the job if it has not been started
                 if not job.inprogress:
                     job.inprogress = True
                     job.save()
-                    
+                        
                     if OPSTATUS == const.CHG_MOLD:
+                        # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
                     elif OPSTATUS == const.CHG_MATERIAL:
+                        # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
                     else:
+                        # Sends normal job start message
                         sendEventMsg(1)
-                        
+                    
+                    # Update the state of machine's operation status
                     OPSTATUS = const.RUNNING
             else:
+                # Currently job_control is ignoring MANUAL_MODE and SEMI_AUTO_MODE
                 pass
-                
+        
+        # Machine enters line change (change mold)        
         elif data[1] == const.CHG_MOLD:
+            # Stop currently running job, update machine status and perform change-over (CO)
             if job.inprogress:
                 OPSTATUS = const.CHG_MOLD
-                session = SessionManagement.objects.first()
                 if performChangeOver(session, task, str(data[2])):
+                    # Successfully enter CO state, send message to server
                     sendEventMsg(6, 'BG')
                 else:
+                    # Error in CO procedure, send message to server to end current job without next job
                     sendEventMsg(6, 'NJ')
         
+        # Machine is changing material
         elif data[1] == const.CHG_MATERIAL:
+            # Stop currently running job and send a downtime message to server
             if job.inprogress:
                 job.inprogress = False
                 job.save()
                 OPSTATUS = const.CHG_MATERIAL
                 sendEventMsg(4)
         else:
+            # Valid machine status are: RUNNING, CHG_MOLD, CHG_MATERIAL
+            # Ignore other (undefined) status for now
             pass
         
     elif source == 'opMetrics':
@@ -137,6 +163,7 @@ def sendMsgBuffer():
     
 def init():
     request_sender.sendPostRequest('false:up')
+    # If all jobs in db are done (not active), get new jobs from server
     activeJobs = Job.objects.filter(active=True)
     if not activeJobs:
         jobxml = getJobsFromServer()
@@ -187,9 +214,9 @@ def performChangeOver(session, task, moldserial):
     
     # If the mold id of the production data has changed, 
     # need to update session reference to the job using the new mold.
-    newJob = Job.objects.filter(moldid=moldserial, active=True)[0]
+    newJob = Job.objects.filter(moldid=moldserial, active=True)
     if newJob:
-        session.job = newJob
+        session.job = newJob[0]
         session.save()
         if task is None:
             print '!!! Unable to update task period due to missing argument !!!'

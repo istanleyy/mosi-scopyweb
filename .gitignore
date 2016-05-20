@@ -9,6 +9,8 @@ scopy/scope_core/migrations/*
 celerybeat-schedule
 scopyweb.db
 scope_config.xml
+scope_joblist.xml
+scope_msglog.xml
 
 # ignore MacOSX directory cache
 .DS_Store
