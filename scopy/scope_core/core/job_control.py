@@ -71,15 +71,14 @@ def processQueryResult(source, data, task=None):
         
         # Machine enters line change (change mold)        
         elif data[1] == const.CHG_MOLD:
-            # Stop currently running job, update machine status and perform change-over (CO)
-            if job.inprogress:
-                OPSTATUS = const.CHG_MOLD
-                if performChangeOver(session, task, str(data[2])):
-                    # Successfully enter CO state, send message to server
-                    sendEventMsg(6, 'BG')
-                else:
-                    # Error in CO procedure, send message to server to end current job without next job
-                    sendEventMsg(6, 'NJ')
+            # Update machine status and perform change-over (CO)
+            OPSTATUS = const.CHG_MOLD
+            if performChangeOver(session, task, str(data[2])):
+                # Successfully enter CO state, send message to server
+                sendEventMsg(6, 'BG')
+            else:
+                # Error in CO procedure, send message to server to end current job without next job
+                sendEventMsg(6, 'NJ')
         
         # Machine is changing material
         elif data[1] == const.CHG_MATERIAL:
