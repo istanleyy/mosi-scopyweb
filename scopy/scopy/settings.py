@@ -143,5 +143,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 
+# Additional djcelery settings
+
 import djcelery
 djcelery.setup_loader()

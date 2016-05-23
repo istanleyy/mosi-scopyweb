@@ -14,8 +14,8 @@ import requests
 from scope_core.config import settings
 
 def sendPostRequest(msg, contenttype='xml'):
-    #url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
-    url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+    url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
+    #url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
     if contenttype == 'xml':
         headers = {'Content-Type': 'text/xml'}
     else:
