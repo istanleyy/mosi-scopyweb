@@ -28,7 +28,7 @@ class ModbusConnectionManager(AbstractConnectionManager):
         
     def connect(self):
         try:
-            self.mbmaster = modbus_tcp.TcpMaster(port=settings.MODBUS_CONFIG['port'])
+            self.mbmaster = modbus_tcp.TcpMaster(host=settings.MODBUS_CONFIG['slaveAddr'], port=settings.MODBUS_CONFIG['port'])
             self.mbmaster.set_timeout(5.0)
             return True
         except modbus_tk.modbus.ModbusError as error:
