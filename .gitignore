@@ -2,6 +2,7 @@
 config/*
 scopy/scope_core/migrations/*
 scopyw-env/
+venv/
 
 # ignore compiled files
 *.pyc
