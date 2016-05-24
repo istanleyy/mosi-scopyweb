@@ -13,6 +13,7 @@ scopyweb.db
 scope_config.xml
 scope_joblist.xml
 scope_msglog.xml
+scopy/scope_core/config/settings.py
 
 # ignore MacOSX directory cache
 .DS_Store
