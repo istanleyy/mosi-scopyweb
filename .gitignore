@@ -1,6 +1,7 @@
 # folders to ignore
 config/*
 scopy/scope_core/migrations/*
+scopyw-env/
 
 # ignore compiled files
 *.pyc
