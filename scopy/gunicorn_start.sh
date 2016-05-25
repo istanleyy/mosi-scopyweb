@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAME="scopy_app"
-DJANGODIR=/scopyweb/scopy
+DJANGODIR=/home/mosidev/sandbox/scopyweb/scopy
 USER=mosidev
 NUM_WORKERS=1
 DJANGO_SETTINGS_MODULE=scopy.settings
