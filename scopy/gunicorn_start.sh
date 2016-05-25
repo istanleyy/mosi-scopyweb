@@ -2,6 +2,7 @@
 
 NAME="scopy_app"
 DJANGODIR=/home/mosidev/sandbox/scopyweb/scopy
+SOCKFILE=/home/mosidev/sandbox/scopyweb/run/gunicorn.sock
 USER=mosidev
 NUM_WORKERS=1
 DJANGO_SETTINGS_MODULE=scopy.settings
@@ -15,7 +16,7 @@ source ../venv/bin/activate
 export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 export PYTHONPATH=$DJANGODIR:$PYTHONPATH
 
-# Create tun directory if it doesn't exist
+# Create run directory if it doesn't exist
 RUNDIR=$(dirname $SOCKFILE)
 test -d $RUNDIR || mkdir -p $RUNDIR
 
