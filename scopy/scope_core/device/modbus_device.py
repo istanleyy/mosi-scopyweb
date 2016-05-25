@@ -76,7 +76,7 @@ class ModbusDevice(AbstractDevice):
 
     def getDeviceStatus(self):
         # Control registers map: [opmode, chovrsw, chmatsw, moldid] 
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 3)
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 4)
         if result is not None:
             #print(result)
             machine = Machine.objects.first()

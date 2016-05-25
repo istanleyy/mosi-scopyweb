@@ -41,7 +41,7 @@ SCOPE_SERVER = {
 
 DEBUG_SERVER = {
     'IP': 'http://requestb.in/',
-    'PATH': '1fia5ul1'
+    'PATH': 'xqbbz4xq'
 }
 
 MYSQL_CONFIG = {
