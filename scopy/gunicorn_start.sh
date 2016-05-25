@@ -3,7 +3,6 @@
 NAME="scopy_app"
 DJANGODIR=/scopyweb/scopy
 USER=mosidev
-GROUP=webapps
 NUM_WORKERS=1
 DJANGO_SETTINGS_MODULE=scopy.settings
 DJANGO_WSGI_MODULE=scopy.wsgi
@@ -25,7 +24,7 @@ test -d $RUNDIR || mkdir -p $RUNDIR
 exec ../venv/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
     --name $NAME \
     --workers $NUM_WORKERS \
-    --user=$USER --group=$GROUP \
+    --user=$USER \
     --bind=unix:$SOCKFILE \
     --log-level=debug \
     --log-file=-
