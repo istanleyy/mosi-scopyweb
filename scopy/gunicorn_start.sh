@@ -1,7 +1,7 @@
 #!/bin/bash
 
 NAME="scopy_app"
-DJANGODIR=/scopyweb/scopy/scopy
+DJANGODIR=/scopyweb/scopy
 USER=mosidev
 GROUP=webapps
 NUM_WORKERS=1
@@ -12,7 +12,7 @@ echo "Starting $NAME as `whoami`"
 
 # Activate virtual environment
 cd $DJANGODIR
-source ../bin/activate
+source ../venv/bin/activate
 export DJANGO_SETTINGS_MODULE=$DJANGO_SETTINGS_MODULE
 export PYTHONPATH=$DJANGODIR:$PYTHONPATH
 
@@ -22,7 +22,7 @@ test -d $RUNDIR || mkdir -p $RUNDIR
 
 # Start Django Unicorn
 # Programs meant to be run under Supervisor shouldn't be daemonized
-exec ../bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
+exec ../venv/bin/gunicorn ${DJANGO_WSGI_MODULE}:application \
     --name $NAME \
     --workers $NUM_WORKERS \
     --user=$USER --group=$GROUP \
