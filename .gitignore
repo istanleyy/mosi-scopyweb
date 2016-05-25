@@ -4,6 +4,7 @@ scopy/scope_core/migrations/*
 scopyw-env/*
 venv/*
 run/*
+log/*
 
 # ignore compiled files
 *.pyc
