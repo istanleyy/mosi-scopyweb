@@ -165,9 +165,12 @@ def init():
     # If all jobs in db are done (not active), get new jobs from server
     activeJobs = Job.objects.filter(active=True)
     if not activeJobs:
-        jobxml = getJobsFromServer()
-        if jobxml is not None:
-            xmlparser.isScopeXml(jobxml)
+        result = getJobsFromServer()
+        if result is not None:
+            if result == 'ServerMsg:no more job':
+                pass
+            else:
+                xmlparser.isScopeXml(jobxml)
     
 def getJobsFromServer():
     return request_sender.sendGetRequest()
