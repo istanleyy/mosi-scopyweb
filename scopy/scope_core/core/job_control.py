@@ -103,16 +103,16 @@ def processQueryResult(source, data, task=None):
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
         
-        if task.interval.every != session.job.ct:
-            intv, created = IntervalSchedule.objects.get_or_create(
-                every=session.job.ct, period='seconds'
-                )
-            task.interval_id = intv.id
-            task.save()
-        
         if session.job.inprogress:
             dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
             sendUpdateMsg(pcs, mct)
+            
+            if task.interval.every != session.job.ct:
+                intv, created = IntervalSchedule.objects.get_or_create(
+                    every=session.job.ct, period='seconds'
+                    )
+                task.interval_id = intv.id
+                task.save()
 
     elif source == 'alarmStatus':
         session = SessionManagement.objects.first()
