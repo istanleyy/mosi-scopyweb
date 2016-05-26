@@ -114,7 +114,7 @@ class SocketServer(Thread):
         try:
             self.s.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
         except socket.error as msg:
-            if msg[0] != 48:
+            if msg[0] != 48 or msg[0] != 98:
                 print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
                 sys.exit()
      

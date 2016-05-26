@@ -99,7 +99,7 @@ def processQueryResult(source, data, task=None):
         #moldSerial = str(data[2])
         
         #machine = Machine.objects.first()
-        #session = SessionManagement.objects.first()
+        session = SessionManagement.objects.first()
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
         
