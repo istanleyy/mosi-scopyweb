@@ -13,17 +13,20 @@ request_sender.py
 import requests
 from scope_core.config import settings
 
-def sendPostRequest(msg, contenttype='xml'):
-    url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
-    #url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
-    if contenttype == 'xml':
-        headers = {'Content-Type': 'text/xml'}
+def sendPostRequest(msg):
+    if settings.DEBUG:
+        url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
-        headers = {'Content-Type': 'text/plain'}
+        url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
     
+    headers = {'Content-Type': 'application/json'}
+    payload = {
+        'station': settings.DEVICE_INFO['NAME'],
+        'message': msg
+    }
     try:
         print '-----> sending request...'
-        r = requests.post(url, data=msg, headers=headers)
+        r = requests.post(url, json=payload, headers=headers)
         print '<----- remote response: ' + r.content
         return True
     except requests.exceptions.RequestException as e:
@@ -32,10 +35,15 @@ def sendPostRequest(msg, contenttype='xml'):
         return False
 
 def sendGetRequest():
-    url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+    if settings.DEBUG:
+        url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
+    else:
+        url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+    
+    param = {'station': settings.DEVICE_INFO['NAME']}
     try:
         print '-----> sending request...'
-        r = requests.get(url)
+        r = requests.get(url, params=param)
         print '<----- remote response: ' + r.content
         return r.content
     except requests.exceptions.RequestException as e:

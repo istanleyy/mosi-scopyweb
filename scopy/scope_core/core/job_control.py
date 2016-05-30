@@ -36,7 +36,7 @@ def processQueryResult(source, data, task=None):
                 if job.inprogress:
                     job.inprogress = False
                     job.save()
-                    request_sender.sendPostRequest('false:bye', 'text')
+                    request_sender.sendPostRequest('false:bye')
             
             # If the machine has been switched to AUTO_MODE
             elif data[0] == const.AUTO_MODE:
@@ -170,7 +170,7 @@ def init():
             if result == 'ServerMsg:no more job':
                 pass
             else:
-                xmlparser.isScopeXml(jobxml)
+                xmlparser.isScopeXml(result)
     
 def getJobsFromServer():
     return request_sender.sendGetRequest()
