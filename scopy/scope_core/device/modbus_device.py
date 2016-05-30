@@ -128,13 +128,13 @@ class ModbusDevice(AbstractDevice):
     def getProductionStatus(self):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 5)
         
-        # For testing purpose
-        #self.outpcs = random.randint(self.outpcs, self.outpcs+1)
-        self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
-        
         if result is not None:
-            #return (result[0], result[1], '20150823ABC')
-            return (result[0], self.outpcs)
+            if settings.DEBUG:
+                # For testing purpose
+                self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
+                return (result[0], self.outpcs)
+            else:
+                return (result[0], result[1])
         else:
             return "fail"
 
