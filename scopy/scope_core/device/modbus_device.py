@@ -76,12 +76,13 @@ class ModbusDevice(AbstractDevice):
 
     def getDeviceStatus(self):
         # Control registers map: [opmode, chovrsw, chmatsw, moldid] 
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 4)
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 10)
         if result is not None:
             #print(result)
             machine = Machine.objects.first()
             status = const.RUNNING
-            moldid = str(result[3])
+            moldid = self.hextostr(result[3:9])
+            #print('moldid: ' + moldid)
             
             if result[1] == 1:
                 status = const.CHG_MOLD
@@ -137,6 +138,15 @@ class ModbusDevice(AbstractDevice):
                 return (result[0], result[1])
         else:
             return "fail"
+            
+    def hextostr(self, registers):
+        #print registers
+        result = ''
+        for i in range(len(registers)):
+            if registers[i] != 0:
+                hexval = '%x' % registers[i]
+                result += hexval.decode('hex')
+        return result.strip(' \t\n\r')
 
     def __init__(self, id):
         self.id = id
