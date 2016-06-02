@@ -25,7 +25,7 @@ def isScopeXml(str):
     try:
         dom = etree.fromstring(str)
     except etree.XMLSyntaxError:
-        print "[Exception] Bad XML format."
+        print '\033[91m' + '[Scopy] XMLSyntaxError exception!' + '\033[0m'
         return False
         
     if dom.tag == 'scope_job':

@@ -58,7 +58,7 @@ class ModbusDevice(AbstractDevice):
     isConnected = False
     
     # For testing purpose
-    outpcs = 5
+    outpcs = 0
 
     def connect(self):
         return self._connectionManager.connect()
@@ -78,44 +78,71 @@ class ModbusDevice(AbstractDevice):
         # Control registers map: [opmode, chovrsw, chmatsw, moldid] 
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 10)
         if result is not None:
-            #print(result)
+        
+            if settings.DEBUG:
+                print(result)        
             machine = Machine.objects.first()
             status = const.RUNNING
+            mode = const.OFFLINE
             moldid = self.hextostr(result[3:9])
             #print('moldid: ' + moldid)
+            statuschange = False
+            modechange = False
             
             if result[1] == 1:
                 status = const.CHG_MOLD
+                if not machine.moldAdjustStatus:
+                    machine.moldAdjustStatus = True
+                    statuschange = True
+                
             else:
+                status = const.RUNNING
+                if machine.moldAdjustStatus:
+                    machine.moldAdjustStatus = False
+                    statuschange = True
+
                 if result[2] == 1:
                     status = const.CHG_MATERIAL
+                    if not machine.cleaningStatus:
+                        machine.cleaningStatus = True
+                        statuschange = True
+                    
+                else:
+                    if machine.cleaningStatus:
+                        machine.cleaningStatus = False
+                        statuschange = True
             
             if result[0] == 0:
                 print('Device is offline!')
+                mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
-                    machine.save()
-                    return (const.OFFLINE, status, moldid)
+                    modechange = True
             elif result[0] == 1:
+                mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
-                    machine.save()
+                    modechange = True
                     print('Device in manual mode.')
-                    return (const.MANUAL_MODE, status, moldid)
             elif result[0] == 2:
+                mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
-                    machine.save()
+                    modechange = True
                     print('Device in semi-auto mode.')
-                    return (const.SEMI_AUTO_MODE, status, moldid)
             elif result[0] == 3:
+                mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
-                    machine.save()
+                    modechange = True
                     print('Device in auto mode.')
-                    return (const.AUTO_MODE, status, moldid)
             else:
                 pass
+            
+            if statuschange or modechange:
+                machine.save()
+                return (mode, status, moldid)
+                
         else:
             return "fail"
     
@@ -130,7 +157,7 @@ class ModbusDevice(AbstractDevice):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 5)
         
         if result is not None:
-            if settings.DEBUG:
+            if settings.SIMULATE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
                 return (result[0], self.outpcs)

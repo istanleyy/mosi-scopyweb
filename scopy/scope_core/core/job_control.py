@@ -17,6 +17,7 @@ from djcelery.models import IntervalSchedule
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement
 from scope_core.device import device_definition as const
+from scope_core.config import settings
 from . import xmlparser
 from . import request_sender
 
@@ -29,13 +30,18 @@ def processQueryResult(source, data, task=None):
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
+        if settings.DEBUG:
+                print(data)
+        
         # Machine is in ready-to -produce status (RUNNING)
         if data[1] == const.RUNNING:
             # If the machine is detected to be OFFLINE, send corresponding message to server
             if data[0] == const.OFFLINE:
-                if job.inprogress:
-                    job.inprogress = False
-                    job.save()
+                if OPSTATUS != const.OFFLINE:
+                    OPSTATUS = const.OFFLINE
+                    if job.inprogress:
+                        job.inprogress = False
+                        job.save()
                     request_sender.sendPostRequest('false:bye')
             
             # If the machine has been switched to AUTO_MODE
@@ -71,14 +77,15 @@ def processQueryResult(source, data, task=None):
         
         # Machine enters line change (change mold)        
         elif data[1] == const.CHG_MOLD:
-            # Update machine status and perform change-over (CO)
-            OPSTATUS = const.CHG_MOLD
-            if performChangeOver(session, task, str(data[2])):
-                # Successfully enter CO state, send message to server
-                sendEventMsg(6, 'BG')
-            else:
-                # Error in CO procedure, send message to server to end current job without next job
-                sendEventMsg(6, 'NJ')
+            # If not already in change-over (CO), update machine status and perform CO
+            if OPSTATUS != const.CHG_MOLD:
+                OPSTATUS = const.CHG_MOLD
+                if performChangeOver(session, task, str(data[2])):
+                    # Successfully enter CO state, send message to server
+                    sendEventMsg(6, 'BG')
+                else:
+                    # Error in CO procedure, send message to server to end current job without next job
+                    sendEventMsg(6, 'NJ')
         
         # Machine is changing material
         elif data[1] == const.CHG_MATERIAL:

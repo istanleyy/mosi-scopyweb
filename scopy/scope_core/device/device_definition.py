@@ -11,13 +11,13 @@ solutions. Implemented using python and django framework.
 """
 
 # Machine mode definitions
-OFFLINE = 0
-MANUAL_MODE = 1
-SEMI_AUTO_MODE = 2
-AUTO_MODE = 3
+OFFLINE = 'm0'
+MANUAL_MODE = 'm1'
+SEMI_AUTO_MODE = 'm2'
+AUTO_MODE = 'm3'
 
 # Machine status definitions
-RUNNING = 0
-CHG_MOLD = 1
-CHG_MATERIAL = 2
-MOLD_ADJUST = 3
+RUNNING = 's0'
+CHG_MOLD = 's1'
+CHG_MATERIAL = 's2'
+MOLD_ADJUST = 's3'
