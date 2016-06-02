@@ -28,7 +28,10 @@ def sendPostRequest(msg):
         print '-----> sending request...'
         r = requests.post(url, json=payload, headers=headers)
         print '<----- remote response: ' + r.content
-        return True
+        if r.content == 'ServerError:msg sync':
+            return None
+        else:
+            return True
     except requests.exceptions.RequestException as e:
         print e
         print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'

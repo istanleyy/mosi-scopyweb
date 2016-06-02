@@ -91,6 +91,7 @@ class ModbusDevice(AbstractDevice):
             
             if result[1] == 1:
                 status = const.CHG_MOLD
+                self.outpcs = 0
                 if not machine.moldAdjustStatus:
                     machine.moldAdjustStatus = True
                     statuschange = True

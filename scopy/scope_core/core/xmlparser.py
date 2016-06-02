@@ -266,3 +266,6 @@ def getUnsyncMsgStr():
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return None
+        
+def flushUnsyncMsg():
+    pass
