@@ -170,7 +170,7 @@ def sendUpdateMsg(pcs=None, mct=None):
     
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
-    result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr())
+    result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
     if result:
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()

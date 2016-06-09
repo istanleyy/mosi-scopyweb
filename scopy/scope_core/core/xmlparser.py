@@ -184,8 +184,8 @@ def createJobList(xmldom):
                 newJob.jobid = int(element[0].text)
                 newJob.productid = element[3].text
                 newJob.quantity = int(element[2].text)
-                newJob.ct = int(element[4].text)
-                newJob.multiplier = int(element[5].text)
+                newJob.ct = int(element[4].text) if element[4].text is not None else 20
+                newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
                 newJob.moldid = element[6].text
                 if element[1].text == 'yes':
                     newJob.urgent = True
@@ -204,10 +204,7 @@ def logUnsyncMsg(xmlstring):
         if not os.path.isfile(settings.UNSYNC_MSG_PATH):
             msgTemp = BytesIO('''\
             <scope_job>
-                <unsync_messages>
-                    <event_list></event_list>
-                    <update_list></update_list>
-                </unsync_messages>
+                <unsync_messages></unsync_messages>
             </scope_job>''')
             xmltree = etree.parse(msgTemp, parser)
             file = open(settings.UNSYNC_MSG_PATH, "w")
@@ -216,10 +213,9 @@ def logUnsyncMsg(xmlstring):
         else:
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
         
-        if dom[0].tag == 'job_event':
-            insertpos = xmltree.find(".//event_list")
-        elif dom[0].tag == 'job_update':
-            insertpos = xmltree.find(".//update_list")
+        # Log only event or update messages
+        if dom[0].tag == 'job_event' or dom[0].tag == 'job_update':
+            insertpos = xmltree.find(".//unsync_messages")
         else:
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
@@ -245,10 +241,7 @@ def getUnsyncMsgStr():
         if not os.path.isfile(settings.UNSYNC_MSG_PATH):
             msgTemp = BytesIO('''\
             <scope_job>
-                <unsync_messages>
-                    <event_list></event_list>
-                    <update_list></update_list>
-                </unsync_messages>
+                <unsync_messages></unsync_messages>
             </scope_job>''')
             xmltree = etree.parse(msgTemp, parser)
             file = open(settings.UNSYNC_MSG_PATH, "w")
@@ -268,4 +261,17 @@ def getUnsyncMsgStr():
         return None
         
 def flushUnsyncMsg():
-    pass
+    try:
+        parser = etree.XMLParser(remove_blank_text=True)
+        msgTemp = BytesIO('''\
+        <scope_job>
+            <unsync_messages></unsync_messages>
+        </scope_job>''')
+        xmltree = etree.parse(msgTemp, parser)
+        file = open(settings.UNSYNC_MSG_PATH, "w")
+        file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+        file.close()
+    
+    except IOError:
+        print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
+        return None

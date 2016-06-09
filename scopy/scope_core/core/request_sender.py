@@ -13,11 +13,14 @@ request_sender.py
 import requests
 from scope_core.config import settings
 
-def sendPostRequest(msg):
+def sendPostRequest(msg, errHandle=False):
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
-        url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+        if errHandle:
+            url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['ERR_HANDLE']
+        else:
+            url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
     
     headers = {'Content-Type': 'application/json'}
     payload = {
@@ -25,7 +28,7 @@ def sendPostRequest(msg):
         'message': msg
     }
     try:
-        print '-----> sending request...'
+        print '-----> sending request to ' + url
         r = requests.post(url, json=payload, headers=headers)
         print '<----- remote response: ' + r.content
         if r.content == 'ServerError:msg sync':
@@ -45,7 +48,7 @@ def sendGetRequest():
     
     param = {'station': settings.DEVICE_INFO['NAME']}
     try:
-        print '-----> sending request...'
+        print '-----> sending request to ' + url
         r = requests.get(url, params=param)
         print '<----- remote response: ' + r.content
         return r.content
