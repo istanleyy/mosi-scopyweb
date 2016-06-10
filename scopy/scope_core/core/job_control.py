@@ -22,7 +22,7 @@ from . import xmlparser
 from . import request_sender
 
 # OPSTATUS maintains the state of current machine status
-OPSTATUS = const.RUNNING
+OPSTATUS = const.IDLE
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
@@ -33,9 +33,10 @@ def processQueryResult(source, data, task=None):
         if settings.DEBUG:
                 print(data)
         
-        # Machine is in ready-to -produce status (RUNNING)
+        # Machine is in ready-to-produce status (RUNNING)
         if data[1] == const.RUNNING:
-            # If the machine is detected to be OFFLINE, send corresponding message to server
+            # If the machine is detected to be OFFLINE (FCS DB device), 
+            # send corresponding message to server
             if data[0] == const.OFFLINE:
                 if OPSTATUS != const.OFFLINE:
                     OPSTATUS = const.OFFLINE
@@ -96,7 +97,7 @@ def processQueryResult(source, data, task=None):
                 OPSTATUS = const.CHG_MATERIAL
                 sendEventMsg(4)
         else:
-            # Valid machine status are: RUNNING, CHG_MOLD, CHG_MATERIAL
+            # Valid machine status are: IDLE, RUNNING, CHG_MOLD, CHG_MATERIAL
             # Ignore other (undefined) status for now
             pass
         

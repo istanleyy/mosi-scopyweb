@@ -82,7 +82,7 @@ class ModbusDevice(AbstractDevice):
             if settings.DEBUG:
                 print(result)        
             machine = Machine.objects.first()
-            status = const.RUNNING
+            status = const.IDLE
             mode = const.OFFLINE
             moldid = self.hextostr(result[3:9])
             #print('moldid: ' + moldid)
@@ -97,7 +97,7 @@ class ModbusDevice(AbstractDevice):
                     statuschange = True
                 
             else:
-                status = const.RUNNING
+                status = const.RUNNING if result[0] != 0 else const.IDLE
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
@@ -107,7 +107,6 @@ class ModbusDevice(AbstractDevice):
                     if not machine.cleaningStatus:
                         machine.cleaningStatus = True
                         statuschange = True
-                    
                 else:
                     if machine.cleaningStatus:
                         machine.cleaningStatus = False

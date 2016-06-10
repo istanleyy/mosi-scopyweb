@@ -77,44 +77,55 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getDeviceStatus(self):
         query = (
-            "SELECT MachineStatus FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT MachineStatus,ModName FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:
             #print(result)
             machine = Machine.objects.first()
+            status = const.RUNNING
+            mode = const.OFFLINE
+            moldid = result[1]
+            statuschange = False
+            modechange = False
+
             if result[0] == u'離線':
                 print('Device is offline!')
+                mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
-                    machine.save()
-                    return const.OFFLINE
+                    modechange = True
             elif str(result[0])[0] == '1':
+                mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
-                    machine.save()
+                    modechange = True
                     print('Device in manual mode.')
-                    return const.MANUAL_MODE
             elif str(result[0])[0] == '2':
+                mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
-                    machine.save()
+                    modechange = True
                     print('Device in semi-auto mode.')
-                    return const.SEMI_AUTO_MODE
             elif str(result[0])[0] == '3':
+                mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
-                    machine.save()
+                    modechange = True
                     print('Device in auto mode.')
-                    return const.AUTO_MODE
             else:
                 pass
+
+            if statuschange or modechange:
+                machine.save()
+                return (mode, status, moldid)
+
         else:
             return "fail"
     
     def getAlarmStatus(self):
         query = (
-            "SELECT strtime,alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
+            "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:
@@ -125,7 +136,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,CurrBoxNum,ModName FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT CycleTime,CurrBoxNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:
