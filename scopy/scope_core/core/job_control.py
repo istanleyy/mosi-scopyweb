@@ -22,7 +22,7 @@ from . import xmlparser
 from . import request_sender
 
 # OPSTATUS maintains the state of current machine status
-OPSTATUS = const.IDLE
+OPSTATUS = const.OFFLINE
 
 def processQueryResult(source, data, task=None):
     if source == 'opStatus':
@@ -33,20 +33,20 @@ def processQueryResult(source, data, task=None):
         if settings.DEBUG:
                 print(data)
         
+        # If the machine is detected to be OFFLINE (FCS DB device), 
+        # send corresponding message to server
+        if data[0] == const.OFFLINE:
+            if OPSTATUS != const.OFFLINE:
+                OPSTATUS = const.OFFLINE
+                if job.inprogress:
+                    job.inprogress = False
+                    job.save()
+                request_sender.sendPostRequest('false:bye')
+
         # Machine is in ready-to-produce status (RUNNING)
         if data[1] == const.RUNNING:
-            # If the machine is detected to be OFFLINE (FCS DB device), 
-            # send corresponding message to server
-            if data[0] == const.OFFLINE:
-                if OPSTATUS != const.OFFLINE:
-                    OPSTATUS = const.OFFLINE
-                    if job.inprogress:
-                        job.inprogress = False
-                        job.save()
-                    request_sender.sendPostRequest('false:bye')
-            
             # If the machine has been switched to AUTO_MODE
-            elif data[0] == const.AUTO_MODE:
+            if data[0] == const.AUTO_MODE:
                 # Check job status for current session
                 if not job.active:
                     # If current job is completed or removed from work (not active),
@@ -56,7 +56,7 @@ def processQueryResult(source, data, task=None):
                         job = SessionManagement.objects.first().job
                         
                 # Start the job if it has not been started
-                if not job.inprogress:
+                if not job.inprogress and job.active:
                     job.inprogress = True
                     job.save()
                         

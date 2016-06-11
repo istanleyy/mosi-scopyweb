@@ -33,6 +33,8 @@ def sendPostRequest(msg, errHandle=False):
         print '<----- remote response: ' + r.content
         if r.content == 'ServerError:msg sync':
             return None
+        elif r.content == 'ServerError:sync fail':
+            return False
         else:
             return True
     except requests.exceptions.RequestException as e:
