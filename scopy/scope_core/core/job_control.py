@@ -178,18 +178,21 @@ def sendMsgBuffer():
     
 def init():
     request_sender.sendPostRequest('false:up')
-    # If all jobs in db are done (not active), get new jobs from server
-    activeJobs = Job.objects.filter(active=True)
-    if not activeJobs:
-        result = getJobsFromServer()
-        if result is not None:
-            if result == 'ServerMsg:no more job':
-                pass
-            else:
-                xmlparser.isScopeXml(result)
+    getJobsFromServer()
     
 def getJobsFromServer():
-    return request_sender.sendGetRequest()
+    # If all jobs in db are done (not active), get new jobs from server
+    # Function returns True if there are executable jobs, False otherwise
+    activeJobs = Job.objects.filter(active=True)
+    if not activeJobs:
+        result = request_sender.sendGetRequest()
+        if result is not None:
+            if result == 'ServerMsg:no more job':
+                return False
+            else:
+                return xmlparser.isScopeXml(result)
+    else:
+        return True
 
 def evalCOCondition(machine, session):
     # Evaluate CO condition only if machine is not offline nor in auto mode
@@ -230,26 +233,31 @@ def performChangeOver(session, task, moldserial):
     oldJob.active = False
     oldJob.save()
     
-    # If the mold id of the production data has changed, 
-    # need to update session reference to the job using the new mold.
-    newJob = Job.objects.filter(moldid=moldserial, active=True)
-    if newJob:
-        session.job = newJob[0]
-        session.save()
-        if task is None:
-            print '!!! Unable to update task period due to missing argument !!!'
+    # Load new job information only if we can find executable jobs in the db
+    if getJobsFromServer():
+        # If the mold id of the production data has changed, 
+        # need to update session reference to the job using the new mold.
+        newJob = Job.objects.filter(moldid=moldserial, active=True)
+        if newJob:
+            session.job = newJob[0]
+            session.save()
+            if task is None:
+                print '!!! Unable to update task period due to missing argument !!!'
+                return False
+            else:
+                # Compare polling period with retrieved mct value
+                if session.job.ct != task.interval.every:
+                    intv, created = IntervalSchedule.objects.get_or_create(
+                        every=session.job.ct, period='seconds'
+                        )
+                    task.interval_id = intv.id
+                    task.save()        
+                return True
         else:
-            # Compare polling period with retrieved mct value
-            if session.job.ct != task.interval.every:
-                intv, created = IntervalSchedule.objects.get_or_create(
-                    every=session.job.ct, period='seconds'
-                    )
-                task.interval_id = intv.id
-                task.save()
-                    
-        return True
+            print '\033[91m' + '[Scopy] Unable to find next job matching mold ID: ' + moldserial + '\033[0m'
+            return False
             
     # Warn unable to find new job
     else:
-        print '\033[91m' + '[Scopy] Unable to find next job in CO process!' + '\033[0m'
+        print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
