@@ -16,6 +16,7 @@ fcs_injection_db.py
     FCSInjectionDevice_db class
 """
 
+#import RPi.GPIO as GPIO
 import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
@@ -88,14 +89,19 @@ class FCSInjectionDevice_db(AbstractDevice):
             moldid = result[1]
             statuschange = False
             modechange = False
-
-            if result[0] == u'離線':
-                print('Device is offline!')
-                mode = const.OFFLINE
-                if machine.opmode != 0:
-                    machine.opmode = 0
-                    modechange = True
-            elif str(result[0])[0] == '1':
+            '''
+            if GPIO.status(28):
+                status = const.CHG_MOLD
+                if not machine.moldAdjustStatus:
+                    machine.moldAdjustStatus = True
+                    statuschange = True
+            else:
+                status = const.RUNNING if result[0] != 0 else const.IDLE
+                if machine.moldAdjustStatus:
+                    machine.moldAdjustStatus = False
+                    statuschange = True
+            '''
+            if str(result[0])[0] == u'1':
                 mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
@@ -114,7 +120,11 @@ class FCSInjectionDevice_db(AbstractDevice):
                     modechange = True
                     print('Device in auto mode.')
             else:
-                pass
+                print('Device is offline!')
+                mode = const.OFFLINE
+                if machine.opmode != 0:
+                    machine.opmode = 0
+                    modechange = True
 
             if statuschange or modechange:
                 machine.save()
@@ -136,7 +146,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,CurrBoxNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT CycleTime,TotalCycles FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:

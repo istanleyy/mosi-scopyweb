@@ -123,24 +123,24 @@ def processQueryResult(source, data, task=None):
                 task.save()
 
     elif source == 'alarmStatus':
-        session = SessionManagement.objects.first()
-        errlatch = 'X2'
-        
-        if str(data[1]) == '1':
-            if not session.errflag:
-                if session.errid != data[0]:
-                    session.errid = data[0]
-                    errlatch = data[0]
-                session.errflag = True
-                session.save()
-                sendEventMsg(4)
-        else:
-            if session.errflag:
-                session.errflag = False
-                session.save()
-                #sendEventMsg(1, errlatch)
-                sendEventMsg(1, "X2")
-    
+        if OPSTATUS != const.OFFLINE:
+            session = SessionManagement.objects.first()
+            errlatch = 'X2'
+            
+            if str(data[1]) == '1':
+                if not session.errflag:
+                    if session.errid != data[0]:
+                        session.errid = data[0]
+                        errlatch = data[0]
+                    session.errflag = True
+                    session.save()
+                    sendEventMsg(4)
+            else:
+                if session.errflag:
+                    session.errflag = False
+                    session.save()
+                    #sendEventMsg(1, errlatch)
+                    sendEventMsg(1, "X2")
     else:
         pass
 

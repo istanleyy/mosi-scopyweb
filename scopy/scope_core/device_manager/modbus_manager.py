@@ -39,14 +39,14 @@ class ModbusConnectionManager(AbstractConnectionManager):
         
     def readHoldingReg(self, startadd, quantity):
         try:
-            result = self.mbmaster.execute(1, const.READ_HOLDING_REGISTERS, startadd, quantity)
+            result = self.mbmaster.execute(51, const.READ_HOLDING_REGISTERS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
             logger.error("%s- Code=%d", error, error.get_exception_code())
     
     def readCoil(self, startadd, quantity):
         try:
-            result = self.mbmaster.execute(1, const.READ_COILS, startadd, quantity)
+            result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
             logger.error("%s- Code=%d", error, error.get_exception_code())

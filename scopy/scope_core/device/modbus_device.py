@@ -94,8 +94,7 @@ class ModbusDevice(AbstractDevice):
                 self.outpcs = 0
                 if not machine.moldAdjustStatus:
                     machine.moldAdjustStatus = True
-                    statuschange = True
-                
+                    statuschange = True        
             else:
                 status = const.RUNNING if result[0] != 0 else const.IDLE
                 if machine.moldAdjustStatus:
