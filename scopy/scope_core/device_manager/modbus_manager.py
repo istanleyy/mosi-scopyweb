@@ -32,7 +32,7 @@ class ModbusConnectionManager(AbstractConnectionManager):
             self.mbmaster.set_timeout(5.0)
             return True
         except modbus_tk.modbus.ModbusError as error:
-            logger.error("%s- Code=%d", error, error.get_exception_code())
+            self.logger.error("%s- Code=%d", error, error.get_exception_code())
             
     def disconnect(self):
         pass
@@ -42,12 +42,12 @@ class ModbusConnectionManager(AbstractConnectionManager):
             result = self.mbmaster.execute(51, const.READ_HOLDING_REGISTERS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
-            logger.error("%s- Code=%d", error, error.get_exception_code())
+            self.logger.error("%s- Code=%d", error, error.get_exception_code())
     
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
-            logger.error("%s- Code=%d", error, error.get_exception_code())
+            self.logger.error("%s- Code=%d", error, error.get_exception_code())
     
