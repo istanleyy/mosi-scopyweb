@@ -61,6 +61,10 @@ class FCSInjectionDevice_db(AbstractDevice):
     id = 'not_set'
     isConnected = False
 
+    # Setup RPi GPIO
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
     def connect(self):
         return self._connectionManager.connect()
     
@@ -82,15 +86,15 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            #print(result)
+            print(result)
             machine = Machine.objects.first()
             status = const.RUNNING
             mode = const.OFFLINE
             moldid = result[1]
             statuschange = False
             modechange = False
-            '''
-            if GPIO.status(28):
+            
+            if not GPIO.input(23):
                 status = const.CHG_MOLD
                 if not machine.moldAdjustStatus:
                     machine.moldAdjustStatus = True
@@ -100,20 +104,21 @@ class FCSInjectionDevice_db(AbstractDevice):
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
-            '''
-            if str(result[0])[0] == u'1':
+            
+            modestr = result[0].encode('utf-8', 'ignore')
+            if modestr[0] == '1':
                 mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
                     print('Device in manual mode.')
-            elif str(result[0])[0] == '2':
+            elif modestr[0][0] == '2':
                 mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print('Device in semi-auto mode.')
-            elif str(result[0])[0] == '3':
+            elif modestr[0][0] == '3':
                 mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
@@ -168,4 +173,3 @@ class FCSInjectionDevice_db(AbstractDevice):
                 self.disconnect()
         else:
             print("Connection failed!")
-        
