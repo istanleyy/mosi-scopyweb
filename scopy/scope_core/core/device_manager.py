@@ -12,8 +12,6 @@ device_manager.py
 """
 
 from scope_core.config import settings
-from scope_core.device.modbus_device import ModbusDevice
-from scope_core.device.fcs_injection_db import FCSInjectionDevice_db
 
 deviceInstance = None
 
@@ -21,8 +19,10 @@ def getDeviceInstance():
     global deviceInstance
     if deviceInstance is None:
         if settings.CONNECTOR == 'modbus':
+	    from scope_core.device.modbus_device import ModbusDevice
             deviceInstance = ModbusDevice(settings.DEVICE_INFO['ID'])
         elif settings.CONNECTOR == 'fcsmysql':
+	    from scope_core.device.fcs_injection_db import FCSInjectionDevice_db
             deviceInstance = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
         else:
             pass

@@ -30,8 +30,7 @@ def processQueryResult(source, data, task=None):
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
-        if settings.DEBUG:
-                print(data)
+        print(data)
         
         # If the machine is detected to be OFFLINE (FCS DB device), 
         # send corresponding message to server
@@ -42,9 +41,11 @@ def processQueryResult(source, data, task=None):
                     job.inprogress = False
                     job.save()
                 request_sender.sendPostRequest('false:bye')
+	else:
+	    OPSTATUS = data[0]
 
         # Machine is in ready-to-produce status (RUNNING)
-        if data[1] == const.RUNNING:
+        if data[1] == const.RUNNING or data[1] == const.IDLE:
             # If the machine has been switched to AUTO_MODE
             if data[0] == const.AUTO_MODE:
                 # Check job status for current session
@@ -123,11 +124,13 @@ def processQueryResult(source, data, task=None):
                 task.save()
 
     elif source == 'alarmStatus':
+	print (data, OPSTATUS)
         if OPSTATUS != const.OFFLINE:
             session = SessionManagement.objects.first()
             errlatch = 'X2'
-            
-            if str(data[1]) == '1':
+            print data
+            if data[1]:
+		print 'Machine error...'
                 if not session.errflag:
                     if session.errid != data[0]:
                         session.errid = data[0]

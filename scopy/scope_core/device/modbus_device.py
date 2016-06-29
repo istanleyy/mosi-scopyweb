@@ -59,6 +59,7 @@ class ModbusDevice(AbstractDevice):
     
     # For testing purpose
     outpcs = 0
+    mct = 0.0
 
     def connect(self):
         return self._connectionManager.connect()
@@ -75,21 +76,25 @@ class ModbusDevice(AbstractDevice):
             return False
 
     def getDeviceStatus(self):
-        # Control registers map: [opmode, chovrsw, chmatsw, moldid] 
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 10)
+        # Control registers map: [opmode, chovrsw, chmatsw, moldid]
+        global mode
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
         if result is not None:
         
             if settings.DEBUG:
-                print(result)        
+                print(result)
+	    status = const.RUNNING
+	    mode = const.OFFLINE
             machine = Machine.objects.first()
-            status = const.IDLE
-            mode = const.OFFLINE
-            moldid = self.hextostr(result[3:9])
-            #print('moldid: ' + moldid)
+	    jobserial = self.hextostr(result[10:16])
+            moldid = self.hextostr(result[20:26])
+            print('jobserial: ' + jobserial + ' moldid: ' + moldid)
             statuschange = False
             modechange = False
-            
-            if result[1] == 1:
+
+	    modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
+ 
+            if result[0] == 1:
                 status = const.CHG_MOLD
                 self.outpcs = 0
                 if not machine.moldAdjustStatus:
@@ -100,7 +105,7 @@ class ModbusDevice(AbstractDevice):
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
-
+		"""
                 if result[2] == 1:
                     status = const.CHG_MATERIAL
                     if not machine.cleaningStatus:
@@ -110,26 +115,27 @@ class ModbusDevice(AbstractDevice):
                     if machine.cleaningStatus:
                         machine.cleaningStatus = False
                         statuschange = True
-            
-            if result[0] == 0:
-                print('Device is offline!')
+            	"""
+
+            if modeval[0] == 1024:
+                print('Device offline!')
                 mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
                     modechange = True
-            elif result[0] == 1:
+            elif modeval[0] == 2048:
                 mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
                     print('Device in manual mode.')
-            elif result[0] == 2:
+            elif modeval[0] == 4096:
                 mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print('Device in semi-auto mode.')
-            elif result[0] == 3:
+            elif modeval[0] == 8192:
                 mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
@@ -140,28 +146,37 @@ class ModbusDevice(AbstractDevice):
             
             if statuschange or modechange:
                 machine.save()
+		print (mode, status)
                 return (mode, status, moldid)
                 
         else:
             return "fail"
     
     def getAlarmStatus(self):
-        result = self._connectionManager.readCoil(settings.MODBUS_CONFIG['alarmRegAddr'], 5)
-        if result is not None:
-            return (999, result[0])
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
+	print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
+	if result is not None:
+	    if result[3] != 0 or result[4] != 0:
+            	print result
+		return (999, True)
+	    else:
+		return (999, False)
         else:
             return "fail"
             
     def getProductionStatus(self):
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 5)
+        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         
         if result is not None:
+	    pcshex = [result[1], result[0]]
             if settings.SIMULATE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
                 return (result[0], self.outpcs)
             else:
-                return (result[0], result[1])
+		self.outpcs = self.hextoint32(pcshex)
+		print (self.mct, self.outpcs)
+                return (self.mct, self.outpcs)
         else:
             return "fail"
             
@@ -173,6 +188,12 @@ class ModbusDevice(AbstractDevice):
                 hexval = '%x' % registers[i]
                 result += hexval.decode('hex')
         return result.strip(' \t\n\r')
+
+    def hextoint32(self, registers):
+	if registers[0] != 0:
+	    return registers[0] << 16 | registers[1]
+	else:
+	    return registers[1]
 
     def __init__(self, id):
         self.id = id

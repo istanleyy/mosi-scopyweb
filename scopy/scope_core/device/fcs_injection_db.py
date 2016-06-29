@@ -140,7 +140,10 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connectionManager.query(query)
         if result is not None:
             print(result)
-            return result
+	    if result[1] == 1:
+		return (result[0], True)
+	    else: 
+                return (result[0], False)
         else:
             return "fail"
             
@@ -149,8 +152,8 @@ class FCSInjectionDevice_db(AbstractDevice):
             "SELECT CycleTime,TotalCycles FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
-        if result is not None:
-            print(result)
+        print(result)
+	if result is not None:
             return result
         else:
             return "fail"

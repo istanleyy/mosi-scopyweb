@@ -40,7 +40,7 @@ def pollAlarmStatus():
     release_lock = lambda: cache.delete(lock_id)
     
     if acquire_lock():
-        logger.info("Polling device status (p={})...".format(P_PRIOR_HIGH))
+        logger.info("Polling alarm status (p={})...".format(P_PRIOR_HIGH))
         try:
             result = device.getDeviceInstance().getAlarmStatus()
             if result is not None:

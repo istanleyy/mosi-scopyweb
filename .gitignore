@@ -11,6 +11,7 @@ log/*
 
 # ignore local files
 celerybeat-schedule
+djcelery.schedulers.DatabaseScheduler
 scopyweb.db
 scope_config.xml
 scope_joblist.xml
