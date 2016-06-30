@@ -14,7 +14,7 @@ operator_interface.py
 from . import i2c_lcd_driver
 from . import barcode
 
-class OperatorIO(Object):
+class OperatorIO:
 
     def __init__(self):
         self.lcd = i2c_lcd_driver.lcd()
