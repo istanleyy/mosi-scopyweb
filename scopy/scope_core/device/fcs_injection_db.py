@@ -16,11 +16,14 @@ fcs_injection_db.py
     FCSInjectionDevice_db class
 """
 
-import RPi.GPIO as GPIO
+import platform
 import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 from scope_core.models import Machine
+
+if platform.system() != 'Darwin':
+    import RPi.GPIO as GPIO
 
 class FCSInjectionDevice_db(AbstractDevice):
 
@@ -62,8 +65,9 @@ class FCSInjectionDevice_db(AbstractDevice):
     isConnected = False
 
     # Setup RPi GPIO
-    GPIO.setmode(GPIO.BCM)
-    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    if platform.system() != 'Darwin':
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def connect(self):
         return self._connectionManager.connect()
@@ -94,7 +98,13 @@ class FCSInjectionDevice_db(AbstractDevice):
             statuschange = False
             modechange = False
             
-            if not GPIO.input(23):
+            if platform.system() != 'Darwin':
+                coswitch = GPIO.input(23)
+            else:
+                # Testing on OSX
+                coswitch = True
+
+            if not coswitch:
                 status = const.CHG_MOLD
                 if not machine.moldAdjustStatus:
                     machine.moldAdjustStatus = True
@@ -112,13 +122,13 @@ class FCSInjectionDevice_db(AbstractDevice):
                     machine.opmode = 1
                     modechange = True
                     print('Device in manual mode.')
-            elif modestr[0][0] == '2':
+            elif modestr[0] == '2':
                 mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print('Device in semi-auto mode.')
-            elif modestr[0][0] == '3':
+            elif modestr[0] == '3':
                 mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3

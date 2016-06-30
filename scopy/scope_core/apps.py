@@ -13,10 +13,12 @@ class ScopeCoreConfig(AppConfig):
         from .tasks import pollDeviceStatus
         from core import job_control
         from core import device_manager as device
+        from core import operator_interface
         from core.socket_server import SocketServer
 
         socketServer = SocketServer()
         socketServer.start()
+        iodevices = operator_interface.OperatorIO()
         fcsDevice = device.getDeviceInstance()
         if fcsDevice.isConnected:
             job_control.init()
