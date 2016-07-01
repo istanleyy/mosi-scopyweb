@@ -56,6 +56,7 @@ class Scanner(threading.Thread):
                 time.sleep(3)
     
     def getBarcode(self):
+        barcode = ''
         try:
             for event in self.device.read():
                 if event.type == ecodes.EV_KEY:
