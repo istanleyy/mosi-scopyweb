@@ -47,6 +47,7 @@ class Scanner(threading.Thread):
         dev_found = False
         while not dev_found:
             try:
+                print "##### ANCHOR #####"
                 scanner = InputDevice('/dev/input/event0')
                 print scanner
                 dev_found = True
