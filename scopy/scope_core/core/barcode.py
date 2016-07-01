@@ -47,14 +47,14 @@ class Scanner(threading.Thread):
         print "##### ANCHOR #####"
         dev_found = False
         while not dev_found:
-            try:
-                scanner = InputDevice('/dev/input/event0')
-                print scanner
-                dev_found = True
-                return scanner
-            except OSError:
-                print "Scanner not found, retrying..."
-                time.sleep(3)
+            #try:
+            scanner = InputDevice('/dev/input/event0')
+            print scanner
+            dev_found = True
+            return scanner
+            #except OSError:
+            #    print "Scanner not found, retrying..."
+            #    time.sleep(3)
     
     def getBarcode(self):
         try:
