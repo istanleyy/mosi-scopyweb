@@ -44,10 +44,10 @@ class Scanner(threading.Thread):
             self.getBarcode()
 
     def getScanner(self):
+        print "##### ANCHOR #####"
         dev_found = False
         while not dev_found:
             try:
-                print "##### ANCHOR #####"
                 scanner = InputDevice('/dev/input/event0')
                 print scanner
                 dev_found = True
