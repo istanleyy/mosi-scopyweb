@@ -18,7 +18,7 @@ class OperatorIO:
 
     def __init__(self):
         self.lcd = i2c_lcd_driver.lcd()
-        self.barcodeScanner = barcode.Scanner(self)
+        self.barcodeScanner = barcode.getScannerInstance(self)
         self.barcodeScanner.start()
         self.lcd.lcd_clear()
         self.lcd.lcd_display_string("MOSi ScopePi", 1)

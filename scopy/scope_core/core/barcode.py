@@ -26,6 +26,14 @@ keys = {
     50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT',
 }
 
+scannerInstance = None
+
+def getScannerInstance(operatorio):
+    global scannerInstance
+    if scannerInstance is None:
+        scannerInstance = Scanner(operatorio)
+    return scannerInstance
+
 class Scanner(threading.Thread):
 
     def run(self):
@@ -40,13 +48,12 @@ class Scanner(threading.Thread):
         while not dev_found:
             try:
                 scanner = InputDevice('/dev/input/event0')
-                scanner.grab()
                 print scanner
                 dev_found = True
                 return scanner
             except OSError:
                 print "Scanner not found, retrying..."
-                time.sleep(1)
+                time.sleep(3)
     
     def getBarcode(self):
         try:
