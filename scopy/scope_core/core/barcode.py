@@ -70,13 +70,13 @@ class Scanner(threading.Thread):
                                 self.barcode = ''
                         else:
                             self.barcode += keys[data.scancode]
-        finally:
-            self.device.ungrab()
         except AttributeError:
             print "error parsing barcode stream"
         except IOError:
             print "error capturing input event"
             self.device = self.getScanner()
+        finally:
+            self.device.ungrab()
 
     def __init__(self, operatorio):
         threading.Thread.__init__(self)
