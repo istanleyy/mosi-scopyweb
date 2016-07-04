@@ -48,6 +48,7 @@ class Scanner(threading.Thread):
         while not dev_found:
             try:
                 scanner = InputDevice('/dev/input/event0')
+                scanner.grab()
                 print scanner
                 dev_found = True
                 return scanner
@@ -56,6 +57,7 @@ class Scanner(threading.Thread):
                 time.sleep(3)
     
     def getBarcode(self):
+        self.device.grab()
         try:
             for event in self.device.read():
                 if event.type == ecodes.EV_KEY:
@@ -68,6 +70,8 @@ class Scanner(threading.Thread):
                                 self.barcode = ''
                         else:
                             self.barcode += keys[data.scancode]
+        finally:
+            self.device.ungrab()
         except AttributeError:
             print "error parsing barcode stream"
         except IOError:
