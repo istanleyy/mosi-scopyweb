@@ -48,7 +48,6 @@ class Scanner(threading.Thread):
         while not dev_found:
             try:
                 scanner = InputDevice('/dev/input/event0')
-                scanner.grab()
                 print scanner
                 dev_found = True
                 return scanner
