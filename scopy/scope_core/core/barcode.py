@@ -63,9 +63,10 @@ class Scanner(threading.Thread):
                     data = categorize(event)
                     if event.type == 1 and event.value == 1 and data.scancode != 42 and data.scancode < 54:
                         if data.scancode == 28:
-                            print barcode
-                            self.operatorio.update_display(barcode)
-                            barcode = ''
+                            with self.lock:
+                                print barcode
+                                self.operatorio.update_display(barcode)
+                                barcode = ''
                         else:
                             barcode += keys[data.scancode]
         except AttributeError:
@@ -76,6 +77,7 @@ class Scanner(threading.Thread):
 
     def __init__(self, operatorio):
         threading.Thread.__init__(self)
+        self.lock = threading.RLock()
         self.daemon = True
         self.operatorio = operatorio
         self.barcode = ''

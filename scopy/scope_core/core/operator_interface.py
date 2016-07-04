@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 MOSi Scope Device Framework:
 Make real world manufacturing machines highly interoperable with different IT 
