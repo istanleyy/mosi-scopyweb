@@ -23,7 +23,7 @@ keys = {
     20: u'T', 21: u'Y', 22: u'U', 23: u'I', 24: u'O', 25: u'P', 26: u'[', 27: u']', 28: u'CRLF', 29: u'LCTRL',
     30: u'A', 31: u'S', 32: u'D', 33: u'F', 34: u'G', 35: u'H', 36: u'J', 37: u'K', 38: u'L', 39: u';',
     40: u'"', 41: u'`', 42: u'LSHFT', 43: u'\\', 44: u'Z', 45: u'X', 46: u'C', 47: u'V', 48: u'B', 49: u'N',
-    50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT',
+    50: u'M', 51: u',', 52: u'.', 53: u'/', 54: u'RSHFT', 56: u'LALT', 100: u'RALT'
 }
 
 scannerInstance = None
@@ -56,7 +56,6 @@ class Scanner(threading.Thread):
                 time.sleep(3)
     
     def getBarcode(self):
-        barcode = ''
         try:
             for event in self.device.read():
                 if event.type == ecodes.EV_KEY:
@@ -64,11 +63,11 @@ class Scanner(threading.Thread):
                     if event.type == 1 and event.value == 1 and data.scancode != 42 and data.scancode < 54:
                         if data.scancode == 28:
                             with self.lock:
-                                print barcode
-                                self.operatorio.update_display(barcode)
-                                barcode = ''
+                                print self.barcode
+                                self.operatorio.update_display(self.barcode)
+                                self.barcode = ''
                         else:
-                            barcode += keys[data.scancode]
+                            self.barcode += keys[data.scancode]
         except AttributeError:
             print "error parsing barcode stream"
         except IOError:
