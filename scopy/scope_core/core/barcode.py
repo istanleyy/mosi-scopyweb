@@ -56,7 +56,6 @@ class Scanner(threading.Thread):
                 time.sleep(3)
     
     def getBarcode(self):
-        self.device.grab()
         try:
             for event in self.device.read():
                 if event.type == ecodes.EV_KEY:
@@ -74,8 +73,6 @@ class Scanner(threading.Thread):
         except IOError:
             print "error capturing input event"
             self.device = self.getScanner()
-        finally:
-            self.device.ungrab()
 
     def __init__(self, operatorio):
         threading.Thread.__init__(self)

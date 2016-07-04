@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'scope_core.apps.ScopeCoreConfig',
+    'scope_core',
     'rest_framework',
     'djcelery',
 ]

@@ -156,7 +156,7 @@ class ModbusDevice(AbstractDevice):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
 	print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
 	if result is not None:
-	    if result[3] != 0 or result[4] != 0:
+	    if result[3] != 0 or result[3] != 0:
             	print result
 		return (999, True)
 	    else:
