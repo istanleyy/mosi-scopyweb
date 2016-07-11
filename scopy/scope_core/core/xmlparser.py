@@ -18,7 +18,7 @@ from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
-from scope_core import job_control as JobManager
+from . import job_control as JobManager
 
 LOCK = threading.Lock()
 
