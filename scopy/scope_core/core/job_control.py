@@ -23,8 +23,6 @@ from . import request_sender
 
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
-# USERS maintains a list of logged in operators
-USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -269,7 +267,6 @@ def performChangeOver(session, task, moldserial):
         return False
 
 def processBarcodeActivity(data):
-    global USERS
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barodes[1]
@@ -278,10 +275,10 @@ def processBarcodeActivity(data):
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
-                USERS.append(uid)
+                settings.USERS.append(uid)
                 print "Users: ", USERS
             else:
-                USERS.remove(uid)
+                settings.USERS.remove(uid)
                 print "Users: ", USERS
             return True
         else:

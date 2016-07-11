@@ -18,7 +18,6 @@ from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
-from . import job_control as JobManager
 
 LOCK = threading.Lock()
 
@@ -62,8 +61,8 @@ def getJobUpdateXml(actualPcs, mct):
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
 
-    if JobManager.USERS:
-        for user in JobManager.USERS:
+    if settings.USERS:
+        for user in settings.USERS:
             userTag = etree.SubElement(jobUpdate, "user")
             userTag.text = user
     
