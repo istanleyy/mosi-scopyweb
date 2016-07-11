@@ -269,7 +269,7 @@ def performChangeOver(session, task, moldserial):
 def processBarcodeActivity(data):
     barcodes = data.split(',')
     uid = barcodes[0]
-    activity = barodes[1]
+    activity = barcodes[1]
     quantity = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
