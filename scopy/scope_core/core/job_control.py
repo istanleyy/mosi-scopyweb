@@ -276,10 +276,10 @@ def processBarcodeActivity(data):
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
                 settings.USERS.append(uid)
-                print "Users: ", USERS
+                print "Users: ", settings.USERS
             else:
                 settings.USERS.remove(uid)
-                print "Users: ", USERS
+                print "Users: ", settings.USERS
             return True
         else:
             return False
