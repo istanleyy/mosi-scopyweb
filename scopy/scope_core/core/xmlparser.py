@@ -94,7 +94,7 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
             refList = data.split('-')
             for ref in refList:
                 serialTag = etree.SubElement(jobEvent, "ref_serial")
-                serialTag.text = data
+                serialTag.text = ref
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
