@@ -48,6 +48,12 @@ class SocketServer(Thread):
                     if msgContent[1] == 'alive check':
                         job_control.sendUpdateMsg()
                     reply = 'false:ok'
+                elif msgContent[0] == 'ScanManager':
+                    print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
+                    if job_control.processBarcodeActivity(msgContent[1]):
+                        reply = 'ok'
+                    else:
+                        reply = 'fail'
                 elif msgContent[0] == 'test-toggleco':
                     # For testing, should remove this elif block in production!
                     if not self.isCO:

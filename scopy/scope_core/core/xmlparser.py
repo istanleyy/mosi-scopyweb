@@ -18,6 +18,7 @@ from datetime import date
 from lxml import etree
 from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
+from scope_core import job_control as JobManager
 
 LOCK = threading.Lock()
 
@@ -60,11 +61,16 @@ def getJobUpdateXml(actualPcs, mct):
     timeTag.text = timeText
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
+
+    if JobManager.USERS:
+        for user in JobManager.USERS:
+            userTag = etree.SubElement(jobUpdate. "user")
+            userTag.text = user
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
-def getJobEventXml(eventType, eventCode):
+def getJobEventXml(eventType, eventCode, user=""):
     msgId, timeText = getXmlTimeVal()
     docRoot = etree.Element("scope_job")
     jobEvent = etree.SubElement(docRoot, "job_event", msg_id=msgId)
@@ -72,12 +78,15 @@ def getJobEventXml(eventType, eventCode):
     stationTag = etree.SubElement(jobEvent, "station")
     timeTag = etree.SubElement(jobEvent, "time")
     typeTag = etree.SubElement(jobEvent, "type", code=eventCode)
+    userTag = etree.Subelement(jobEvent, "user")
     
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
     stationTag.text = settings.DEVICE_INFO['ID']
     timeTag.text = timeText
     typeTag.text = str(eventType)
+    if user != "":
+        userTag.text = user
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
@@ -160,6 +169,7 @@ def getStartupXml():
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=False)
 
 def getXmlTimeVal():
+    global LOCK
     LOCK.acquire()
     try:
         today = date.today()

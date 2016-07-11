@@ -23,10 +23,12 @@ from . import request_sender
 
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
+# USERS maintains a list of logged in operators
+USERS = []
 
 def processQueryResult(source, data, task=None):
+    global OPSTATUS
     if source == 'opStatus':
-        global OPSTATUS
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
@@ -147,8 +149,8 @@ def processQueryResult(source, data, task=None):
     else:
         pass
 
-def sendEventMsg(evttype, code=""):
-    scopemsg = xmlparser.getJobEventXml(evttype, code)
+def sendEventMsg(evttype, code="", user=""):
+    scopemsg = xmlparser.getJobEventXml(evttype, code, user)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
         xmlparser.logUnsyncMsg(scopemsg)
@@ -156,6 +158,7 @@ def sendEventMsg(evttype, code=""):
     else:
         if not result:
             xmlparser.logUnsyncMsg(scopemsg)
+        return result
 
 def sendUpdateMsg(pcs=None, mct=None):
     if pcs is None:
@@ -264,3 +267,24 @@ def performChangeOver(session, task, moldserial):
     else:
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
+
+def processBarcodeActivity(data):
+    global USERS
+    barcodes = data.split(',')
+    uid = barcodes[0]
+    activity = barodes[1]
+    quantity = barcodes[2]
+
+    if activity == 'LOGIN' or activity == 'LOGOUT':
+        if sendEventMsg(uid, activity):
+            if activity == 'LOGIN':
+                USERS.append(uid)
+                print "Users: ", USERS
+            else:
+                USERS.remove(uid)
+                print "Users: ", USERS
+            return True
+        else:
+            return False
+    else:
+        return sendEventMsg(activity, 'WS', uid)
