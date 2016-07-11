@@ -86,14 +86,15 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
     if user != "":
         userTag = etree.SubElement(jobEvent, "user")
         userTag.text = user
-    if data[0] != "W":
-        qtyTag = etree.SubElement(jobEvent, "stock_qty")
-        qtyTag.text = data
-    else:
-        refList = data.split('-')
-        for ref in refList:
-            serialTag = etree.SubElement(jobEvent, "ref_serial")
-            serialTag.text = data
+    if data != "":
+        if data[0] != "W":
+            qtyTag = etree.SubElement(jobEvent, "stock_qty")
+            qtyTag.text = data
+        else:
+            refList = data.split('-')
+            for ref in refList:
+                serialTag = etree.SubElement(jobEvent, "ref_serial")
+                serialTag.text = data
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
