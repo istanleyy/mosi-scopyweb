@@ -85,7 +85,7 @@ class SocketServer(Thread):
                 break
      
             conn.sendall(reply)
-            print 'Local reply: ' + reply
+            #print 'Local reply: ' + reply
      
         # Close socket when done
         conn.close()

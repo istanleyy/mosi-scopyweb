@@ -147,8 +147,8 @@ def processQueryResult(source, data, task=None):
     else:
         pass
 
-def sendEventMsg(evttype, code="", user=""):
-    scopemsg = xmlparser.getJobEventXml(evttype, code, user)
+def sendEventMsg(evttype, code="", user="", data=""):
+    scopemsg = xmlparser.getJobEventXml(evttype, code, user, data)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
         xmlparser.logUnsyncMsg(scopemsg)
@@ -270,7 +270,7 @@ def processBarcodeActivity(data):
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
-    quantity = barcodes[2]
+    data = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
@@ -284,4 +284,4 @@ def processBarcodeActivity(data):
         else:
             return False
     else:
-        return sendEventMsg(activity, 'WS', uid)
+        return sendEventMsg(activity, 'WS', uid, data)

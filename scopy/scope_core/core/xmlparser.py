@@ -69,7 +69,7 @@ def getJobUpdateXml(actualPcs, mct):
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
-def getJobEventXml(eventType, eventCode, user=""):
+def getJobEventXml(eventType, eventCode, user="", data=""):
     msgId, timeText = getXmlTimeVal()
     docRoot = etree.Element("scope_job")
     jobEvent = etree.SubElement(docRoot, "job_event", msg_id=msgId)
@@ -77,7 +77,6 @@ def getJobEventXml(eventType, eventCode, user=""):
     stationTag = etree.SubElement(jobEvent, "station")
     timeTag = etree.SubElement(jobEvent, "time")
     typeTag = etree.SubElement(jobEvent, "type", code=eventCode)
-    userTag = etree.SubElement(jobEvent, "user")
     
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
@@ -85,7 +84,16 @@ def getJobEventXml(eventType, eventCode, user=""):
     timeTag.text = timeText
     typeTag.text = str(eventType)
     if user != "":
+        userTag = etree.SubElement(jobEvent, "user")
         userTag.text = user
+    if data[0] != "W":
+        qtyTag = etree.SubElement(jobEvent, "stock_qty")
+        qtyTag.text = data
+    else:
+        refList = data.split('-')
+        for ref in refList:
+            serialTag = etree.SubElement(jobEvent, "ref_serial")
+            serialTag.text = data
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
