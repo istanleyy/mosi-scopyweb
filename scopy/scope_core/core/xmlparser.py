@@ -64,7 +64,7 @@ def getJobUpdateXml(actualPcs, mct):
 
     if JobManager.USERS:
         for user in JobManager.USERS:
-            userTag = etree.SubElement(jobUpdate. "user")
+            userTag = etree.SubElement(jobUpdate, "user")
             userTag.text = user
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
