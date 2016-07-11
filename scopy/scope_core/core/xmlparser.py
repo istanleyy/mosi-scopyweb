@@ -77,7 +77,7 @@ def getJobEventXml(eventType, eventCode, user=""):
     stationTag = etree.SubElement(jobEvent, "station")
     timeTag = etree.SubElement(jobEvent, "time")
     typeTag = etree.SubElement(jobEvent, "type", code=eventCode)
-    userTag = etree.Subelement(jobEvent, "user")
+    userTag = etree.SubElement(jobEvent, "user")
     
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
