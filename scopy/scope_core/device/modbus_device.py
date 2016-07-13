@@ -81,7 +81,7 @@ class ModbusDevice(AbstractDevice):
             if settings.DEBUG:
                 print(result)
             machine = Machine.objects.first()
-	        jobserial = self.hextostr(result[10:16])
+            jobserial = self.hextostr(result[10:16])
             moldid = self.hextostr(result[20:26])
             print('jobserial: ' + jobserial + ' moldid: ' + moldid)
             statuschange = False
