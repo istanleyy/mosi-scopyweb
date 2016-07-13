@@ -141,20 +141,20 @@ class ModbusDevice(AbstractDevice):
             
             if statuschange or modechange:
                 machine.save()
-		        print (mode, status)
+                print (mode, status)
                 return (mode, status, moldid)
         else:
             return "fail"
     
     def getAlarmStatus(self):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
-	    print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
-	    if result is not None:
-	        if result[3] != 0 or result[3] != 0:
-            	print result
-		        return (999, True)
-	        else:
-		        return (999, False)
+        print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
+        if result is not None:
+            if result[3] != 0 or result[3] != 0:
+                print result
+                return (999, True)
+            else:
+                return (999, False)
         else:
             return "fail"
             
@@ -162,15 +162,15 @@ class ModbusDevice(AbstractDevice):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         
         if result is not None:
-	        pcshex = [result[1], result[0]]
+            pcshex = [result[1], result[0]]
             if settings.SIMULATE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
                 return (result[0], self.outpcs)
             else:
-		        self.outpcs = self.hextoint32(pcshex)
+                self.outpcs = self.hextoint32(pcshex)
                 self.mct = self.getmct()
-		        print (self.mct, self.outpcs)
+                print (self.mct, self.outpcs)
                 return (self.mct, self.outpcs)
         else:
             return "fail"
