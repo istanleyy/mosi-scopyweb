@@ -113,8 +113,10 @@ def processQueryResult(source, data, task=None):
         #    performChangeOver(session, task, moldSerial)
         
         if session.job.inprogress:
-            dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
-            sendUpdateMsg(pcs, mct)
+            # Log event only when there are actual outputs from the machine
+            if pcs != ProductionDataTS.objects.last().output:
+                dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
+                sendUpdateMsg(pcs, mct)
             
             if task.interval.every != session.job.ct:
                 intv, created = IntervalSchedule.objects.get_or_create(
@@ -124,13 +126,13 @@ def processQueryResult(source, data, task=None):
                 task.save()
 
     elif source == 'alarmStatus':
-	print (data, OPSTATUS)
+        print (data, OPSTATUS)
         if OPSTATUS != const.OFFLINE:
             session = SessionManagement.objects.first()
             errlatch = 'X2'
             print data
             if data[1]:
-		print 'Machine error...'
+                print 'Machine error...'
                 if not session.errflag:
                     if session.errid != data[0]:
                         session.errid = data[0]

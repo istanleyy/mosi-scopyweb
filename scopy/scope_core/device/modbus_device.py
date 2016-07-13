@@ -169,15 +169,19 @@ class ModbusDevice(AbstractDevice):
                 return (result[0], self.outpcs)
             else:
                 self.outpcs = self.hextoint32(pcshex)
-                self.mct = self.getmct()
+                # Calc mct only if the output has changed
+                if self.outpcs != self.lastOutput:
+                    self.mct = self.getmct()
+                    self.lastOutput = self.outpcs
                 print (self.mct, self.outpcs)
                 return (self.mct, self.outpcs)
         else:
             return "fail"
 
     def getmct(self):
-        delta = datetime.now() - self.tLastUpdate
-        self.tLastUpdate = datetime.now()
+        now = datetime.now()
+        delta = now - self.tLastUpdate
+        self.tLastUpdate = now
         return delta.seconds
 
     def hextostr(self, registers):
@@ -199,6 +203,7 @@ class ModbusDevice(AbstractDevice):
         self.id = id
         self.mode = const.OFFLINE
         self.status = const.IDLE
+        self.lastOutput = 0
         self.tLastUpdate = datetime.now()
         if self.connect():
             print("Host connected. Check device ID={}...".format(id))
