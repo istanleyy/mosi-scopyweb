@@ -13,6 +13,7 @@ modbus_device.py
 
 import random
 import device_definition as const
+from datetime import datetime
 from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
@@ -56,8 +57,6 @@ class ModbusDevice(AbstractDevice):
 
     id = 'not_set'
     isConnected = False
-    
-    # For testing purpose
     outpcs = 0
     mct = 0.0
 
@@ -77,35 +76,31 @@ class ModbusDevice(AbstractDevice):
 
     def getDeviceStatus(self):
         # Control registers map: [opmode, chovrsw, chmatsw, moldid]
-        global mode
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
         if result is not None:
-        
             if settings.DEBUG:
                 print(result)
-	    status = const.RUNNING
-	    mode = const.OFFLINE
             machine = Machine.objects.first()
-	    jobserial = self.hextostr(result[10:16])
+	        jobserial = self.hextostr(result[10:16])
             moldid = self.hextostr(result[20:26])
             print('jobserial: ' + jobserial + ' moldid: ' + moldid)
             statuschange = False
             modechange = False
 
-	    modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
+	        modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
  
             if result[0] == 1:
-                status = const.CHG_MOLD
+                self.status = const.CHG_MOLD
                 self.outpcs = 0
                 if not machine.moldAdjustStatus:
                     machine.moldAdjustStatus = True
                     statuschange = True        
             else:
-                status = const.RUNNING if result[0] != 0 else const.IDLE
+                self.status = const.RUNNING if result[0] != 0 else const.IDLE
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
-		"""
+		        """
                 if result[2] == 1:
                     status = const.CHG_MATERIAL
                     if not machine.cleaningStatus:
@@ -115,28 +110,28 @@ class ModbusDevice(AbstractDevice):
                     if machine.cleaningStatus:
                         machine.cleaningStatus = False
                         statuschange = True
-            	"""
+                """
 
             if modeval[0] == 1024:
                 print('Device offline!')
-                mode = const.OFFLINE
+                self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
                     modechange = True
             elif modeval[0] == 2048:
-                mode = const.MANUAL_MODE
+                self.mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
                     print('Device in manual mode.')
             elif modeval[0] == 4096:
-                mode = const.SEMI_AUTO_MODE
+                self.mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print('Device in semi-auto mode.')
             elif modeval[0] == 8192:
-                mode = const.AUTO_MODE
+                self.mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
                     modechange = True
@@ -146,21 +141,20 @@ class ModbusDevice(AbstractDevice):
             
             if statuschange or modechange:
                 machine.save()
-		print (mode, status)
+		        print (mode, status)
                 return (mode, status, moldid)
-                
         else:
             return "fail"
     
     def getAlarmStatus(self):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
-	print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
-	if result is not None:
-	    if result[3] != 0 or result[3] != 0:
+	    print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
+	    if result is not None:
+	        if result[3] != 0 or result[3] != 0:
             	print result
-		return (999, True)
-	    else:
-		return (999, False)
+		        return (999, True)
+	        else:
+		        return (999, False)
         else:
             return "fail"
             
@@ -168,18 +162,24 @@ class ModbusDevice(AbstractDevice):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         
         if result is not None:
-	    pcshex = [result[1], result[0]]
+	        pcshex = [result[1], result[0]]
             if settings.SIMULATE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
                 return (result[0], self.outpcs)
             else:
-		self.outpcs = self.hextoint32(pcshex)
-		print (self.mct, self.outpcs)
+		        self.outpcs = self.hextoint32(pcshex)
+                self.mct = self.getmct()
+		        print (self.mct, self.outpcs)
                 return (self.mct, self.outpcs)
         else:
             return "fail"
-            
+
+    def getmct():
+        delta = datetime.now() - self.tLastUpdate
+        self.tLastUpdate = datetime.now()
+        return delta.seconds
+
     def hextostr(self, registers):
         #print registers
         result = ''
@@ -190,13 +190,16 @@ class ModbusDevice(AbstractDevice):
         return result.strip(' \t\n\r')
 
     def hextoint32(self, registers):
-	if registers[0] != 0:
-	    return registers[0] << 16 | registers[1]
-	else:
-	    return registers[1]
+	    if registers[0] != 0:
+	        return registers[0] << 16 | registers[1]
+	    else:
+	        return registers[1]
 
     def __init__(self, id):
         self.id = id
+        self.mode = const.OFFLINE
+        self.status = const.IDLE
+        self.tLastUpdate = datetime.now()
         if self.connect():
             print("Host connected. Check device ID={}...".format(id))
             if self.checkDeviceExists():
