@@ -86,8 +86,8 @@ class ModbusDevice(AbstractDevice):
             print('jobserial: ' + jobserial + ' moldid: ' + moldid)
             statuschange = False
             modechange = False
-
-	        modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
+            
+            modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
  
             if result[0] == 1:
                 self.status = const.CHG_MOLD
