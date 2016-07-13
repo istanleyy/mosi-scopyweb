@@ -100,7 +100,7 @@ class ModbusDevice(AbstractDevice):
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
-		        """
+                """
                 if result[2] == 1:
                     status = const.CHG_MATERIAL
                     if not machine.cleaningStatus:
