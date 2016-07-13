@@ -175,7 +175,7 @@ class ModbusDevice(AbstractDevice):
         else:
             return "fail"
 
-    def getmct():
+    def getmct(self):
         delta = datetime.now() - self.tLastUpdate
         self.tLastUpdate = datetime.now()
         return delta.seconds
