@@ -41,8 +41,8 @@ def processQueryResult(source, data, task=None):
                     job.inprogress = False
                     job.save()
                 request_sender.sendPostRequest('false:bye')
-	else:
-	    OPSTATUS = data[0]
+	    else:
+	        OPSTATUS = data[0]
 
         # Machine is in ready-to-produce status (RUNNING)
         if data[1] == const.RUNNING or data[1] == const.IDLE:
