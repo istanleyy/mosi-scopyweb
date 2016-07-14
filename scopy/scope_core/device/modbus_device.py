@@ -141,8 +141,8 @@ class ModbusDevice(AbstractDevice):
             
             if statuschange or modechange:
                 machine.save()
-                print (mode, status)
-                return (mode, status, moldid)
+                print (self.mode, self.status)
+                return (self.mode, self.status, moldid)
         else:
             return "fail"
     
