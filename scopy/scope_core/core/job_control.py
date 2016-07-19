@@ -117,7 +117,7 @@ def processQueryResult(source, data, task=None):
         
         if session.job.inprogress:
             # Log event only when there are actual outputs from the machine
-            if pcs != ProductionDataTS.objects.last().output:
+            if ProductionDataTS.objects.last() is None or pcs != ProductionDataTS.objects.last().output:
                 dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
                 sendUpdateMsg(pcs, mct)
             
