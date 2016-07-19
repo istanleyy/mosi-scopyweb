@@ -279,7 +279,7 @@ def processBarcodeActivity(data):
     if len(barcodes) > 3:
         data = barcodes[3]
     else:
-        data = barcode[2]
+        data = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
