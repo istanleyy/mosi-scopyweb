@@ -24,7 +24,6 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
-USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -279,6 +278,7 @@ def performChangeOver(session, task, moldserial):
 def processBarcodeActivity(data):
     global CO_OVERRIDE
     global USERS
+    USERS = []
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
