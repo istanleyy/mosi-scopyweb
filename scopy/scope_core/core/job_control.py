@@ -24,6 +24,7 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
+USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -164,15 +165,14 @@ def sendEventMsg(evttype, code="", user="", data=""):
         return result
 
 def sendUpdateMsg(pcs=None, mct=None):
-    global USERS
     if pcs is None:
         pcs = ProductionDataTS.objects.last().output
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
 
-    print '----------job_control----------'
+    print '----------user_list----------'
     print USERS
-    print '----------job_control----------'
+    print '----------user_list----------'
 
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct, USERS)
     result = request_sender.sendPostRequest(scopemsg)
@@ -191,8 +191,6 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
     
 def init():
-    global USERS
-    USERS = []
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     
