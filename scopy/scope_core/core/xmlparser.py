@@ -41,7 +41,7 @@ def isScopeXml(str):
     else:
         return False
         
-def getJobUpdateXml(actualPcs, mct, users=[]):
+def getJobUpdateXml(actualPcs, mct, users):
     msgId, timeText = getXmlTimeVal()
     docRoot = etree.Element("scope_job")
     jobUpdate = etree.SubElement(docRoot, "job_update", msg_id=msgId)
