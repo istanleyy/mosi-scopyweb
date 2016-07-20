@@ -278,7 +278,10 @@ def performChangeOver(session, task, moldserial):
 def processBarcodeActivity(data):
     global CO_OVERRIDE
     global USERS
-    USERS = []
+
+    if USERS is None:
+        USERS = []
+        
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
