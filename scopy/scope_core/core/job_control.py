@@ -24,6 +24,8 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
+
+global USERS
 USERS = []
 
 def processQueryResult(source, data, task=None):
@@ -165,7 +167,6 @@ def sendEventMsg(evttype, code="", user="", data=""):
         return result
 
 def sendUpdateMsg(pcs=None, mct=None):
-    global USERS
     if pcs is None:
         pcs = ProductionDataTS.objects.last().output
     if mct is None:
@@ -290,11 +291,9 @@ def processBarcodeActivity(data):
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
-                global USERS
                 USERS.append(uid)
                 print "Users: ", USERS
             else:
-                global USERS
                 USERS.remove(uid)
                 print "Users: ", USERS
             return True

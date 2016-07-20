@@ -61,7 +61,6 @@ def getJobUpdateXml(actualPcs, mct, users):
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
 
-    print users
     if len(users) > 0:
         for user in users:
             userTag = etree.SubElement(jobUpdate, "user")
