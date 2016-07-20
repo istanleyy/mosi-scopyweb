@@ -294,3 +294,18 @@ def flushUnsyncMsg():
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return None
+
+def updateOperatorList(list):
+    global OPERATOR_LIST
+    OPERATOR_LIST = list[:]
+    print OPERATOR_LIST
+
+"""
+def addOperator(id):
+    global OPERATOR_LIST
+    OPERATOR_LIST.append(id)
+
+def removeOperator(id):
+    global OPERATOR_LIST
+    OPERATOR_LIST.remove(id)
+"""

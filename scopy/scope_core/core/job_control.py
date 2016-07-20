@@ -292,7 +292,7 @@ def processBarcodeActivity(data):
             else:
                 USERS.remove(uid)
                 print "Users: ", USERS
-            xmlparser.OPERATOR_LIST = USERS[:]
+            xmlparser.updateOperatorList(USERS)
             return True
         else:
             return False
