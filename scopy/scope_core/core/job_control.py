@@ -170,7 +170,11 @@ def sendUpdateMsg(pcs=None, mct=None):
         pcs = ProductionDataTS.objects.last().output
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
-        
+
+    print '----------job_control----------'
+    print USERS
+    print '----------job_control----------'
+
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct, USERS)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
