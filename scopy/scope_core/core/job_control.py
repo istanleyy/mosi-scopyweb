@@ -169,7 +169,7 @@ def sendUpdateMsg(pcs=None, mct=None):
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
         
-    scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
+    scopemsg = xmlparser.getJobUpdateXml(pcs, mct, settings.USERS)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
         xmlparser.logUnsyncMsg(scopemsg)
