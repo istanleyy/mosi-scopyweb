@@ -25,9 +25,6 @@ from . import request_sender
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
 
-global USERS
-USERS = []
-
 def processQueryResult(source, data, task=None):
     global OPSTATUS
     global CO_OVERRIDE
@@ -167,6 +164,7 @@ def sendEventMsg(evttype, code="", user="", data=""):
         return result
 
 def sendUpdateMsg(pcs=None, mct=None):
+    global USERS
     if pcs is None:
         pcs = ProductionDataTS.objects.last().output
     if mct is None:
@@ -193,6 +191,8 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
     
 def init():
+    global USERS
+    USERS = []
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     
@@ -280,6 +280,7 @@ def performChangeOver(session, task, moldserial):
 
 def processBarcodeActivity(data):
     global CO_OVERRIDE
+    global USERS
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
