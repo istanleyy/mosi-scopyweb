@@ -24,6 +24,7 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
+USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -169,11 +170,7 @@ def sendUpdateMsg(pcs=None, mct=None):
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
 
-    print '----------user_list----------'
-    print USERS
-    print '----------user_list----------'
-
-    scopemsg = xmlparser.getJobUpdateXml(pcs, mct, USERS)
+    scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
         xmlparser.logUnsyncMsg(scopemsg)
@@ -279,9 +276,6 @@ def processBarcodeActivity(data):
     global CO_OVERRIDE
     global USERS
 
-    if USERS is None:
-        USERS = []
-        
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -298,6 +292,7 @@ def processBarcodeActivity(data):
             else:
                 USERS.remove(uid)
                 print "Users: ", USERS
+            xmlparser.OPERATOR_LIST = USERS[:]
             return True
         else:
             return False
