@@ -24,6 +24,7 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
+USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -164,12 +165,13 @@ def sendEventMsg(evttype, code="", user="", data=""):
         return result
 
 def sendUpdateMsg(pcs=None, mct=None):
+    global USERS
     if pcs is None:
         pcs = ProductionDataTS.objects.last().output
     if mct is None:
         mct = ProductionDataTS.objects.last().mct
         
-    scopemsg = xmlparser.getJobUpdateXml(pcs, mct, settings.USERS)
+    scopemsg = xmlparser.getJobUpdateXml(pcs, mct, USERS)
     result = request_sender.sendPostRequest(scopemsg)
     if result is None:
         xmlparser.logUnsyncMsg(scopemsg)
@@ -186,7 +188,6 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
     
 def init():
-    settings.initUsers()
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     
@@ -274,6 +275,7 @@ def performChangeOver(session, task, moldserial):
 
 def processBarcodeActivity(data):
     global CO_OVERRIDE
+    global USERS
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -285,11 +287,11 @@ def processBarcodeActivity(data):
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
-                settings.USERS.append(uid)
-                print "Users: ", settings.USERS
+                USERS.append(uid)
+                print "Users: ", USERS
             else:
-                settings.USERS.remove(uid)
-                print "Users: ", settings.USERS
+                USERS.remove(uid)
+                print "Users: ", USERS
             return True
         else:
             return False
