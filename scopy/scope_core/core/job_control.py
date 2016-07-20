@@ -279,7 +279,6 @@ def performChangeOver(session, task, moldserial):
 
 def processBarcodeActivity(data):
     global CO_OVERRIDE
-    global USERS
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -291,9 +290,11 @@ def processBarcodeActivity(data):
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
+                global USERS
                 USERS.append(uid)
                 print "Users: ", USERS
             else:
+                global USERS
                 USERS.remove(uid)
                 print "Users: ", USERS
             return True
