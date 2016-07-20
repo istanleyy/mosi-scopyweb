@@ -186,6 +186,7 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
     
 def init():
+    settings.initUsers()
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     
