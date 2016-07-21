@@ -16,7 +16,7 @@ import time
 from io import BytesIO
 from datetime import date
 from lxml import etree
-from scope_core.models import Job, SessionManagement
+from scope_core.models import Job, SessionManagement, UserActivity
 from scope_core.config import settings
 
 LOCK = threading.Lock()
@@ -62,10 +62,11 @@ def getJobUpdateXml(actualPcs, mct):
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
 
-    if len(OPERATOR_LIST) > 0:
-        for user in OPERATOR_LIST:
+    users = UserActivity.objects.filter(lastLogout=None)
+    if users:
+        for user in users:
             userTag = etree.SubElement(jobUpdate, "user")
-            userTag.text = user
+            userTag.text = user.uid
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)

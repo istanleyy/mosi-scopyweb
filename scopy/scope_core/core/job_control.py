@@ -13,9 +13,10 @@ job_control.py
     Manage Job activities and send corresponding Scope message to the server
 """
 
+from datetime import datetime
 from djcelery.models import IntervalSchedule
 from lxml import etree
-from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement
+from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser
@@ -24,7 +25,6 @@ from . import request_sender
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
 CO_OVERRIDE = False
-USERS = []
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
@@ -274,7 +274,6 @@ def performChangeOver(session, task, moldserial):
 
 def processBarcodeActivity(data):
     global CO_OVERRIDE
-    global USERS
 
     barcodes = data.split(',')
     uid = barcodes[0]
@@ -287,12 +286,20 @@ def processBarcodeActivity(data):
     if activity == 'LOGIN' or activity == 'LOGOUT':
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
-                USERS.append(uid)
-                print "Users: ", USERS
+                if UserActivity.objects.filter(uid=uid) is None:
+                    UserActivity.objects.create(uid=uid, lastLogin=datetime.now(), lastLogout=None)
+                print "Users: ", UserActivity.objects.all()
             else:
-                USERS.remove(uid)
-                print "Users: ", USERS
-            xmlparser.updateOperatorList(USERS)
+                try:
+                    user = UserActivity.objects.get(uid=uid)
+                    user.lastLogout = datetime.now()
+                    user.save()
+                except DoesNotExist:
+                    pass
+                except MultipleObjectsReturned:
+                    pass
+                finally:
+                    print "Users: ", UserActivity.objects.all()
             return True
         else:
             return False
