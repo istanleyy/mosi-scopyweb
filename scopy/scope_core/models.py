@@ -52,8 +52,8 @@ class SessionManagement(models.Model):
 
 class UserActivity(models.Model):
     uid = models.CharField(max_length=10, default='UNKNOWN')
-    lastLogin = models.DateTimeField(blank=True)
-    lastLogout = models.DateTimeField(blank=True)
+    lastLogin = models.DateTimeField(blank=True, null=True)
+    lastLogout = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return self.uid
