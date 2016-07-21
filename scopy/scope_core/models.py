@@ -49,3 +49,11 @@ class SessionManagement(models.Model):
     msgid = models.IntegerField(default=0)
     errid = models.IntegerField(default=0)
     errflag = models.BooleanField(default=False)
+
+class UserActivity(models.Model):
+    uid = models.CharField(max_length=10, default='UNKNOWN')
+    lastLogin = models.DateTimeField(blank=True)
+    lastLogout = models.DateTimeField(blank=True)
+
+    def __str__(self):
+        return self.uid

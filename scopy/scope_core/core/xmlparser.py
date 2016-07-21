@@ -20,7 +20,6 @@ from scope_core.models import Job, SessionManagement
 from scope_core.config import settings
 
 LOCK = threading.Lock()
-OPERATOR_LIST = []
 
 def isScopeXml(str):
     try:
@@ -43,6 +42,7 @@ def isScopeXml(str):
         return False
         
 def getJobUpdateXml(actualPcs, mct):
+    global OPERATOR_LIST
     msgId, timeText = getXmlTimeVal()
     docRoot = etree.Element("scope_job")
     jobUpdate = etree.SubElement(docRoot, "job_update", msg_id=msgId)
