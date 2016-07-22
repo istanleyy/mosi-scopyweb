@@ -163,7 +163,7 @@ def getJobStartXml():
     dataType2.text = 'positiveInteger'
     uom2.text = 'sec'
     key2.text = 'CycleTime'
-    equipId.text = settings.DEVICE_INFO['NAME']
+    equipId.text = settings.DEVICE_INFO['ID']
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)

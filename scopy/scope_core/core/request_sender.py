@@ -24,7 +24,7 @@ def sendPostRequest(msg, errHandle=False):
     
     headers = {'Content-Type': 'application/json'}
     payload = {
-        'station': settings.DEVICE_INFO['NAME'],
+        'station': settings.DEVICE_INFO['ID'],
         'message': msg
     }
     try:
@@ -48,7 +48,7 @@ def sendGetRequest():
     else:
         url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
     
-    param = {'station': settings.DEVICE_INFO['NAME']}
+    param = {'station': settings.DEVICE_INFO['ID']}
     try:
         print '-----> sending request to ' + url
         r = requests.get(url, params=param, timeout=5)
