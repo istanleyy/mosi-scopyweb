@@ -287,8 +287,9 @@ def processBarcodeActivity(data):
         if sendEventMsg(uid, activity):
             if activity == 'LOGIN':
                 if UserActivity.objects.filter(uid=uid) is None:
-                    UserActivity.objects.create(uid=uid, lastLogin=datetime.now(), lastLogout=None)
-                print "Users: ", UserActivity.objects.all()
+                    tLogin = datetime.now()
+                    UserActivity.objects.create(uid=uid, lastLogin=tLogin, lastLogout=None)
+                    print "Users: ", UserActivity.objects.all()
             else:
                 try:
                     user = UserActivity.objects.get(uid=uid)
