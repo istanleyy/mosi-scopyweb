@@ -166,15 +166,17 @@ class ModbusDevice(AbstractDevice):
             if settings.SIMULATE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
-                return (result[0], self.outpcs)
+                if self.outpcs != self.lastOutput:
+                    self.mct = self.getmct()
+                    self.lastOutput = self.outpcs
             else:
                 self.outpcs = self.hextoint32(pcshex)
                 # Calc mct only if the output has changed
                 if self.outpcs != self.lastOutput:
                     self.mct = self.getmct()
                     self.lastOutput = self.outpcs
-                print (self.mct, self.outpcs)
-                return (self.mct, self.outpcs)
+            print (self.mct, self.outpcs)
+            return (self.mct, self.outpcs)
         else:
             return "fail"
 
