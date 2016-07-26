@@ -48,7 +48,7 @@ def processQueryResult(source, data, task=None):
 	        OPSTATUS = data[0]
         
         # Machine enters line change (change mold)        
-        if data[1] == const.CHG_MOLD or Machine.objects.first().moldChangeStatus:
+        if data[1] == const.CHG_MOLD or CO_OVERRIDE:
             # If not already in change-over (CO), update machine status and perform CO
             if OPSTATUS != const.CHG_MOLD:
                 OPSTATUS = const.CHG_MOLD
@@ -86,6 +86,7 @@ def processQueryResult(source, data, task=None):
                     job.save()
                         
                     if OPSTATUS == const.CHG_MOLD:
+                        CO_OVERRIDE = False
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
 
@@ -313,6 +314,8 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             # Barcode CO event over-rides machine's mold change status
             if machine.opmode != 3:
+                global CO_OVERRIDE
+                CO_OVERRIDE = True
                 machine.moldChangeStatus = True
                 machine.save()
 
