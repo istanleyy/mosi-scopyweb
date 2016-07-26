@@ -65,12 +65,16 @@ def processQueryResult(source, data, task=None):
                     job.save()
                         
                     if OPSTATUS == const.CHG_MOLD:
+                        machine = Machine.objects.first()
+                        machine.moldChangeStatus = False
+                        machine.save()
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
-                        CO_OVERRIDE = False
+
                     elif OPSTATUS == const.CHG_MATERIAL:
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
+                        
                     else:
                         # Sends normal job start message
                         sendEventMsg(1)
@@ -82,7 +86,7 @@ def processQueryResult(source, data, task=None):
                 pass
         
         # Machine enters line change (change mold)        
-        elif data[1] == const.CHG_MOLD or CO_OVERRIDE:
+        elif data[1] == const.CHG_MOLD or Machine.objects.first().moldChangeStatus:
             # If not already in change-over (CO), update machine status and perform CO
             if OPSTATUS != const.CHG_MOLD:
                 OPSTATUS = const.CHG_MOLD
@@ -214,21 +218,19 @@ def evalCOCondition(machine, session):
         #   - motor of the machine is switched OFF
         if (ProductionDataTS.objects.last().output >= session.job.quantity and
             not session.errflag and
-            not Machine.objects.first().motorOnOffStatus):
+            not Machine.objects.first().moldChangeStatus):
             return 'mold'
         
         # Conditions for the machine to enter material pipe cleaning status:
         #   - machine is not having erronous downtime
         #   - machine's mold adjustment switch is ON
-        elif (not session.errflag and  
-                Machine.objects.first().moldAdjustStatus):
+        elif (not session.errflag and Machine.objects.first().setupStatus):
             return 'moldadjust'
         
         # Conditions for the machine to enter material pipe cleaning status:
         #   - machine is not having erronous downtime
         #   - machine's material pipe cleaning switch is ON
-        elif (not session.errflag and  
-                Machine.objects.first().cleaningStatus):
+        elif (not session.errflag and Machine.objects.first().matChangeStatus):
             return 'material'
         
         else:
@@ -273,8 +275,6 @@ def performChangeOver(session, task, moldserial):
         return False
 
 def processBarcodeActivity(data):
-    global CO_OVERRIDE
-
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -312,9 +312,10 @@ def processBarcodeActivity(data):
     else:
         # If performing change-over procedure
         if activity == '1062' or activity == '1063':
-            # Barcode CO event over-rides CO status, CO_OVERRIDE will
-            # be cleared when the machine is set to auto mode.
-            if Machine.objects.first().opmode != 3:
-                CO_OVERRIDE = True
+            machine = Machine.objects.first()
+            # Barcode CO event over-rides machine's mold change status
+            if machine.opmode != 3:
+                machine.moldChangeStatus = True
+                machine.save()
 
         return sendEventMsg(activity, 'WS', uid, data)

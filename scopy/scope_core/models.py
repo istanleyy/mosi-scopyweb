@@ -15,9 +15,9 @@ class Machine(models.Model):
         (AUTO_OP, 'Auto'),
     )
     opmode = models.IntegerField(choices=OP_MODE_CHOICES, default=OFFLINE)
-    motorOnOffStatus = models.BooleanField(default=False)
-    moldAdjustStatus = models.BooleanField(default=False)
-    cleaningStatus = models.BooleanField(default=False)
+    moldChangeStatus = models.BooleanField(default=False)
+    setupStatus = models.BooleanField(default=False)
+    matChangeStatus = models.BooleanField(default=False)
 
 @python_2_unicode_compatible
 class Job(models.Model):
