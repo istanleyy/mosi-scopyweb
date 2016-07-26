@@ -24,14 +24,13 @@ from . import request_sender
 
 # OPSTATUS maintains the state of current machine status
 OPSTATUS = const.OFFLINE
-CO_OVERRIDE = False
 
 def processQueryResult(source, data, task=None):
     global OPSTATUS
-    global CO_OVERRIDE
     if source == 'opStatus':
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
+        machine = Machine.objects.first()
         
         print(data)
         
@@ -48,8 +47,8 @@ def processQueryResult(source, data, task=None):
 	        OPSTATUS = data[0]
         
         # Machine enters line change (change mold)        
-        if data[1] == const.CHG_MOLD or CO_OVERRIDE:
-            print 'CO_OVERRIDE: ', CO_OVERRIDE
+        if data[1] == const.CHG_MOLD or machine.cooverride:
+            print 'CO_OVERRIDE: ', machine.cooverride
             # If not already in change-over (CO), update machine status and perform CO
             if OPSTATUS != const.CHG_MOLD:
                 OPSTATUS = const.CHG_MOLD
@@ -87,7 +86,8 @@ def processQueryResult(source, data, task=None):
                     job.save()
                         
                     if OPSTATUS == const.CHG_MOLD:
-                        CO_OVERRIDE = False
+                        machine.cooverride = False
+                        machine.save()
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
 
@@ -315,9 +315,7 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             # Barcode CO event over-rides machine's mold change status
             if machine.opmode != 3:
-                global CO_OVERRIDE
-                CO_OVERRIDE = True
-                machine.moldChangeStatus = True
+                machine.cooverride = True
                 machine.save()
                 print '***** barcode CO *****'
 

@@ -18,6 +18,7 @@ class Machine(models.Model):
     moldChangeStatus = models.BooleanField(default=False)
     setupStatus = models.BooleanField(default=False)
     matChangeStatus = models.BooleanField(default=False)
+    cooverride = model.BooleanField(default=False)
 
 @python_2_unicode_compatible
 class Job(models.Model):
