@@ -46,9 +46,30 @@ def processQueryResult(source, data, task=None):
                 request_sender.sendPostRequest('false:bye')
 	    else:
 	        OPSTATUS = data[0]
-
+        
+        # Machine enters line change (change mold)        
+        if data[1] == const.CHG_MOLD or Machine.objects.first().moldChangeStatus:
+            # If not already in change-over (CO), update machine status and perform CO
+            if OPSTATUS != const.CHG_MOLD:
+                OPSTATUS = const.CHG_MOLD
+                if performChangeOver(session, task, str(data[2])):
+                    # Successfully enter CO state, send message to server
+                    sendEventMsg(6, 'BG')
+                else:
+                    # Error in CO procedure, send message to server to end current job without next job
+                    sendEventMsg(6, 'NJ')
+        
+        # Machine is changing material
+        elif data[1] == const.CHG_MATERIAL:
+            # Stop currently running job and send a downtime message to server
+            if job.inprogress:
+                job.inprogress = False
+                job.save()
+                OPSTATUS = const.CHG_MATERIAL
+                sendEventMsg(4)
+        
         # Machine is in ready-to-produce status (RUNNING)
-        if data[1] == const.RUNNING or data[1] == const.IDLE:
+        elif data[1] == const.RUNNING or data[1] == const.IDLE:
             # If the machine has been switched to AUTO_MODE
             if data[0] == const.AUTO_MODE:
                 # Check job status for current session
@@ -74,7 +95,7 @@ def processQueryResult(source, data, task=None):
                     elif OPSTATUS == const.CHG_MATERIAL:
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
-                        
+
                     else:
                         # Sends normal job start message
                         sendEventMsg(1)
@@ -84,27 +105,7 @@ def processQueryResult(source, data, task=None):
             else:
                 # Currently job_control is ignoring MANUAL_MODE and SEMI_AUTO_MODE
                 pass
-        
-        # Machine enters line change (change mold)        
-        elif data[1] == const.CHG_MOLD or Machine.objects.first().moldChangeStatus:
-            # If not already in change-over (CO), update machine status and perform CO
-            if OPSTATUS != const.CHG_MOLD:
-                OPSTATUS = const.CHG_MOLD
-                if performChangeOver(session, task, str(data[2])):
-                    # Successfully enter CO state, send message to server
-                    sendEventMsg(6, 'BG')
-                else:
-                    # Error in CO procedure, send message to server to end current job without next job
-                    sendEventMsg(6, 'NJ')
-        
-        # Machine is changing material
-        elif data[1] == const.CHG_MATERIAL:
-            # Stop currently running job and send a downtime message to server
-            if job.inprogress:
-                job.inprogress = False
-                job.save()
-                OPSTATUS = const.CHG_MATERIAL
-                sendEventMsg(4)
+
         else:
             # Valid machine status are: IDLE, RUNNING, CHG_MOLD, CHG_MATERIAL
             # Ignore other (undefined) status for now
