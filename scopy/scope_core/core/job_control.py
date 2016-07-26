@@ -86,9 +86,6 @@ def processQueryResult(source, data, task=None):
                     job.save()
                         
                     if OPSTATUS == const.CHG_MOLD:
-                        machine = Machine.objects.first()
-                        machine.moldChangeStatus = False
-                        machine.save()
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
 
