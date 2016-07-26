@@ -49,6 +49,7 @@ def processQueryResult(source, data, task=None):
         
         # Machine enters line change (change mold)        
         if data[1] == const.CHG_MOLD or CO_OVERRIDE:
+            print 'CO_OVERRIDE: ', CO_OVERRIDE
             # If not already in change-over (CO), update machine status and perform CO
             if OPSTATUS != const.CHG_MOLD:
                 OPSTATUS = const.CHG_MOLD
@@ -318,5 +319,6 @@ def processBarcodeActivity(data):
                 CO_OVERRIDE = True
                 machine.moldChangeStatus = True
                 machine.save()
+                print '***** barcode CO *****'
 
         return sendEventMsg(activity, 'WS', uid, data)
