@@ -14,7 +14,15 @@ class Machine(models.Model):
         (SEMI_OP, 'Semi-auto'),
         (AUTO_OP, 'Auto'),
     )
+    OP_STAT_CHOICES = (
+        (0, 'Idle'),
+        (1, 'Running'),
+        (2, 'CO'),
+        (3, 'Material'),
+        (4, 'Setup'),
+    )
     opmode = models.IntegerField(choices=OP_MODE_CHOICES, default=OFFLINE)
+    opstatus = models.IntegerField(choices=OP_STAT_CHOICES, default=0)
     moldChangeStatus = models.BooleanField(default=False)
     setupStatus = models.BooleanField(default=False)
     matChangeStatus = models.BooleanField(default=False)
