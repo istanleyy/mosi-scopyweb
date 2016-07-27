@@ -26,10 +26,10 @@ from . import request_sender
 #OPSTATUS = const.OFFLINE
 
 def processQueryResult(source, data, task=None):
+    machine = Machine.objects.first()
     if source == 'opStatus':
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
-        machine = Machine.objects.first()
         
         print(data)
         
