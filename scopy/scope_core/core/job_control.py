@@ -46,8 +46,8 @@ def processQueryResult(source, data, task=None):
                 request_sender.sendPostRequest('false:bye')
         
         # Machine enters line change (change mold)        
-        if data[1] == const.CHG_MOLD or machine.cooverride:
-            print 'CO_OVERRIDE: ', machine.cooverride
+        elif data[1] == const.CHG_MOLD or machine.cooverride:
+            print('CO_OVERRIDE: ', machine.cooverride)
             # If not already in change-over (CO), update machine status and perform CO
             if OPSTATUS != const.CHG_MOLD:
                 OPSTATUS = const.CHG_MOLD
@@ -83,7 +83,7 @@ def processQueryResult(source, data, task=None):
                 if not job.inprogress and job.active:
                     job.inprogress = True
                     job.save()
-                        
+
                     if OPSTATUS == const.CHG_MOLD:
                         machine.cooverride = False
                         machine.save()
@@ -103,6 +103,9 @@ def processQueryResult(source, data, task=None):
             else:
                 # Currently job_control is ignoring MANUAL_MODE and SEMI_AUTO_MODE
                 OPSTATUS = const.IDLE
+                if machine.cooverride:
+                    machine.cooverride = False
+                    machine.save()
 
         else:
             # Valid machine status are: IDLE, RUNNING, CHG_MOLD, CHG_MATERIAL
@@ -313,7 +316,7 @@ def processBarcodeActivity(data):
         if activity == '1062' or activity == '1063':
             machine = Machine.objects.first()
             # Barcode CO event over-rides machine's mold change status
-            if machine.opmode != 3:
+            if machine.opmode != 3 and not machine.cooverride:
                 machine.cooverride = True
                 machine.save()
                 print '***** barcode CO *****'
