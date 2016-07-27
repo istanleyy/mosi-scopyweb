@@ -17,8 +17,8 @@ SEMI_AUTO_MODE = 'm2'
 AUTO_MODE = 'm3'
 
 # Machine status definitions
-IDLE = 's0'
-RUNNING = 's1'
-CHG_MOLD = 's2'
-CHG_MATERIAL = 's3'
-SETUP = 's4'
+IDLE = 0
+RUNNING = 1
+CHG_MOLD = 2
+CHG_MATERIAL = 3
+SETUP = 4
