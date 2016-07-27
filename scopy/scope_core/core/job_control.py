@@ -45,32 +45,10 @@ def processQueryResult(source, data, task=None):
                     job.save()
                 request_sender.sendPostRequest('false:bye')
         
-        # Machine enters line change (change mold)        
-        elif data[1] == const.CHG_MOLD or machine.cooverride:
-            print('CO_OVERRIDE: ', machine.cooverride)
-            # If not already in change-over (CO), update machine status and perform CO
-            if OPSTATUS != const.CHG_MOLD:
-                OPSTATUS = const.CHG_MOLD
-                if performChangeOver(session, task, str(data[2])):
-                    # Successfully enter CO state, send message to server
-                    sendEventMsg(6, 'BG')
-                else:
-                    # Error in CO procedure, send message to server to end current job without next job
-                    sendEventMsg(6, 'NJ')
-        
-        # Machine is changing material
-        elif data[1] == const.CHG_MATERIAL:
-            # Stop currently running job and send a downtime message to server
-            if OPSTATUS != const.CHG_MATERIAL and job.inprogress:
-                job.inprogress = False
-                job.save()
-                OPSTATUS = const.CHG_MATERIAL
-                sendEventMsg(4)
-        
-        # Machine is in ready-to-produce status (RUNNING)
-        elif data[1] == const.RUNNING or data[1] == const.IDLE:
-            # If the machine has been switched to AUTO_MODE
-            if data[0] == const.AUTO_MODE:
+        # If the machine has been switched to AUTO_MODE
+        elif data[0] == const.AUTO_MODE:
+            # Machine is in ready-to-produce status (RUNNING)
+            if data[1] == const.RUNNING or data[1] == const.IDLE:
                 # Check job status for current session
                 if not job.active:
                     # If current job is completed or removed from work (not active),
@@ -101,16 +79,44 @@ def processQueryResult(source, data, task=None):
                     # Update the state of machine's operation status
                     OPSTATUS = const.RUNNING
             else:
-                # Currently job_control is ignoring MANUAL_MODE and SEMI_AUTO_MODE
+                # When the machine is in auto mode, it cannot be changing mold or
+                # material, so the system should ignore such mode-status combinations
+                pass
+        
+        # Machine is in MANUAL or SEMI_AUTO mode
+        else:
+            # Machine enters line change (change mold)        
+            if data[1] == const.CHG_MOLD or machine.cooverride:
+                print 'CO_OVERRIDE: ' + str(machine.cooverride)
+                # If not already in change-over (CO), update machine status
+                # and perform CO
+                if OPSTATUS != const.CHG_MOLD:
+                    OPSTATUS = const.CHG_MOLD
+                    if performChangeOver(session, task, str(data[2])):
+                        # Successfully enter CO state, send message to server
+                        sendEventMsg(6, 'BG')
+                    else:
+                        # Error in CO procedure, send message to server to end current job without next job
+                        sendEventMsg(6, 'NJ')
+        
+            # Machine is changing material
+            elif data[1] == const.CHG_MATERIAL:
+                # Stop currently running job and send a downtime message to server
+                if OPSTATUS != const.CHG_MATERIAL and job.inprogress:
+                    job.inprogress = False
+                    job.save()
+                    OPSTATUS = const.CHG_MATERIAL
+                    sendEventMsg(4)
+            
+            # Machine is under setup
+            elif data[1] == const.SETUP:
+                pass
+
+            else:
                 OPSTATUS = const.IDLE
                 if machine.cooverride:
                     machine.cooverride = False
                     machine.save()
-
-        else:
-            # Valid machine status are: IDLE, RUNNING, CHG_MOLD, CHG_MATERIAL
-            # Ignore other (undefined) status for now
-            pass
         
     elif source == 'opMetrics':
         mct = data[0]
