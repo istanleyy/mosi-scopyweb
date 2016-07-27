@@ -115,7 +115,7 @@ def processQueryResult(source, data, task=None):
                 pass
 
             else:
-                machine.opstatus = const.IDLE
+                machine.opstatus = data[1]
                 if machine.cooverride:
                     machine.cooverride = False
                 machine.save()
