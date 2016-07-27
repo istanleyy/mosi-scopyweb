@@ -37,14 +37,13 @@ def processQueryResult(source, data, task=None):
         # If the machine is detected to be OFFLINE (FCS DB device), 
         # send corresponding message to server
         if data[0] == const.OFFLINE:
-            if OPSTATUS != const.OFFLINE:
-                OPSTATUS = const.OFFLINE
+            if machine.opmode != 0:
+                machine.opmode = 0
+                machine.save()
                 if job.inprogress:
                     job.inprogress = False
                     job.save()
                 request_sender.sendPostRequest('false:bye')
-	    else:
-	        OPSTATUS = data[0]
         
         # Machine enters line change (change mold)        
         if data[1] == const.CHG_MOLD or machine.cooverride:
@@ -62,7 +61,7 @@ def processQueryResult(source, data, task=None):
         # Machine is changing material
         elif data[1] == const.CHG_MATERIAL:
             # Stop currently running job and send a downtime message to server
-            if job.inprogress:
+            if OPSTATUS != const.CHG_MATERIAL and job.inprogress:
                 job.inprogress = False
                 job.save()
                 OPSTATUS = const.CHG_MATERIAL
@@ -103,7 +102,7 @@ def processQueryResult(source, data, task=None):
                     OPSTATUS = const.RUNNING
             else:
                 # Currently job_control is ignoring MANUAL_MODE and SEMI_AUTO_MODE
-                pass
+                OPSTATUS = const.IDLE
 
         else:
             # Valid machine status are: IDLE, RUNNING, CHG_MOLD, CHG_MATERIAL
