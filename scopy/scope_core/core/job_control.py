@@ -62,7 +62,8 @@ def processQueryResult(source, data, task=None):
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
 
-                    elif machine.lastHaltReason == const.CHG_MATERIAL:
+                    elif (machine.lastHaltReason == const.CHG_MATERIAL or 
+                            machine.lastHaltReason == const.SETUP):
                         machine.lastHaltReason = 0
                         machine.save()
                         # If previous status is CHG_MATERIAL, need to send DT end message
@@ -81,33 +82,36 @@ def processQueryResult(source, data, task=None):
         else:
             # Machine enters line change (change mold)        
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
-                print 'CO_OVERRIDE: ' + str(machine.cooverride)
-                # perform change-over
-                if performChangeOver(session, task, str(data[2])):
-                    # Successfully enter CO state, send message to server
-                    sendEventMsg(6, 'BG')
-                else:
-                    # Error in CO procedure, send message to server to end current job without next job
-                    sendEventMsg(6, 'NJ')
+                if machine.lastHaltReason != const.CHG_MOLD:
+                    print 'CO_OVERRIDE: ' + str(machine.cooverride)
+                    # perform change-over
+                    if performChangeOver(session, task, str(data[2])):
+                        # Successfully enter CO state, send message to server
+                        sendEventMsg(6, 'BG')
+                    else:
+                        # Error in CO procedure, send message to server to end current job without next job
+                        sendEventMsg(6, 'NJ')
                 
-                machine.lastHaltReason = const.CHG_MOLD
-                machine.save()
+                    machine.lastHaltReason = const.CHG_MOLD
+                    machine.save()
         
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:
-                # Stop currently running job and send a downtime message to server
-                if job.inprogress:
-                    job.inprogress = False
-                    job.save()
-                    sendEventMsg(4)
+                if machine.lastHaltReason != const.CHG_MATERIAL:
+                    # Stop currently running job and send a downtime message to server
+                    if job.inprogress:
+                        job.inprogress = False
+                        job.save()
+                        sendEventMsg(4)
 
-                machine.lastHaltReason = const.CHG_MATERIAL
-                machine.save()
+                    machine.lastHaltReason = const.CHG_MATERIAL
+                    machine.save()
             
             # Machine is under SETUP
             elif machine.opstatus == const.SETUP:
-                machine.lastHaltReason = const.SETUP
-                machine.save()
+                if machine.lastHaltReason != const.SETUP:
+                    machine.lastHaltReason = const.SETUP
+                    machine.save()
             
             # Machine in RUNNING or IDLE state
             else:
