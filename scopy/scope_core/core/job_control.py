@@ -39,7 +39,7 @@ def processQueryResult(source, data, task=None):
             request_sender.sendPostRequest('false:bye')
         
         # If the machine has been switched to AUTO_MODE
-        elif machine.opmode == const.AUTO_MODE:
+        elif machine.opmode == 3:
             # Machine is in ready-to-produce status (RUNNING)
             if machine.opstatus == const.RUNNING or machine.opstatus == const.IDLE:
                 # Check job status for current session
