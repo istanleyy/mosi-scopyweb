@@ -29,7 +29,7 @@ def processQueryResult(source, data, task=None):
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
-        print(data)
+        print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
         # If the machine is detected to be OFFLINE (FCS DB device), 
         # send corresponding message to server
         if machine.opmode == const.OFFLINE:
