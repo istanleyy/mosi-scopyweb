@@ -72,6 +72,11 @@ def processQueryResult(source, data, task=None):
                     else:
                         # Sends normal job start message
                         sendEventMsg(1)
+                
+                else:
+                    # Cannot load new job, simply clear any halt states
+                    machine.lastHaltReason = 0
+                    machine.save()
             
             else:
                 # When the machine is in auto mode, it cannot be changing mold or
