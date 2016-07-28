@@ -23,10 +23,8 @@ class Machine(models.Model):
     )
     opmode = models.IntegerField(choices=OP_MODE_CHOICES, default=OFFLINE)
     opstatus = models.IntegerField(choices=OP_STAT_CHOICES, default=0)
-    moldChangeStatus = models.BooleanField(default=False)
-    setupStatus = models.BooleanField(default=False)
-    matChangeStatus = models.BooleanField(default=False)
     cooverride = models.BooleanField(default=False)
+    lastHaltReason = models.IntegerField(default=0)
 
 @python_2_unicode_compatible
 class Job(models.Model):

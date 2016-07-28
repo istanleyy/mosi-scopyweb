@@ -89,44 +89,26 @@ class ModbusDevice(AbstractDevice):
             
             modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
  
-            if result[0] == 2:
+            if result[0] == 2 or machine.cooverride:
                 self.status = const.CHG_MOLD
-                self.outpcs = 0
-                if not machine.moldChangeStatus:
-                    machine.moldChangeStatus = True
-                    statuschange = True        
+                self.outpcs = 0        
+            elif result[0] == 3:
+                self.status = const.CHG_MATERIAL
+            elif result[0] == 4:
+                self.status = const.SETUP
             else:
                 self.status = const.RUNNING if result[0] == 1 else const.IDLE
-                if machine.moldChangeStatus:
-                    machine.moldChangeStatus = False
-                    statuschange = True
-                """
-                if result[0] == 3:
-                    self.status = const.CHG_MATERIAL
-                    if not machine.matChangeStatus:
-                        machine.matChangeStatus = True
-                        statuschange = True
-                else:
-                    if machine.matChangeStatus:
-                        machine.matChangeStatus = False
-                        statuschange = True
 
-                    if result[0] == 4:
-                        self.status = const.SETUP
-                        if not machine.setupStatus:
-                            machine.setupStatus = True
-                            statusChange = True
-                    else:
-                        if machine.setupStatus:
-                            machine.setupStatus = False
-                            statusChange = True
-                """
+            if machine.opstatus != self.status:
+                machine.opstatus = self.status
+                statuschange = True
 
             if modeval[0] == 1024:
                 print('Device offline!')
                 self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
+                    machine.opstatus = 0
                     modechange = True
             elif modeval[0] == 2048:
                 self.mode = const.MANUAL_MODE

@@ -22,33 +22,26 @@ from scope_core.config import settings
 from . import xmlparser
 from . import request_sender
 
-# OPSTATUS maintains the state of current machine status
-#OPSTATUS = const.OFFLINE
-
 def processQueryResult(source, data, task=None):
     machine = Machine.objects.first()
+
     if source == 'opStatus':
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
         print(data)
-        
         # If the machine is detected to be OFFLINE (FCS DB device), 
         # send corresponding message to server
-        if data[0] == const.OFFLINE:
-            if machine.opmode != 0:
-                machine.opmode = 0
-                machine.opstatus = 0
-                machine.save()
-                if job.inprogress:
-                    job.inprogress = False
-                    job.save()
-                request_sender.sendPostRequest('false:bye')
+        if machine.opmode == const.OFFLINE:
+            if job.inprogress:
+                job.inprogress = False
+                job.save()
+            request_sender.sendPostRequest('false:bye')
         
         # If the machine has been switched to AUTO_MODE
-        elif data[0] == const.AUTO_MODE:
+        elif machine.opmode == const.AUTO_MODE:
             # Machine is in ready-to-produce status (RUNNING)
-            if data[1] == const.RUNNING or data[1] == const.IDLE:
+            if machine.opstatus == const.RUNNING or machine.opstatus == const.IDLE:
                 # Check job status for current session
                 if not job.active:
                     # If current job is completed or removed from work (not active),
@@ -62,22 +55,23 @@ def processQueryResult(source, data, task=None):
                     job.inprogress = True
                     job.save()
 
-                    if machine.opstatus == const.CHG_MOLD:
+                    if machine.lastHaltReadon == const.CHG_MOLD:
                         machine.cooverride = False
+                        machine.lastHaltReason = 0
+                        machine.save()
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         sendEventMsg(6, 'ED')
 
-                    elif machine.opstatus == const.CHG_MATERIAL:
+                    elif machine.lastHaltReason == const.CHG_MATERIAL:
+                        machine.lastHaltReason = 0
+                        machine.save()
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
 
                     else:
                         # Sends normal job start message
                         sendEventMsg(1)
-                    
-                    # Update the state of machine's operation status
-                    machine.opstatus = const.RUNNING
-                    machine.save()
+            
             else:
                 # When the machine is in auto mode, it cannot be changing mold or
                 # material, so the system should ignore such mode-status combinations
@@ -86,39 +80,38 @@ def processQueryResult(source, data, task=None):
         # Machine is in MANUAL or SEMI_AUTO mode
         else:
             # Machine enters line change (change mold)        
-            if data[1] == const.CHG_MOLD or machine.cooverride:
+            if machine.opstatus == const.CHG_MOLD or machine.cooverride:
                 print 'CO_OVERRIDE: ' + str(machine.cooverride)
-                # If not already in change-over (CO), update machine status
-                # and perform CO
-                if machine.opstatus != const.CHG_MOLD:
-                    machine.opstatus = const.CHG_MOLD
-                    machine.save()
-                    if performChangeOver(session, task, str(data[2])):
-                        # Successfully enter CO state, send message to server
-                        sendEventMsg(6, 'BG')
-                    else:
-                        # Error in CO procedure, send message to server to end current job without next job
-                        sendEventMsg(6, 'NJ')
+                # perform change-over
+                if performChangeOver(session, task, str(data[2])):
+                    # Successfully enter CO state, send message to server
+                    sendEventMsg(6, 'BG')
+                else:
+                    # Error in CO procedure, send message to server to end current job without next job
+                    sendEventMsg(6, 'NJ')
+                
+                machine.lastHaltReason = const.CHG_MOLD
+                machine.save()
         
             # Machine is changing material
-            elif data[1] == const.CHG_MATERIAL:
+            elif machine.opstatus == const.CHG_MATERIAL:
                 # Stop currently running job and send a downtime message to server
-                if machine.opstatus != const.CHG_MATERIAL and job.inprogress:
+                if job.inprogress:
                     job.inprogress = False
                     job.save()
-                    machine.opstatus = const.CHG_MATERIAL
-                    machine.save()
                     sendEventMsg(4)
-            
-            # Machine is under setup
-            elif data[1] == const.SETUP:
-                pass
 
-            else:
-                machine.opstatus = data[1]
-                if machine.cooverride:
-                    machine.cooverride = False
+                machine.lastHaltReason = const.CHG_MATERIAL
                 machine.save()
+            
+            # Machine is under SETUP
+            elif machine.opstatus == const.SETUP:
+                machine.lastHaltReason = const.SETUP
+                machine.save()
+            
+            # Machine in RUNNING or IDLE state
+            else:
+                pass
         
     elif source == 'opMetrics':
         mct = data[0]
@@ -328,5 +321,12 @@ def processBarcodeActivity(data):
                 machine.cooverride = True
                 machine.save()
                 print '***** barcode CO *****'
+
+        if activity == '1065':
+            machine = Machine.objects.first()
+            # Barcode event to signal end of mold-change procedure
+            if machine.cooverride:
+                machine.cooverride = False
+                machine.save()
 
         return sendEventMsg(activity, 'WS', uid, data)
