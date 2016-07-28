@@ -89,7 +89,7 @@ class ModbusDevice(AbstractDevice):
             
             modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
  
-            if result[0] == 2 or machine.cooverride:
+            if result[0] == 2:
                 self.status = const.CHG_MOLD
                 self.outpcs = 0        
             elif result[0] == 3:
