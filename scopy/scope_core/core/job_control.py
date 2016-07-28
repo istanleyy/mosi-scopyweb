@@ -55,7 +55,7 @@ def processQueryResult(source, data, task=None):
                     job.inprogress = True
                     job.save()
 
-                    if machine.lastHaltReadon == const.CHG_MOLD:
+                    if machine.lastHaltReason == const.CHG_MOLD:
                         machine.cooverride = False
                         machine.lastHaltReason = 0
                         machine.save()
