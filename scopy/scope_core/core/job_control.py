@@ -120,8 +120,9 @@ def processQueryResult(source, data, task=None):
             
             # Machine in RUNNING or IDLE state
             else:
-                machine.lastHaltReason = 0
-                machine.save()
+                if machine.lastHaltReason != 0:
+                    machine.lastHaltReason = 0
+                    machine.save()
         
     elif source == 'opMetrics':
         mct = data[0]

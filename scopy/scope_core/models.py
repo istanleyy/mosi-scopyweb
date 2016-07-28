@@ -39,7 +39,7 @@ class Job(models.Model):
     inprogress = models.BooleanField(default=False)
     
     def __str__(self):
-        return self.productid
+        return self.jobid + ':' + self.productid
 
 class ProductionDataTS(models.Model):
     job = models.ForeignKey(Job, on_delete=models.PROTECT)
