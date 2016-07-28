@@ -36,7 +36,7 @@ def processQueryResult(source, data, task=None):
             if job.inprogress:
                 job.inprogress = False
                 job.save()
-            request_sender.sendPostRequest('false:bye')
+                request_sender.sendPostRequest('false:bye')
         
         # If the machine has been switched to AUTO_MODE
         elif machine.opmode == 3:
