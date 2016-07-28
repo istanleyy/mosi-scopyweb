@@ -308,7 +308,7 @@ def processBarcodeActivity(data):
                     user[0].lastLogin = tLogin
                     user[0].lastLogout = None
                     user[0].save()
-                print "Users: ", UserActivity.objects.all()
+                print "Users: ", UserActivity.objects.filter(lastLogout=None)
             else:
                 try:
                     user = UserActivity.objects.get(uid=uid)
@@ -319,7 +319,7 @@ def processBarcodeActivity(data):
                 except MultipleObjectsReturned:
                     pass
                 finally:
-                    print "Users: ", UserActivity.objects.all()
+                    print "Users: ", UserActivity.objects.filter(lastLogout=None)
             return True
         else:
             return False
