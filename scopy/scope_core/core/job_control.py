@@ -75,6 +75,7 @@ def processQueryResult(source, data, task=None):
                 
                 else:
                     # Cannot load new job, simply clear any halt states
+                    machine.cooverride = False
                     machine.lastHaltReason = 0
                     machine.save()
             
