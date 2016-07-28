@@ -32,7 +32,7 @@ def processQueryResult(source, data, task=None):
         print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
         # If the machine is detected to be OFFLINE (FCS DB device), 
         # send corresponding message to server
-        if machine.opmode == const.OFFLINE:
+        if machine.opmode == 0:
             if job.inprogress:
                 job.inprogress = False
                 job.save()
@@ -94,12 +94,11 @@ def processQueryResult(source, data, task=None):
                     if performChangeOver(session, task, str(data[2])):
                         # Successfully enter CO state, send message to server
                         sendEventMsg(6, 'BG')
+                        machine.lastHaltReason = const.CHG_MOLD
+                        machine.save()
                     else:
                         # Error in CO procedure, send message to server to end current job without next job
                         sendEventMsg(6, 'NJ')
-                
-                    machine.lastHaltReason = const.CHG_MOLD
-                    machine.save()
         
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:
@@ -149,7 +148,7 @@ def processQueryResult(source, data, task=None):
 
     elif source == 'alarmStatus':
         print (data, machine.opstatus)
-        if machine.opmode != const.OFFLINE:
+        if machine.opmode != 0:
             session = SessionManagement.objects.first()
             errlatch = 'X2'
             print data
