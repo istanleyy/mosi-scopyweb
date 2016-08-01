@@ -14,14 +14,9 @@ class ScopeCoreConfig(AppConfig):
         from core import job_control
         from core import device_manager as device
         from core.socket_server import SocketServer
-        import imp
 
         socketServer = SocketServer()
         socketServer.start()
-
-        scanner = imp.load_source("scanner", "/home/mosidev/sandbox/barcode_test/scanner.py").load_module()
-        #scanner.main()
-
         fcsDevice = device.getDeviceInstance()
         if fcsDevice.isConnected:
             job_control.init()
