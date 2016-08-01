@@ -19,7 +19,7 @@ class ScopeCoreConfig(AppConfig):
         socketServer = SocketServer()
         socketServer.start()
 
-        scanner = imp.load_source("scanner", "~/sandbox/barcode_test/scanner.py").load_module()
+        scanner = imp.load_source("scanner", "/home/mosidev/sandbox/barcode_test/scanner.py").load_module()
         #scanner.main()
 
         fcsDevice = device.getDeviceInstance()
