@@ -58,7 +58,7 @@ class ModbusDevice(AbstractDevice):
     id = 'not_set'
     isConnected = False
     outpcs = 0
-    mct = 0.0
+    mct = 0
 
     def connect(self):
         return self._connectionManager.connect()

@@ -332,8 +332,9 @@ def processBarcodeActivity(data):
                 machine.cooverride = True
                 machine.save()
                 print '***** barcode CO *****'
-
-        if activity == '1065':
+        
+        # 1065 Test mold, 9229 Setup 
+        if activity == '1065' or activity == '9229':
             machine = Machine.objects.first()
             # Barcode event to signal end of mold-change procedure
             if machine.cooverride:
