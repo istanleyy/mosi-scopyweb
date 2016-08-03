@@ -22,8 +22,8 @@ from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 from scope_core.models import Machine
 
-if platform.system() != 'Darwin':
-    import RPi.GPIO as GPIO
+#if platform.system() != 'Darwin':
+#    import RPi.GPIO as GPIO
 
 class FCSInjectionDevice_db(AbstractDevice):
 
@@ -65,9 +65,9 @@ class FCSInjectionDevice_db(AbstractDevice):
     isConnected = False
 
     # Setup RPi GPIO
-    if platform.system() != 'Darwin':
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    #if platform.system() != 'Darwin':
+    #    GPIO.setmode(GPIO.BCM)
+    #    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
     def connect(self):
         return self._connectionManager.connect()
@@ -90,14 +90,13 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         if result is not None:
-            print(result)
+            if settings.DEBUG:
+                print(result)
             machine = Machine.objects.first()
-            status = const.RUNNING
-            mode = const.OFFLINE
             moldid = result[1]
             statuschange = False
             modechange = False
-            
+            """
             if platform.system() != 'Darwin':
                 coswitch = GPIO.input(23)
             else:
@@ -114,37 +113,38 @@ class FCSInjectionDevice_db(AbstractDevice):
                 if machine.moldAdjustStatus:
                     machine.moldAdjustStatus = False
                     statuschange = True
-            
+            """
             modestr = result[0].encode('utf-8', 'ignore')
             if modestr[0] == '1':
-                mode = const.MANUAL_MODE
+                self.mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
                     print('Device in manual mode.')
             elif modestr[0] == '2':
-                mode = const.SEMI_AUTO_MODE
+                self.mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print('Device in semi-auto mode.')
             elif modestr[0] == '3':
-                mode = const.AUTO_MODE
+                self.mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
+                    machine.opstatus = const.RUNNING
                     modechange = True
                     print('Device in auto mode.')
             else:
                 print('Device is offline!')
-                mode = const.OFFLINE
+                self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
+                    machine.opstatus = const.IDLE
                     modechange = True
 
             if statuschange or modechange:
                 machine.save()
-                return (mode, status, moldid)
-
+                return (self.mode, self.status, moldid)
         else:
             return "fail"
     
@@ -155,9 +155,9 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connectionManager.query(query)
         if result is not None:
             print(result)
-	    if result[1] == 1:
-		return (result[0], True)
-	    else: 
+	        if result[1] == 1:
+		        return (result[0], True)
+	        else: 
                 return (result[0], False)
         else:
             return "fail"
@@ -168,13 +168,15 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         print(result)
-	if result is not None:
+	    if result is not None:
             return result
         else:
             return "fail"
 
     def __init__(self, id):
         self.id = id
+        self.mode = const.OFFLINE
+        self.status = const.IDLE
         if self.connect():
             print("DB connected. Check device ID={}...".format(id))
             if self.checkDeviceExists():
