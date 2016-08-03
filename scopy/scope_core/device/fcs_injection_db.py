@@ -144,7 +144,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
             if statuschange or modechange:
                 machine.save()
-                return (self.mode, self.status, moldid)
+            return (self.mode, self.status, moldid)
         else:
             return "fail"
     
