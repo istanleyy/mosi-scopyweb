@@ -14,7 +14,7 @@ job_control.py
 """
 
 from datetime import datetime
-from djcelery.models import IntervalSchedule
+from djcelery.models import IntervalSchedule, PeriodicTask
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
