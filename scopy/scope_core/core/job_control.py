@@ -351,6 +351,7 @@ def processServerAction(data):
         return False
 
 def performChangeOverByID(id):
+    session = SessionManagement.objects.first()
     # Set current job inactive
     oldJob = session.job
     oldJob.inprogress = False
@@ -359,7 +360,6 @@ def performChangeOverByID(id):
     
     # Load new job information only if we can find executable jobs in the db
     if getJobsFromServer():
-        session = SessionManagement.objects.first()
         task = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
         # If the mold id of the production data has changed, 
         # need to update session reference to the job using the new mold.
