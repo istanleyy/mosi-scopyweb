@@ -54,6 +54,12 @@ class SocketServer(Thread):
                         reply = 'ok'
                     else:
                         reply = 'fail'
+                elif msgContent[0] == 'ServerAction':
+                    print '\033[93m' + '[ServerAction] ' + msgContent[1] + '\033[0m'
+                    if job_control.processServerAction(msgContent[1]):
+                        reply = 'false:ok'
+                    else:
+                        reply = 'true:cannot perform server action'
                 elif msgContent[0] == 'test-toggleco':
                     # For testing, should remove this elif block in production!
                     if not self.isCO:

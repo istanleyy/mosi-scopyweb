@@ -342,3 +342,48 @@ def processBarcodeActivity(data):
                 machine.save()
 
         return sendEventMsg(activity, 'WS', uid, data)
+
+def processServerAction(data):
+    actparam = data.split(',')
+    if actparam[0] == 'co':
+        return performChangeOverByID(actparam[1])
+    else:
+        return False
+
+def performChangeOverByID(id):
+    # Set current job inactive
+    oldJob = session.job
+    oldJob.inprogress = False
+    oldJob.active = False
+    oldJob.save()
+    
+    # Load new job information only if we can find executable jobs in the db
+    if getJobsFromServer():
+        session = SessionManagement.objects.first()
+        task = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
+        # If the mold id of the production data has changed, 
+        # need to update session reference to the job using the new mold.
+        newJob = Job.objects.filter(jobid=int(id), active=True)
+        if newJob:
+            session.job = newJob[0]
+            session.save()
+            if task is None:
+                print '!!! Unable to update task period due to missing argument !!!'
+                return False
+            else:
+                # Compare polling period with retrieved mct value
+                if session.job.ct != task.interval.every:
+                    intv, created = IntervalSchedule.objects.get_or_create(
+                        every=session.job.ct, period='seconds'
+                        )
+                    task.interval_id = intv.id
+                    task.save()        
+                return True
+        else:
+            print '\033[91m' + '[Scopy] Unable to find next job matching mold ID: ' + moldserial + '\033[0m'
+            return False
+            
+    # Warn unable to find new job
+    else:
+        print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
+        return False
