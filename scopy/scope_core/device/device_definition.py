@@ -22,3 +22,13 @@ RUNNING = 1
 CHG_MOLD = 2
 CHG_MATERIAL = 3
 SETUP = 4
+
+# Machine error code definitions
+ERROR_LIST = {
+    'X2': 999,
+    'X5': 100,
+    'X6': 200,
+    'X7': 300,
+    'X8': 400,
+    'X9': 500,
+}

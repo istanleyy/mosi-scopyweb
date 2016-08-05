@@ -151,14 +151,11 @@ def processQueryResult(source, data, task=None):
         print (data, machine.opstatus)
         if machine.opmode != 0:
             session = SessionManagement.objects.first()
-            errlatch = 'X2'
-            print data
             if data[1]:
                 print 'Machine error...'
                 if not session.errflag:
                     if session.errid != data[0]:
                         session.errid = data[0]
-                        errlatch = data[0]
                     session.errflag = True
                     session.save()
                     sendEventMsg(4)
@@ -166,8 +163,7 @@ def processQueryResult(source, data, task=None):
                 if session.errflag:
                     session.errflag = False
                     session.save()
-                    #sendEventMsg(1, errlatch)
-                    sendEventMsg(1, "X2")
+                    sendEventMsg(1, 'X2')
     else:
         pass
 
@@ -346,7 +342,14 @@ def processBarcodeActivity(data):
 def processServerAction(data):
     actparam = data.split(',')
     if actparam[0] == 'co':
-        return performChangeOverByID(actparam[1])
+        if performChangeOverByID(actparam[1]):
+            sendEventMsg(6, 'BG')
+            machine = Machine.objects.first()
+            machine.lastHaltReason = const.CHG_MOLD
+            machine.save()
+        else:
+            sendEventMsg(6, 'NJ')
+        return True
     else:
         return False
 

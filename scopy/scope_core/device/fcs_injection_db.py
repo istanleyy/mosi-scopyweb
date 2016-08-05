@@ -153,12 +153,15 @@ class FCSInjectionDevice_db(AbstractDevice):
             "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
-        if result is not None:
+        if result is not None and result[0] in const.ERROR_LIST:
             print(result)
 	        if result[1] == 1:
-		        return (result[0], True)
+                for errtag, errcode in const.ERROR_LIST.iteritems():
+                    if result[0] == errcode:
+		                return (errtag, True)
+                return ('X2', True)
 	        else: 
-                return (result[0], False)
+                return ('', False)
         else:
             return "fail"
             

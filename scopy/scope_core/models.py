@@ -55,7 +55,7 @@ class SessionManagement(models.Model):
     modified = models.DateField(auto_now=True)
     job = models.ForeignKey(Job, on_delete=models.SET_NULL, blank=True, null=True)
     msgid = models.IntegerField(default=0)
-    errid = models.IntegerField(default=0)
+    errid = models.CharField(max_length=3, default='X2')
     errflag = models.BooleanField(default=False)
 
 class UserActivity(models.Model):

@@ -142,11 +142,15 @@ class ModbusDevice(AbstractDevice):
         result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
         print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
         if result is not None:
-            if result[3] != 0 or result[3] != 0:
-                print result
-                return (999, True)
+            errid_1 = int(result[2])
+            errid_2 = int(result[3])
+            if errid_1 != 0 or errid_2 != 0:
+                for errtag, errcode in const.ERROR_LIST.iteritems():
+                    if errid_1 == errcode or errid_2 == errcode:
+                        return (errtag, True)
+                return ('X2', True)
             else:
-                return (999, False)
+                return ('', False)
         else:
             return "fail"
             
