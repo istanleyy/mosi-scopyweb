@@ -99,6 +99,9 @@ def processQueryResult(source, data, task=None):
                     else:
                         # Error in CO procedure, send message to server to end current job without next job
                         sendEventMsg(6, 'NJ')
+                        if machine.cooverride:
+                            machine.cooverride = False
+                            machine.save()
         
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:
