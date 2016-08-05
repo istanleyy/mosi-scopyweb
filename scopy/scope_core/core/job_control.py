@@ -248,7 +248,7 @@ def evalCOCondition(machine, session):
     
     return 'nochange'
 
-def performChangeOver(session, task, moldserial):
+def performChangeOver(session, task, moldserial=None):
     # Set current job inactive
     oldJob = session.job
     oldJob.inprogress = False
@@ -259,7 +259,7 @@ def performChangeOver(session, task, moldserial):
     if getJobsFromServer():
         # If the mold id of the production data has changed, 
         # need to update session reference to the job using the new mold.
-        newJob = Job.objects.filter(moldid=moldserial, active=True)
+        newJob = Job.objects.filter(active=True)
         if newJob:
             session.job = newJob[0]
             session.save()
