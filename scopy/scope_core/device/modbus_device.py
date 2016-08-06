@@ -214,4 +214,3 @@ class ModbusDevice(AbstractDevice):
                 self.disconnect()
         else:
             print("Connection failed!")
-        

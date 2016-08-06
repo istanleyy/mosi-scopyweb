@@ -381,7 +381,8 @@ def performChangeOverByID(id):
                         every=session.job.ct, period='seconds'
                         )
                     task.interval_id = intv.id
-                    task.save()        
+                    task.save()
+                print '\033[93m' + '[Scopy] Server force CO.' + '\033[0m'
                 return True
         else:
             print '\033[91m' + '[Scopy] Unable to find next job matching mold ID: ' + moldserial + '\033[0m'
