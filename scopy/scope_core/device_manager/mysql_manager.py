@@ -32,7 +32,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
             cursor.execute('SET NAMES utf8;');
             cursor.execute('SET CHARACTER SET utf8;');
             cursor.execute('SET character_set_connection=utf8;');
-
+            cursor.close()
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Invalid username or password!")
@@ -49,6 +49,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
         
     def query(self, queryString):
         try:
+            self.connect()
             cursor = self.connection.cursor()
         except mysql.connector.Error:
             self.connection = self.cnxpool.get_connection()
@@ -57,4 +58,5 @@ class MySqlConnectionManager(AbstractConnectionManager):
         cursor.execute(queryString)
         result = cursor.fetchone()
         cursor.close()
+        self.disconnect()
         return result

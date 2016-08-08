@@ -41,7 +41,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.0'
+        return '0.1.1'
 
     @property
     def description(self):
@@ -86,7 +86,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getDeviceStatus(self):
         query = (
-            "SELECT MachineStatus,ModName FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT MachineStatus,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         if result is not None:
@@ -167,7 +167,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,TotalCycles FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
         print(result)

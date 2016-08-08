@@ -23,4 +23,5 @@ class ScopeCoreConfig(AppConfig):
             pollDeviceStatus.delay()
         else:
             print "!!! Unable to connect to device {} !!!".format(fcsDevice.id)
-            sys.exit(1)
+            if not settings.DEBUG:
+                sys.exit(1)
