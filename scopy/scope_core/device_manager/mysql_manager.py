@@ -21,8 +21,11 @@ class MySqlConnectionManager(AbstractConnectionManager):
     connection = None    
     
     def __init__(self):
-        self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", **settings.MYSQL_CONFIG)
-        
+        try:
+            self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", **settings.MYSQL_CONFIG)
+        except mysql.connector.Error as err:
+            print(err)
+
     def connect(self):
         result = False
         try:
