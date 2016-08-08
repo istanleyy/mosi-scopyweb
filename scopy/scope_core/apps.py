@@ -17,11 +17,11 @@ class ScopeCoreConfig(AppConfig):
 
         socketServer = SocketServer()
         socketServer.start()
-        fcsDevice = device.getDeviceInstance()
-        if fcsDevice.isConnected:
+        scopeDevice = device.getDeviceInstance()
+        if scopeDevice.isConnected:
             job_control.init()
             pollDeviceStatus.delay()
         else:
-            print "!!! Unable to connect to device {} !!!".format(fcsDevice.id)
+            print "!!! Unable to connect to device {} !!!".format(scopeDevice.id)
             if not settings.DEBUG:
                 sys.exit(1)
