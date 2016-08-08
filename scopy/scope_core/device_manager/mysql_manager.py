@@ -29,13 +29,14 @@ class MySqlConnectionManager(AbstractConnectionManager):
     def connect(self):
         result = False
         try:
-            self.connection = self.cnxpool.get_connection()
-            cursor = self.connection.cursor()
-            #self.connection.set_character_set('utf8');
-            cursor.execute('SET NAMES utf8;');
-            cursor.execute('SET CHARACTER SET utf8;');
-            cursor.execute('SET character_set_connection=utf8;');
-            cursor.close()
+            if self.cnxpool:
+                self.connection = self.cnxpool.get_connection()
+                cursor = self.connection.cursor()
+                #self.connection.set_character_set('utf8');
+                cursor.execute('SET NAMES utf8;');
+                cursor.execute('SET CHARACTER SET utf8;');
+                cursor.execute('SET character_set_connection=utf8;');
+                cursor.close()
         except mysql.connector.Error as err:
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Invalid username or password!")
@@ -48,18 +49,21 @@ class MySqlConnectionManager(AbstractConnectionManager):
             return result
             
     def disconnect(self):
-        self.connection.close()
+        if self.connection:
+            self.connection.close()
         
     def query(self, queryString):
         try:
             self.connect()
             cursor = self.connection.cursor()
         except mysql.connector.Error:
-            self.connection = self.cnxpool.get_connection()
-            cursor = self.connection.cursor()
+            if self.cnxpool:
+                self.connection = self.cnxpool.get_connection()
+                cursor = self.connection.cursor()
             
-        cursor.execute(queryString)
-        result = cursor.fetchone()
-        cursor.close()
-        self.disconnect()
-        return result
+        if cursor:
+            cursor.execute(queryString)
+            result = cursor.fetchone()
+            cursor.close()
+            self.disconnect()
+            return result
