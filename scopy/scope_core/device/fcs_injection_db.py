@@ -171,7 +171,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connectionManager.query(query)
         print(result)
-	    if result is not None:
+        if result is not None:
             return result
         else:
             return "fail"
