@@ -54,8 +54,9 @@ class MySqlConnectionManager(AbstractConnectionManager):
         
     def query(self, queryString):
         try:
-            self.connect()
-            cursor = self.connection.cursor()
+            if self.connection:
+                self.connect()
+                cursor = self.connection.cursor()
         except mysql.connector.Error:
             if self.cnxpool:
                 self.connection = self.cnxpool.get_connection()
