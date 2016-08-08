@@ -54,6 +54,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
         
     def query(self, queryString):
         try:
+            cursor = None
             if self.connection:
                 self.connect()
                 cursor = self.connection.cursor()
