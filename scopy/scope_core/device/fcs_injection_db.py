@@ -160,7 +160,7 @@ class FCSInjectionDevice_db(AbstractDevice):
                     if result[0] == errcode:
 		                return (errtag, True)
                 return ('X2', True)
-	        else: 
+            else:
                 return ('', False)
         else:
             return "fail"
