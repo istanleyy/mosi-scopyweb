@@ -68,10 +68,14 @@ class ModbusDevice(AbstractDevice):
         self.isConnected = False
         
     def checkDeviceExists(self):
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
-        if result is not None:
-            return True
-        else:
+        try:
+            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
+            if result is not None:
+                return True
+            else:
+                return False
+        except:
+            print 'Cannot connect to device!'
             return False
 
     def getDeviceStatus(self):
