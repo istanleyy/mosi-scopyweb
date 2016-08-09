@@ -25,6 +25,21 @@ from . import request_sender
 def processQueryResult(source, data, task=None):
     machine = Machine.objects.first()
 
+    if data == 'fail':
+        if machine.opmode != 0:
+            session = SessionManagement.objects.first()
+            print 'Communication error...'
+            if not machine.commerr:
+                machine.commerr = True
+                machine.save()
+                sendEventMsg(4, 'X5')
+                return None
+    else:
+        if machine.commerr:
+            machine.commerr = False
+            machine.save()
+            sendEventMsg(1, 'X5')
+
     if source == 'opStatus':
         session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job

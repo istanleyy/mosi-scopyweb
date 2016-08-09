@@ -23,8 +23,9 @@ class Machine(models.Model):
     )
     opmode = models.IntegerField(choices=OP_MODE_CHOICES, default=OFFLINE)
     opstatus = models.IntegerField(choices=OP_STAT_CHOICES, default=0)
-    cooverride = models.BooleanField(default=False)
     lastHaltReason = models.IntegerField(default=0)
+    cooverride = models.BooleanField(default=False)
+    commerr = models.BooleanField(default=False)
 
 @python_2_unicode_compatible
 class Job(models.Model):

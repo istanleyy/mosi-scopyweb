@@ -148,9 +148,7 @@ class ModbusDevice(AbstractDevice):
                 for errtag, errcode in const.ERROR_LIST.iteritems():
                     if errid_1 == errcode or errid_2 == errcode:
                         return (errtag, True)
-                return ('X2', True)
-            else:
-                return ('', False)
+            return ('', False)
         else:
             return "fail"
             
