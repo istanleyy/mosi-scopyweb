@@ -31,7 +31,7 @@ class Job(models.Model):
     jobid = models.IntegerField(default=0)
     productid = models.CharField(max_length=50, default='TESTPRODUCT')
     quantity = models.IntegerField(default=0)
-    ct = models.IntegerField(default=0)
+    ct = models.DecimalField(default=0, max_digits=5, decimal_places=2)
     multiplier = models.IntegerField(default=1)
     moldid = models.CharField(max_length=50, default='TESTMOLD')
     urgent = models.BooleanField(default=False)

@@ -141,9 +141,12 @@ def processQueryResult(source, data, task=None):
                 dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
                 sendUpdateMsg(pcs, mct)
             
-            if task.interval.every != session.job.ct:
+            ct = int(session.job.ct)
+            if ct == 0:
+                ct += 1
+            if task.interval.every != ct:
                 intv, created = IntervalSchedule.objects.get_or_create(
-                    every=session.job.ct, period='seconds'
+                    every=ct, period='seconds'
                     )
                 task.interval_id = intv.id
                 task.save()
@@ -269,9 +272,12 @@ def performChangeOver(session, task, moldserial=None):
                 return False
             else:
                 # Compare polling period with retrieved mct value
-                if session.job.ct != task.interval.every:
+                ct = int(session.job.ct)
+                if ct == 0:
+                    ct += 1
+                if ct != task.interval.every:
                     intv, created = IntervalSchedule.objects.get_or_create(
-                        every=session.job.ct, period='seconds'
+                        every=ct, period='seconds'
                         )
                     task.interval_id = intv.id
                     task.save()        
@@ -378,9 +384,12 @@ def performChangeOverByID(id):
                     return False
                 else:
                     # Compare polling period with retrieved mct value
-                    if session.job.ct != task.interval.every:
+                    ct = int(session.job.ct)
+                    if ct == 0:
+                        ct += 1
+                    if ct != task.interval.every:
                         intv, created = IntervalSchedule.objects.get_or_create(
-                            every=session.job.ct, period='seconds'
+                            every=ct, period='seconds'
                             )
                         task.interval_id = intv.id
                         task.save()
