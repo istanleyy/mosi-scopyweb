@@ -13,6 +13,7 @@ xmlparser.py
 import os.path
 import threading
 import time
+from decimal import Decimal
 from io import BytesIO
 from datetime import date
 from lxml import etree
@@ -204,7 +205,7 @@ def createJobList(xmldom):
                 newJob.jobid = int(element[0].text)
                 newJob.productid = element[3].text
                 newJob.quantity = int(element[2].text)
-                newJob.ct = int(element[4].text) if element[4].text is not None else 20
+                newJob.ct = Decimal(element[4].text) if element[4].text is not None else 20.0
                 newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
                 newJob.moldid = element[6].text
                 if element[1].text == 'yes':
