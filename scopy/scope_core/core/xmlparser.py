@@ -57,7 +57,7 @@ def getJobUpdateXml(actualPcs, mct):
     session = SessionManagement.objects.first()
     doneTag.text = '1' if actualPcs >= session.job.quantity else '0'
     jobIdTag.text = str(session.job.jobid)
-    stationTag.text = settings.DEVICE_INFO['ID']
+    stationTag.text = settings.DEVICE_INFO['NAME']
     timeTag.text = timeText
     actualPcsTag.text = str(actualPcs)
     mctTag.text = str(mct)
@@ -82,7 +82,7 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
     
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
-    stationTag.text = settings.DEVICE_INFO['ID']
+    stationTag.text = settings.DEVICE_INFO['NAME']
     timeTag.text = timeText
     typeTag.text = str(eventType)
     if user != "":
@@ -163,7 +163,7 @@ def getJobStartXml():
     dataType2.text = 'positiveInteger'
     uom2.text = 'sec'
     key2.text = 'CycleTime'
-    equipId.text = settings.DEVICE_INFO['ID']
+    equipId.text = settings.DEVICE_INFO['NAME']
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)

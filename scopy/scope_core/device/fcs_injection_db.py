@@ -21,6 +21,7 @@ import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 from scope_core.models import Machine
+from scope_core.config import settings
 
 #if platform.system() != 'Darwin':
 #    import RPi.GPIO as GPIO
@@ -153,9 +154,9 @@ class FCSInjectionDevice_db(AbstractDevice):
             "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
             )
         result = self._connectionManager.query(query)
-        if result is not None and result[0] in const.ERROR_LIST:
+        if result is not None:
             print(result)
-            if result[1] == 1:
+            if result[1] == 1 and result[0] in const.ERROR_LIST:
                 for errtag, errcode in const.ERROR_LIST.iteritems():
                     if result[0] == errcode:
 		                return (errtag, True)

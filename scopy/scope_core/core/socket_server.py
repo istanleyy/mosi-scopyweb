@@ -50,6 +50,8 @@ class SocketServer(Thread):
                     reply = 'false:ok'
                 elif msgContent[0] == 'ScanManager':
                     print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
+                    if msgContent[1] == 'initiate':
+                        reply = 'scan'
                     if job_control.processBarcodeActivity(msgContent[1]):
                         reply = 'ok'
                     else:
