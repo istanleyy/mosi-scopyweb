@@ -156,7 +156,7 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connectionManager.query(query)
         if result is not None:
             print(result)
-            if result[1] == 1 and result[0] in const.ERROR_LIST:
+            if result[1] == 1:
                 for errtag, errcode in const.ERROR_LIST.iteritems():
                     if result[0] == errcode:
 		                return (errtag, True)
