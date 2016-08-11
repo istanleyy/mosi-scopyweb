@@ -341,22 +341,19 @@ def processBarcodeActivity(data):
             return False
     else:
         # If performing change-over procedure
-        if activity == '1062' or activity == '1063':
+        if activity == 'CHGOVR':
             machine = Machine.objects.first()
             # Barcode CO event over-rides machine's mold change status
-            if machine.opmode != 3 and not machine.cooverride:
-                machine.cooverride = True
-                machine.save()
-                print '***** barcode CO *****'
-        
-        # 1065 Test mold, 9229 Setup 
-        if activity == '1065' or activity == '9229':
-            machine = Machine.objects.first()
-            # Barcode event to signal end of mold-change procedure
-            if machine.cooverride:
-                machine.cooverride = False
-                machine.save()
-
+            if machine.opmode != 3:
+                if not machine.cooverride:
+                    machine.cooverride = True
+                    machine.save()
+                    print '***** barcode CO *****'
+                else:
+                    # Barcode event to signal end of mold-change procedure
+                    machine.cooverride = False
+                    machine.save()
+                    
         return sendEventMsg(activity, 'WS', uid, data)
 
 def processServerAction(data):
