@@ -173,7 +173,8 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connectionManager.query(query)
         print(result)
         if result is not None:
-            return result
+            # FCS server updates data every minute.
+            return (60, result[1])
         else:
             return "fail"
 
