@@ -308,9 +308,8 @@ def processBarcodeActivity(data):
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
-    if len(barcodes) > 3:
-        data = barcodes[3]
-    else:
+    data = ""
+    if len(barcodes) > 2:
         data = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':

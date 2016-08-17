@@ -90,14 +90,20 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
         userTag = etree.SubElement(jobEvent, "user")
         userTag.text = user
     if data != "":
-        if data[0] != "W":
-            qtyTag = etree.SubElement(jobEvent, "stock_qty")
-            qtyTag.text = data
-        else:
+        if data[0] == 'W':
             refList = data.split('-')
             for ref in refList:
                 serialTag = etree.SubElement(jobEvent, "ref_serial")
                 serialTag.text = ref
+        elif data[0] == 'T':
+            mouldInfo = data.split('-')
+            mouldTag = etree.SubElement(jobEvent, "mould")
+            mouldTag.text = mouldInfo[0]
+            multiplierTag = etree.SubElement(jobEvent, "multiplier")
+            multiplierTag.text = mouldInfo[1]
+        else:
+            qtyTag = etree.SubElement(jobEvent, "stock_qty")
+            qtyTag.text = data
     
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
