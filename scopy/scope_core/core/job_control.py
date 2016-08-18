@@ -23,6 +23,7 @@ from . import xmlparser
 from . import request_sender
 
 def processQueryResult(source, data, task=None):
+    session = SessionManagement.objects.first()
     machine = Machine.objects.first()
 
     if data == 'fail':
@@ -30,16 +31,25 @@ def processQueryResult(source, data, task=None):
         if not machine.commerr:
             machine.commerr = True
             machine.save()
-            sendEventMsg(4, 'X5')
+            if session.job.inprogress:
+                # If communication error is detected when a job is in progress,
+                # notify server with code=X5
+                sendEventMsg(4, 'X5')
+            else:
+                # If communication error is detected when a job is not running,
+                # send 'bye' message to server to hang up the job
+                request_sender.sendPostRequest('false:bye')
             return None
     else:
         if machine.commerr:
             machine.commerr = False
             machine.save()
-            sendEventMsg(1, 'X5')
+            if session.job.inprogress:
+                sendEventMsg(1, 'X5')
+            else:
+                request_sender.sendPostRequest('false:up')
 
     if source == 'opStatus':
-        session = SessionManagement.objects.first()
         job = SessionManagement.objects.first().job
         
         print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
@@ -142,9 +152,6 @@ def processQueryResult(source, data, task=None):
         mct = data[0]
         pcs = data[1]
         #moldSerial = str(data[2])
-        
-        #machine = Machine.objects.first()
-        session = SessionManagement.objects.first()
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
         
@@ -156,7 +163,7 @@ def processQueryResult(source, data, task=None):
             
             ct = int(session.job.ct)
             if ct == 0:
-                ct += 1
+                ct = 1
             if task.interval.every != ct:
                 intv, created = IntervalSchedule.objects.get_or_create(
                     every=ct, period='seconds'
@@ -167,7 +174,6 @@ def processQueryResult(source, data, task=None):
     elif source == 'alarmStatus':
         print (data, machine.opstatus)
         if machine.opmode != 0:
-            session = SessionManagement.objects.first()
             if data[1]:
                 print 'Machine error...'
                 if not session.errflag:
@@ -287,7 +293,7 @@ def performChangeOver(session, task, moldserial=None):
                 # Compare polling period with retrieved mct value
                 ct = int(session.job.ct)
                 if ct == 0:
-                    ct += 1
+                    ct = 1
                 if ct != task.interval.every:
                     intv, created = IntervalSchedule.objects.get_or_create(
                         every=ct, period='seconds'
@@ -395,7 +401,7 @@ def performChangeOverByID(id):
                     # Compare polling period with retrieved mct value
                     ct = int(session.job.ct)
                     if ct == 0:
-                        ct += 1
+                        ct = 1
                     if ct != task.interval.every:
                         intv, created = IntervalSchedule.objects.get_or_create(
                             every=ct, period='seconds'

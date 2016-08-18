@@ -14,12 +14,14 @@ P_PRIOR_HIGH = 9
 P_PRIOR_MID = 11
 P_PRIOR_LOW = 17
 LOCK_EXPIRE = 60
+LOCK_ID = "shared-lock"
 
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
 def pollDeviceStatus():
-    lock_id = '{0}-lock'.format('statustask')
-    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
-    release_lock = lambda: cache.delete(lock_id)
+    global LOCK_ID
+    LOCK_ID = '{0}-lock'.format('statustask')
+    acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(LOCK_ID)
     
     if acquire_lock():
         logger.info("Polling device status (p={})...".format(P_PRIOR_MID))
@@ -30,13 +32,14 @@ def pollDeviceStatus():
         finally:
             release_lock()
     else:
-        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))
+        logger.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_HIGH))
 def pollAlarmStatus():
-    lock_id = '{0}-lock'.format('alarmtask')
-    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
-    release_lock = lambda: cache.delete(lock_id)
+    global LOCK_ID
+    LOCK_ID = '{0}-lock'.format('alarmtask')
+    acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(LOCK_ID)
     
     if acquire_lock():
         logger.info("Polling alarm status (p={})...".format(P_PRIOR_HIGH))
@@ -47,13 +50,14 @@ def pollAlarmStatus():
         finally:
             release_lock()
     else:
-        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))
+        logger.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
 def pollProdStatus():
+    global LOCK_ID
     lock_id = '{0}-lock'.format('infotask')
-    acquire_lock = lambda: cache.add(lock_id, 'true', LOCK_EXPIRE)
-    release_lock = lambda: cache.delete(lock_id)
+    acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
+    release_lock = lambda: cache.delete(LOCK_ID)
     
     if acquire_lock():
         pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
@@ -65,4 +69,4 @@ def pollProdStatus():
         finally:
             release_lock()
     else:
-        logger.info("Blocked: previous task not finished yet! ({})".format(lock_id))
+        logger.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
