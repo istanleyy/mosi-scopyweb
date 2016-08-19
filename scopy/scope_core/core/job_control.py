@@ -219,9 +219,22 @@ def sendUpdateMsg(pcs=None, mct=None):
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
-    if result:
+    if result == 'ServerMsg:ok':
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
+    
+def modelCheck():
+    print '******************************'
+    print 'Checking models...'
+    initJob, jCreated = Job.objects.get_or_create(jobid=0, active=False)
+    if not SessionManagement.objects.first():
+        print 'Initializing session...'
+        SessionManagement.objects.create(job=initJob)
+    if not Machine.objects.first():
+        print 'Initializing machine...'
+        Machine.objects.create()
+    print 'done!'
+    print '******************************'
     
 def init():
     request_sender.sendPostRequest('false:up')

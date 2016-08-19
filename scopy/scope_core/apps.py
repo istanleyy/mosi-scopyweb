@@ -15,6 +15,7 @@ class ScopeCoreConfig(AppConfig):
         from core import device_manager as device
         from core.socket_server import SocketServer
 
+        job_control.modelCheck()
         socketServer = SocketServer()
         socketServer.start()
         scopeDevice = device.getDeviceInstance()
