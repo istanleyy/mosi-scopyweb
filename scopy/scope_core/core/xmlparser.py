@@ -10,6 +10,7 @@ xmlparser.py
     Simple XML parser to manipulate Scope XML messages
 """
 
+import os
 import os.path
 import threading
 import time
@@ -30,6 +31,8 @@ def isScopeXml(str):
         return False
         
     if dom.tag == 'scope_job':
+        if settings.CLEAR_JOBLIST:
+            with open(settings.JOBLIST_PATH, "w"): pass
         file = open(settings.JOBLIST_PATH, "w")
         file.write(etree.tostring(dom, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()

@@ -237,6 +237,7 @@ def modelCheck():
         # If session object's job reference is None, fix it by referring
         # to default job
         if not session.job:
+            print 'Fix missing job reference...'
             session.job = initJob
             session.save()
     # Create Machine object if it doesn't exist
