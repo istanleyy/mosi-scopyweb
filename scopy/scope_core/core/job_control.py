@@ -226,10 +226,20 @@ def sendMsgBuffer():
 def modelCheck():
     print '******************************'
     print 'Checking models...'
+    # Check default job exsits, create if not
     initJob, jCreated = Job.objects.get_or_create(jobid=0, active=False)
-    if not SessionManagement.objects.first():
+    session = SessionManagement.objects.first()
+    # Check default session exist, create if not
+    if not session
         print 'Initializing session...'
         SessionManagement.objects.create(job=initJob)
+    else:
+        # If session object's job reference is None, fix it by referring
+        # to default job
+        if not session.job:
+            session.job = initJob
+            session.save()
+    # Create Machine object if it doesn't exist
     if not Machine.objects.first():
         print 'Initializing machine...'
         Machine.objects.create()
