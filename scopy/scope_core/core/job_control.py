@@ -230,7 +230,7 @@ def modelCheck():
     initJob, jCreated = Job.objects.get_or_create(jobid=0, active=False)
     session = SessionManagement.objects.first()
     # Check default session exist, create if not
-    if not session
+    if not session:
         print 'Initializing session...'
         SessionManagement.objects.create(job=initJob)
     else:
