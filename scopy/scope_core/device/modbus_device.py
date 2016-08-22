@@ -13,6 +13,7 @@ modbus_device.py
 
 import random
 import device_definition as const
+from socket import error as socket_error
 from datetime import datetime
 from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
@@ -35,7 +36,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.1'
+        return '0.1.2'
 
     @property
     def description(self):
@@ -74,13 +75,17 @@ class ModbusDevice(AbstractDevice):
                 return True
             else:
                 return False
-        except:
+        except socket_error:
             print 'Cannot connect to device!'
             return False
 
     def getDeviceStatus(self):
-        # Control registers map: [opmode, chovrsw, chmatsw, moldid]
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+        try:
+            # Control registers map: [opmode, chovrsw, chmatsw, moldid]
+            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+        except socket_error:
+            return 'fail'
+        
         if result is not None:
             if settings.DEBUG:
                 print(result)
@@ -143,7 +148,11 @@ class ModbusDevice(AbstractDevice):
             return "fail"
     
     def getAlarmStatus(self):
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
+        try:
+            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
+        except socket_error:
+            return 'fail'
+
         print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
         if result is not None:
             errid_1 = int(result[2])
@@ -157,8 +166,11 @@ class ModbusDevice(AbstractDevice):
             return "fail"
             
     def getProductionStatus(self):
-        result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
-        
+        try:
+            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
+        except socket_error:
+            return 'fail'
+
         if result is not None:
             pcshex = [result[1], result[0]]
             if settings.SIMULATE:

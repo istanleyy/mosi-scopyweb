@@ -212,18 +212,18 @@ def createJobList(xmldom):
             if not Job.objects.filter(jobid=int(element[0].text)):
                 newJob = Job.objects.create()
                 newJob.jobid = int(element[0].text)
-                newJob.productid = element[3].text
+                if element[1].text == 'yes':
+                    newJob.urgent = True
                 newJob.quantity = int(element[2].text)
+                newJob.productid = element[3].text
                 newJob.ct = Decimal(element[4].text) if element[4].text is not None else 20.0
                 newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
                 newJob.moldid = element[6].text
-                if element[1].text == 'yes':
-                    newJob.urgent = True
                 newJob.save()
             
         print '\033[93m' + '[Scopy] New jobs added.' + '\033[0m'
         return True
-    except etree.XMLSyntaxError:
+    except (etree.XMLSyntaxError, IndexError, ValueError):
         print '\033[91m' + '[Scopy] Cannot add new job. Check message format!' + msgContent[1] + '\033[0m'
         return False
 

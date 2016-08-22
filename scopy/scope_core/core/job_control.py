@@ -38,16 +38,14 @@ def processQueryResult(source, data, task=None):
             else:
                 # If communication error is detected when a job is not running,
                 # send 'bye' message to server to hang up the job
-                request_sender.sendPostRequest('false:bye')
-            return None
+                if source != 'app':
+                    request_sender.sendPostRequest('false:bye')
     else:
         if machine.commerr:
             machine.commerr = False
             machine.save()
             if session.job.inprogress:
                 sendEventMsg(1, 'X5')
-            else:
-                request_sender.sendPostRequest('false:up')
 
     if source == 'opStatus':
         job = SessionManagement.objects.first().job
