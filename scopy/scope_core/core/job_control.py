@@ -190,14 +190,18 @@ def processQueryResult(source, data, task=None):
 
 def sendEventMsg(evttype, code="", user="", data=""):
     scopemsg = xmlparser.getJobEventXml(evttype, code, user, data)
-    result = request_sender.sendPostRequest(scopemsg)
-    if result is None:
+    if SessionManagement.objects.first().msgsync:
         xmlparser.logUnsyncMsg(scopemsg)
         sendMsgBuffer()
     else:
-        if not result:
+        result = request_sender.sendPostRequest(scopemsg)
+        if result is None:
             xmlparser.logUnsyncMsg(scopemsg)
-        return result
+            sendMsgBuffer()
+        else:
+            if not result:
+                xmlparser.logUnsyncMsg(scopemsg)
+            return result
 
 def sendUpdateMsg(pcs=None, mct=None):
     if pcs is None:
@@ -206,14 +210,18 @@ def sendUpdateMsg(pcs=None, mct=None):
         mct = ProductionDataTS.objects.last().mct
 
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-    result = request_sender.sendPostRequest(scopemsg)
-    if result is None:
+    if SessionManagement.objects.first().msgsync:
         xmlparser.logUnsyncMsg(scopemsg)
         sendMsgBuffer()
     else:
-        if not result:
+        result = request_sender.sendPostRequest(scopemsg)
+        if result is None:
             xmlparser.logUnsyncMsg(scopemsg)
-    
+            sendMsgBuffer()
+        else:
+            if not result:
+                xmlparser.logUnsyncMsg(scopemsg)
+
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)

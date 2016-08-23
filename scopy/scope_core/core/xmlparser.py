@@ -33,6 +33,7 @@ def isScopeXml(str):
     if dom.tag == 'scope_job':
         if settings.CLEAR_JOBLIST:
             with open(settings.JOBLIST_PATH, "w"): pass
+            clearJobModel()
         file = open(settings.JOBLIST_PATH, "w")
         file.write(etree.tostring(dom, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()
@@ -228,6 +229,14 @@ def createJobList(xmldom):
         return False
 
 def logUnsyncMsg(xmlstring):
+    # If the frist message of the day cannot be delivered to the server,
+    # need to set msgsync flag to trigger message sync procedure to prevent
+    # data lost due to out-of-sync message sequemce
+    session = SessionManagement.objects.first()
+    if session and session.msgid == 1:
+        session.msgsync = True
+        session.save()
+
     try:
         dom = etree.fromstring(xmlstring)
         parser = etree.XMLParser(remove_blank_text=True)
@@ -311,12 +320,8 @@ def updateOperatorList(list):
     OPERATOR_LIST = list[:]
     print OPERATOR_LIST
 
-"""
-def addOperator(id):
-    global OPERATOR_LIST
-    OPERATOR_LIST.append(id)
-
-def removeOperator(id):
-    global OPERATOR_LIST
-    OPERATOR_LIST.remove(id)
-"""
+def clearJobModel():
+    jobs = Job.objects.exclude(jobid=0, quantity=0, ct=0)
+    for job in jobs:
+        job.active = False
+        job.save()
