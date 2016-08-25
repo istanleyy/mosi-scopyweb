@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     'scope_core.apps.ScopeCoreConfig',
     'rest_framework',
     'djcelery',
+    'dashing',
 ]
 
 MIDDLEWARE_CLASSES = [

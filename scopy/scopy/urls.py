@@ -15,9 +15,11 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from dashing.utils import router
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^scope_core/', include('scope_core.urls')),
-    url(r'^rest-api/', include('rest_framework.urls'))
+    url(r'^rest-api/', include('rest_framework.urls')),
+    url(r'^dashboard/', include(router.urls)),
 ]
