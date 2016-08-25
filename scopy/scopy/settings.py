@@ -156,3 +156,14 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 import djcelery
 djcelery.setup_loader()
+
+DASHING = {
+    'INSTALLED_WIDGETS': (
+        'number', 
+        'list', 
+        'graph',
+    ),
+    'PERMISSION_CLASSES': (
+        'dashing.permissions.IsAuthenticated',
+    )
+}
