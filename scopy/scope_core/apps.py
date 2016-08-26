@@ -20,7 +20,7 @@ class ScopeCoreConfig(AppConfig):
         socketServer.start()
         scopeDevice = device.getDeviceInstance()
         if scopeDevice.isConnected:
-	        job_control.init()
+            job_control.init()
             pollDeviceStatus.delay()
         else:
             print "!!! Unable to connect to device {} !!!".format(scopeDevice.id)
