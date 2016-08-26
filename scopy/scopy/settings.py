@@ -164,6 +164,6 @@ DASHING = {
         'graph',
     ),
     'PERMISSION_CLASSES': (
-        'dashing.permissions.IsAuthenticated',
+        'dashing.permissions.AllowAny',
     )
 }
