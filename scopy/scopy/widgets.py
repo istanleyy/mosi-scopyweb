@@ -1,7 +1,7 @@
 from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
-from scope_core.models import Job
+from scope_core.models import Job, ProductionDataTS
 
 class JobListWidget(ListWidget):
     title = 'Job List'
@@ -27,3 +27,20 @@ class JobCountWidget(NumberWidget):
     def get_more_info(self):
         # Total count
         return '{} total'.format(Job.objects.exclude(jobid=0).count())
+
+class MachineCycleWidget(GraphWidget):
+    title = 'Cycle Count'
+    more_info = 'mct graph'
+
+    def get_value(self):
+        count = 0
+        if ProductionDataTS.objects.last():
+            count = ProductionDataTS.objects.last().output
+        return count
+
+    def get_data(self):
+        last_10_cycles = ProductionDataTS.objects.filter(since=since).order_by('-eventtime')[:10]
+        if last_10_cycles:
+            return [{'x': data.eventtime, 'y': data.mct} for data in last_10_cycles]
+        else:
+            return []

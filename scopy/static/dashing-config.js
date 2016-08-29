@@ -16,25 +16,18 @@ dashboard.addWidget('joblist_widget', 'List', {
     getData: function () {
         var self = this;
         Dashing.utils.get('joblist_widget', function(data) {
-            $.extend(self.scope, data)
+            $.extend(self.scope, data);
         });
     },
     interval: 60000
 });
 
-dashboard.addWidget('machine_cycle_widget', 'Graph', {
+dashboard.addWidget('machinecycle_widget', 'Graph', {
     getData: function () {
-        $.extend(this.scope, {
-            title: 'Cycle Count',
-            value: '40',
-            moreInfo: '# of machine cycles',
-            data: [
-                    { x: 0, y: 10 },
-                    { x: 1, y: 20 },
-                    { x: 2, y: 30 },
-                    { x: 3, y: 30 },
-                    { x: 4, y: 40 }
-                ]
-            });
-    }
+        var self = this;
+        Dashing.utils.get('machinecycle_widget', function(data) {
+            $.extend(self.scope, data);
+        });
+    },
+    interval: 5000
 });
