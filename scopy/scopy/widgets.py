@@ -1,7 +1,7 @@
 from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
-from scope_core.models import Job, ProductionDataTS
+from scope_core.models import Job, ProductionDataTS, Machine
 
 class JobListWidget(ListWidget):
     title = 'Job List'
@@ -44,3 +44,6 @@ class MachineCycleWidget(GraphWidget):
             return [{'x': data.eventtime, 'y': data.mct} for data in last_10_cycles]
         else:
             return []
+
+class MachineStatusWidget(Widget):
+    pass
