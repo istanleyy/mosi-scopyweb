@@ -5,11 +5,9 @@ var dashboard = new Dashboard();
 dashboard.addWidget('jobcount_widget', 'Number', {
     getData: function () {
         var self = this;
-        $.get('/dashboard/', function(data) {
-            self.data = data;
-            dashboard.publish('jobcount_widget/render');
+        $.get('jobcount_widget', function(data) {
+            $.extend(self.data, data);
         });
-        dashboard.publish('jobcount_widget/render');
     }
 });
 
