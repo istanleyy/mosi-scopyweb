@@ -3,7 +3,7 @@ from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
 from scope_core.models import Job
 
-class JoblistWidget(ListWidget):
+class JobListWidget(ListWidget):
     title = 'Job List'
 
     def get_more_info(self):
