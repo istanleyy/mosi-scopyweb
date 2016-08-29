@@ -9,18 +9,17 @@ dashboard.addWidget('jobcount_widget', 'Number', {
             $.extend(self.scope, data);
         });
     },
-    interval: 3000
+    interval: 30000
 });
 
 dashboard.addWidget('joblist_widget', 'List', {
     getData: function () {
         var self = this;
-        $.get('/dashboard/', function(data) {
-            self.data = data;
-            dashboard.publish('joblist_widget/render');
+        Dashing.utils.get('joblist_widget', function(data) {
+            $.extend(self.scope, data)
         });
-        dashboard.publish('joblist_widget/render');
-    }
+    },
+    interval: 60000
 });
 
 dashboard.addWidget('machine_cycle_widget', 'Graph', {
