@@ -18,8 +18,8 @@ from django.contrib import admin
 from dashing.utils import router
 from .widgets import JobListWidget, JobCountWidget
 
-router.register(JobListWidget, 'joblist_widget', eg_kwargs_param="[A-Za-z0-9_-]+")
-router.register(JobCountWidget, 'jobcount_widget', eg_kwargs_param="[A-Za-z0-9_-]+")
+router.register(JobListWidget, 'joblist_widget')
+router.register(JobCountWidget, 'jobcount_widget')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

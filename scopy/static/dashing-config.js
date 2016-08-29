@@ -5,10 +5,11 @@ var dashboard = new Dashboard();
 dashboard.addWidget('jobcount_widget', 'Number', {
     getData: function () {
         var self = this;
-        $.get('jobcount_widget', function(data) {
-            $.extend(self.data, data);
+        Dashing.utils.get('jobcount_widget', function(data) {
+            $.extend(self.scope, data);
         });
-    }
+    },
+    interval: 3000
 });
 
 dashboard.addWidget('joblist_widget', 'List', {
