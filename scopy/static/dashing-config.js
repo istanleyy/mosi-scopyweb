@@ -2,6 +2,16 @@
 
 var dashboard = new Dashboard();
 
+dashboard.addWidget('machinestatus_widget', 'Scopedevice', {
+    getData: function () {
+        var self = this;
+        Dashing.utils.get('machinestatus_widget', function(data) {
+            $.extend(self.scope, data);
+        });
+    },
+    interval: 5000
+})
+
 dashboard.addWidget('jobcount_widget', 'Number', {
     getData: function () {
         var self = this;

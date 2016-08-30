@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from dashing.utils import router
-from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget
+from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, MachineStatusWidget
 
 router.register(JobListWidget, 'joblist_widget')
 router.register(JobCountWidget, 'jobcount_widget')
 router.register(MachineCycleWidget, 'machinecycle_widget')
+router.register(MachineStatusWidget, 'machinestatus_widget')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),

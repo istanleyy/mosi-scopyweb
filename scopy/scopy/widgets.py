@@ -2,6 +2,7 @@ from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
 from scope_core.models import Job, ProductionDataTS, Machine
+from scope_core.config import settings
 
 class JobListWidget(ListWidget):
     title = 'Job List'
@@ -46,4 +47,34 @@ class MachineCycleWidget(GraphWidget):
             return []
 
 class MachineStatusWidget(Widget):
-    pass
+    title = settings.DEVICE_INFO['NAME']
+
+    def get_value(self):
+        # Machine status
+        status = Machine.objects.first().opstatus
+        if status == 0:
+            return 'Idle'
+        elif status == 1:
+            return 'Running'
+        elif status == 2:
+            return 'Line Change'
+        elif status == 3:
+            return 'Material Change'
+        elif status == 4:
+            return 'Setup'
+        else:
+            return 'Unknown'
+    
+    def get_detail(self):
+        # Machine mode
+        mode = Machine.objects.first().opmode
+        if mode == 0:
+            return 'offline'
+        elif mode == 1:
+            return 'manual mode'
+        elif mode == 2:
+            return 'semi-auto mode'
+        elif mode == 3:
+            return 'auto mode'
+        else:
+            return 'unknown'
