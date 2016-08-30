@@ -16,7 +16,7 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from dashing.utils import router
-from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, MachineStatusWidget
+from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, ScopedeviceWidget
 
 router.register(JobListWidget, 'joblist_widget')
 router.register(JobCountWidget, 'jobcount_widget')
