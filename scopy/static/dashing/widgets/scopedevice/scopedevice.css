@@ -1,25 +1,25 @@
-.widget-number {
+.widget-scopedevice {
     background-color: rgb(220, 89, 69);
 }
 
-.widget-number h1 { 
+.widget-scopedevice h1 { 
     color: rgba(255, 255, 255, 0.7);
 }
 
-.widget-number h2 {
+.widget-scopedevice h2 {
     color: #fff;
 }
 
-.widget-number .detail {
+.widget-scopedevice .detail {
     font-weight: 500;
     font-size: 30px;
     color: #fff;
 }
 
-.widget-number .more-info {
+.widget-scopedevice .more-info {
     color: rgba(255, 255, 255, 0.7);
 }
 
-.widget-number .updated-at {
+.widget-scopedevice .updated-at {
     color: rgba(0, 0, 0, 0.3);
 }
