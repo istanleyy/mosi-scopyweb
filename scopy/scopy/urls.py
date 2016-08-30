@@ -21,7 +21,7 @@ from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, MachineS
 router.register(JobListWidget, 'joblist_widget')
 router.register(JobCountWidget, 'jobcount_widget')
 router.register(MachineCycleWidget, 'machinecycle_widget')
-router.register(MachineStatusWidget, 'machinestatus_widget')
+router.register(ScopedeviceWidget, 'machinestatus_widget')
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
