@@ -1,0 +1,18 @@
+{% extends 'dashing/base.html' %}
+{% load staticfiles %}
+
+{% block stylesheets %}
+<link rel="stylesheet" href="{% static 'widgets/scopedevice/scopedevice.css' %}">
+{% endblock %}
+
+{% block templates %}
+<link rel="resource" type="text/html" href="{% static 'widgets/scopedevice/scopedevice.html' %}">
+{% endblock %}
+
+{% block scripts %}
+<script type="text/javascript" src="{% static 'widgets/scopedevice/scopedevice.js' %}"></script>
+{% endblock %}
+
+{% block config_file %}
+<script type="text/javascript" src="{% static 'dashing-config.js' %}"></script>
+{% endblock %}
