@@ -1,3 +1,4 @@
+from dashing.widgets import Widget
 from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
@@ -48,6 +49,9 @@ class MachineCycleWidget(GraphWidget):
 
 class MachineStatusWidget(Widget):
     title = settings.DEVICE_INFO['NAME']
+    more_info = ''
+    updated_at = ''
+    change_rate = ''
 
     def get_value(self):
         # Machine status
