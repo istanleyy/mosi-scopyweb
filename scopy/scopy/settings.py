@@ -162,6 +162,7 @@ DASHING = {
         'number', 
         'list', 
         'graph',
+        'scopedevice',
     ),
     'PERMISSION_CLASSES': (
         'dashing.permissions.AllowAny',
