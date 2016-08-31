@@ -6,7 +6,13 @@ dashboard.addWidget('machinestatus_widget', 'Scopedevice', {
     getData: function () {
         var self = this;
         Dashing.utils.get('machinestatus_widget', function(data) {
-            $.extend(self.scope, data);
+            $.extend(self.scope, {
+                title: '310002',
+                moreInfo: '',
+                updatedAt: '',
+                detail: 'Auto mode',
+                value: 'Running'
+            });
         });
     },
     interval: 5000
