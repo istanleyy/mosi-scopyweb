@@ -51,7 +51,8 @@ class MachineStatusWidget(Widget):
     title = settings.DEVICE_INFO['NAME']
     more_info = ''
     updated_at = ''
-    change_rate = ''
+    detail = ''
+    value = ''
 
     def get_value(self):
         # Machine status
@@ -82,3 +83,21 @@ class MachineStatusWidget(Widget):
             return 'auto mode'
         else:
             return 'unknown'
+
+    def get_title(self):
+        return self.title
+
+    def get_more_info(self):
+        return self.more_info
+
+    def get_updated_at(self):
+        return self.updated_at
+
+    def get_context(self):
+        return {
+            'title': self.get_title(),
+            'moreInfo': self.get_more_info(),
+            'updatedAt': self.get_updated_at(),
+            'detail': self.get_detail(),
+            'value': self.get_value(),
+        }
