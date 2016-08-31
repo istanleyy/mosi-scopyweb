@@ -2,7 +2,7 @@
 
 var dashboard = new Dashboard();
 
-dashboard.addWidget('machinestatus_widget', 'ScopedeviceWidget', {
+dashboard.addWidget('machinestatus_widget', 'Scopedevice', {
     getData: function () {
         var self = this;
         Dashing.utils.get('machinestatus_widget', function(data) {

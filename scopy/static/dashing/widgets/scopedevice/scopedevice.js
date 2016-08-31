@@ -1,6 +1,6 @@
 /* global Dashing */
 
-Dashing.widgets.ScopedeviceWidget = function(dashboard) {
+Dashing.widgets.Scopedevice = function(dashboard) {
     var self = this;
     self.__init__ = Dashing.utils.widgetInit(dashboard, 'scopedevice');
     self.row = 1;

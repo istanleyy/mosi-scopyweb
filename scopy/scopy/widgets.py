@@ -47,7 +47,7 @@ class MachineCycleWidget(GraphWidget):
         else:
             return []
 
-class ScopedeviceWidget(Widget):
+class MachineStatusWidget(Widget):
     title = settings.DEVICE_INFO['NAME']
     more_info = ''
     updated_at = ''
