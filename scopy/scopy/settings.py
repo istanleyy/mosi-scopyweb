@@ -65,7 +65,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            '/static/templates'
+            '/home/mosidev/sandbox/scopyweb/scopy/static/templates'
         ],
         'APP_DIRS': True,
         'OPTIONS': {
