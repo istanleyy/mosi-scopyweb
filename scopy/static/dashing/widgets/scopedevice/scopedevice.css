@@ -47,8 +47,8 @@
 .widget-scopedevice .switch {
     position: relative;
     display: inline-block;
-    vertical-align: middle;
-    width: 52px;
+    vertical-align: text-bottom;
+    width: 50px;
     height: 24px;
 }
 
