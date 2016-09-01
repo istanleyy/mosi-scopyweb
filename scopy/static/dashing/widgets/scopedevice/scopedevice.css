@@ -6,14 +6,33 @@
     color: rgba(255, 255, 255, 0.7);
 }
 
-.widget-scopedevice h2 {
-    color: #fff;
+.widget-scopedevice ol, ul {
+    margin: 0 15px;
+    text-align: left;
+    color: rgba(255, 255, 255, 0.7);
 }
 
-.widget-scopedevice .detail {
-    font-weight: 500;
-    font-size: 30px;
-    color: #fff;
+.widget-scopedevice ol {
+    list-style-position: inside;
+}
+
+.widget-scopedevice li {
+    margin-bottom: 5px;
+}
+
+.widget-scopedevice .list-nostyle {
+    list-style: none;
+}
+
+.widget-scopedevice .label {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.widget-scopedevice .value {
+    float: right;
+    margin-left: 12px;
+    font-weight: 600;
+    color: $value-color;
 }
 
 .widget-scopedevice .more-info {

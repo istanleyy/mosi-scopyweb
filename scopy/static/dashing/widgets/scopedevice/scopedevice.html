@@ -1,7 +1,15 @@
 <div>
     <h1>{ title }</h1>
-    <h2>{ value }</h2>
-    <p class="detail">{ detail }</p>
+    <ul>
+        <li>
+            <span class="label">Status</span>
+            <span class="value">{ value }</span>
+        </li>
+        <li>
+            <span class="label">Mode</span>
+            <span class="value">{ detail }</span>
+        </li>
+    </ul>
     <p class="more-info" rv-show="moreInfo">{ moreInfo }</p>
     <p class="updated-at" rv-show="updatedAt">{ updatedAt }</p>
 </div>
