@@ -45,10 +45,9 @@
 }
 
 .widget-scopedevice .switch {
-    position: relative;
-    display: inline-block;
+    float: right;
     width: 60px;
-    height: 34px;
+    height: 24px;
 }
 
 .widget-scopedevice .switch input { display: none; }
@@ -69,8 +68,8 @@
 .widget-scopedevice .slider:before {
     position: absolute;
     content: "";
-    height: 26px;
-    width: 26px;
+    height: 16px;
+    width: 16px;
     left: 4px;
     bottom: 4px;
     background-color: white;
