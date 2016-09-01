@@ -47,7 +47,7 @@
 .widget-scopedevice .switch {
     position: relative;
     display: inline-block;
-    vertical-align: text-bottom;
+    vertical-align: text-top;
     width: 50px;
     height: 24px;
 }
@@ -82,11 +82,11 @@
 }
 
 .widget-scopedevice input:checked + .slider {
-    background-color: palevioletred;
+    background-color: lightpink;
 }
 
 .widget-scopedevice input:focus + .slider {
-    box-shadow: 0 0 1px palevioletred;
+    box-shadow: 0 0 1px lightpink;
 }
 
 .widget-scopedevice input:checked + .slider:before {
