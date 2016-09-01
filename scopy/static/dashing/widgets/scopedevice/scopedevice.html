@@ -1,6 +1,10 @@
 <div>
-    <h1>{ title }</h1>
+    <h1>Device Info</h1>
     <ul>
+        <li>
+            <span class="label">Machine ID</span>
+            <span class="value">{ title }</span>
+        </li>
         <li>
             <span class="label">Status</span>
             <span class="value">{ value }</span>
@@ -8,6 +12,15 @@
         <li>
             <span class="label">Mode</span>
             <span class="value">{ detail }</span>
+        </li>
+        <li>
+            <span class="label">CommErr</span>
+            <span>
+                <label class="switch">
+                    <input type="checkbox">
+                    <div class="slider"></div>
+                </label>
+            </span>
         </li>
     </ul>
     <p class="more-info" rv-show="moreInfo">{ moreInfo }</p>
