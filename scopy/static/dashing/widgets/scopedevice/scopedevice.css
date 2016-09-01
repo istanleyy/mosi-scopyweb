@@ -51,7 +51,7 @@
     height: 34px;
 }
 
-.widget-scopedevice .switch { display: none; }
+.widget-scopedevice .switch input { display: none; }
 
 .widget-scopedevice .slider {
     position: absolute;
