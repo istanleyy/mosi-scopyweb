@@ -33,7 +33,7 @@
     float: right;
     margin-left: 12px;
     font-weight: 600;
-    color: $value-color;
+    color: white;
 }
 
 .widget-scopedevice .more-info {
