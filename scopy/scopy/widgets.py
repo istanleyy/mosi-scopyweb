@@ -99,6 +99,12 @@ class MachineStatusWidget(Widget):
     def get_updated_at(self):
         return self.updated_at
 
+    def get_commerr(self):
+        return Machine.objects.first().commerr
+
+    def get_coflag(self):
+        return Machine.objects.first().cooverride
+
     def get_context(self):
         return {
             'title': self.get_title(),
@@ -106,4 +112,6 @@ class MachineStatusWidget(Widget):
             'updatedAt': self.get_updated_at(),
             'detail': self.get_detail(),
             'value': self.get_value(),
+            'commerr': self.get_commerr(),
+            'coflag': self.get_coflag()
         }
