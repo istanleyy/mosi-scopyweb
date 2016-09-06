@@ -48,7 +48,7 @@ class MachineCycleWidget(GraphWidget):
             for data in last_10_cycles:
                 dataset.append({'x': index, 'y': data.mct})
                 index += 1
-            return dataset
+            return dataset.reverse()
         else:
             return []
 
