@@ -41,9 +41,10 @@ class MachineCycleWidget(GraphWidget):
         return count
 
     def get_data(self):
-        last_10_cycles = ProductionDataTS.objects.all().order_by('-eventtime')[:10]
+        last_10_cycles = ProductionDataTS.objects.all()[:10]
+        index = -1
         if last_10_cycles:
-            return [{'x': data.eventtime, 'y': data.mct} for data in last_10_cycles]
+            return [{'x': index+1, 'y': data.mct} for data in last_10_cycles]
         else:
             return []
 

@@ -47,7 +47,7 @@ def processQueryResult(source, data, task=None):
             if session.job.inprogress:
                 sendEventMsg(1, 'X5')
 
-    if source == 'opStatus':
+    if source == 'opStatus' and data != 'fail':
         job = SessionManagement.objects.first().job
         
         print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
@@ -146,7 +146,7 @@ def processQueryResult(source, data, task=None):
             else:
                 pass
         
-    elif source == 'opMetrics':
+    elif source == 'opMetrics' and data != 'fail':
         mct = data[0]
         pcs = data[1]
         #moldSerial = str(data[2])
@@ -169,7 +169,7 @@ def processQueryResult(source, data, task=None):
                 task.interval_id = intv.id
                 task.save()
 
-    elif source == 'alarmStatus':
+    elif source == 'alarmStatus' and data != 'fail':
         print (data, machine.opstatus)
         if machine.opmode != 0:
             if data[1]:

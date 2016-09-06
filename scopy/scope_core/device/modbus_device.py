@@ -173,7 +173,7 @@ class ModbusDevice(AbstractDevice):
 
         if result is not None:
             pcshex = [result[1], result[0]]
-            if settings.SIMULATE:
+            if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
                 self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
                 if self.outpcs != self.lastOutput:
