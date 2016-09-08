@@ -48,8 +48,8 @@ class MachineCycleWidget(Widget):
             dataset = []
             last_10_cycles_r = reversed(last_10_cycles)
             for data in last_10_cycles_r:
-                timeval = (data.eventtime - datetime(1970,1,1)).total_seconds()
-                dataset.append({'x': timeval, 'y': data.mct})
+                #timeval = (data.eventtime - datetime(1970,1,1)).total_seconds()
+                dataset.append({'x': data.eventtime, 'y': data.mct})
             return dataset
         else:
             return []
