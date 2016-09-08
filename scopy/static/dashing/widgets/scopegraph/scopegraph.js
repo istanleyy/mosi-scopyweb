@@ -46,22 +46,30 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
         height: container.height,
         series: [{
             color: '#fff',
-            data: data
+            data: data,
+            name: 'mct'
         }]
     });
     graph.configure(properties);
     graph.render();
 
-    xAxis = new Rickshaw.Graph.Axis.X({
+    var ticksTreatment = 'glow';
+
+    xAxis = new Rickshaw.Graph.Axis.Time({
         graph: graph,
-        tickFormat: yFormat || Rickshaw.Fixtures.Number.formatKMBT
+        ticksTreatment: ticksTreatment,
+        timeFixture: new Rickshaw.Fixtures.Time.Local()
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
         graph: graph,
+        ticksTreatment: ticksTreatment,
         tickFormat: yFormat || Rickshaw.Fixtures.Number.formatKMBT
     });
     hoverDetail = new Rickshaw.Graph.HoverDetail({
-        graph: graph
+        graph: graph,
+        xFormatter: function(x) {
+            return new Date(x * 1000).toString();
+        }
     });
     xAxis.render();
     yAxis.render();
