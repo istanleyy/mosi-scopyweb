@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 from dashing.widgets import Widget
 from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
