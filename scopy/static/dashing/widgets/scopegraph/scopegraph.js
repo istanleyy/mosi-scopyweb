@@ -16,6 +16,7 @@ Dashing.widgets.Scopegraph = function (dashboard) {
 };
 
 rivets.binders['dashing-graph'] = function binder(el, data) {
+    console.log(data);
     if (!data) return;
     if (!window.Rickshaw) {
         $(document).on('libs/rickshaw/loaded',
@@ -68,7 +69,6 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
     hoverDetail = new Rickshaw.Graph.HoverDetail({
         graph: graph,
         xFormatter: function(x) {
-            console.log(x);
             return new Date(x * 1000).toString();
         }
     });
