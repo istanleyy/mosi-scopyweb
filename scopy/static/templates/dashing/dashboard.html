@@ -7,14 +7,17 @@ Scope Device
 
 {% block stylesheets %}
 <link rel="stylesheet" href="{% static 'dashing/widgets/scopedevice/scopedevice.css' %}">
+<link rel="stylesheet" href="{% static 'dashing/widgets/scopegraph/scopegraph.css' %}">
 {% endblock %}
 
 {% block templates %}
 <link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopedevice/scopedevice.html' %}" data-widget="scopedevice">
+<link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopegraph/scopegraph.html' %}" data-widget="scopegraph">
 {% endblock %}
 
 {% block scripts %}
 <script type="text/javascript" src="{% static 'dashing/widgets/scopedevice/scopedevice.js' %}"></script>
+<script type="text/javascript" src="{% static 'dashing/widgets/scopegraph/scopegraph.js' %}"></script>
 {% endblock %}
 
 {% block config_file %}

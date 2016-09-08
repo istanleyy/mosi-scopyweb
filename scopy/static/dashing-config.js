@@ -32,7 +32,7 @@ dashboard.addWidget('joblist_widget', 'List', {
     interval: 60000
 });
 
-dashboard.addWidget('machinecycle_widget', 'Graph', {
+dashboard.addWidget('machinecycle_widget', 'Scopegraph', {
     getData: function () {
         var self = this;
         Dashing.utils.get('machinecycle_widget', function(data) {

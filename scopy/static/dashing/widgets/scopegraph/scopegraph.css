@@ -1,0 +1,58 @@
+.widget-scopegraph { 
+    background-color: #ff9618;;
+    position: relative;
+}
+
+.widget-scopegraph svg {
+    position: absolute;
+    opacity: 0.4;
+    fill-opacity: 0.4;
+    left: 0px;
+    top: 0px;
+}
+
+.widget-scopegraph h1, h2 {
+    position: relative;
+    z-index: 99;
+}
+
+.widget-scopegraph h1 { 
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.widget-scopegraph .more-info {
+    color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+.widget-scopegraph .x_tick {
+    position: absolute;
+    bottom: 0;
+}
+
+.widget-scopegraph .x_tick .title {
+    font-size: 20px;
+    color: rgba(0, 0, 0, 0.4);
+    opacity: 0.5;
+    padding-bottom: 3px;
+}
+
+.widget-scopegraph .y_ticks {
+    font-size: 20px;
+    fill: rgba(0, 0, 0, 0.4);
+    fill-opacity: 1;
+}
+
+.widget-scopegraph .domain {
+    display: none;
+}
+
+.widget-scopegraph .x_tick {
+    border: none;
+}
+
+.widget-scopegraph .tick {
+    stroke: transparent !important;
+}

@@ -22,7 +22,7 @@ class JobCountWidget(NumberWidget):
         # Incomplete count
         return Job.objects.filter(active=True).count()
 
-    def get_change_rate(self):
+    def get_detail(self):
         # Complete count
         return '{} completed'.format(Job.objects.filter(jobid__gt=0, active=False).count())
 
@@ -30,9 +30,10 @@ class JobCountWidget(NumberWidget):
         # Total count
         return '{} total'.format(Job.objects.exclude(jobid=0).count())
 
-class MachineCycleWidget(GraphWidget):
+class MachineCycleWidget(Widget):
     title = 'Cycle Count'
     more_info = 'mct graph'
+    properties = {}
 
     def get_value(self):
         count = 0
@@ -52,6 +53,18 @@ class MachineCycleWidget(GraphWidget):
             return dataset
         else:
             return []
+    
+    def get_properties(self):
+        return self.properties
+
+    def get_context(self):
+        return {
+            'title': self.title,
+            'moreInfo': self.more_info,
+            'value': self.get_value(),
+            'data': self.get_data(),
+            'properties': self.get_properties(),
+        }
 
 class MachineStatusWidget(Widget):
     title = settings.DEVICE_INFO['NAME']
