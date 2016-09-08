@@ -68,7 +68,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
     hoverDetail = new Rickshaw.Graph.HoverDetail({
         graph: graph,
         xFormatter: function(x) {
-            console.log(x)
+            console.log(x);
             return new Date(x * 1000).toString();
         }
     });
