@@ -58,8 +58,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
 
     xAxis = new Rickshaw.Graph.Axis.Time({
         graph: graph,
-        ticksTreatment: ticksTreatment,
-        timeFixture: new Rickshaw.Fixtures.Time.Local()
+        ticksTreatment: ticksTreatment
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
         graph: graph,

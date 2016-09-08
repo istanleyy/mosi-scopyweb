@@ -46,12 +46,10 @@ class MachineCycleWidget(Widget):
         last_10_cycles = ProductionDataTS.objects.all().order_by('-eventtime')[:10]
         if last_10_cycles:
             dataset = []
-            index = 0
             last_10_cycles_r = reversed(last_10_cycles)
             for data in last_10_cycles_r:
-                #timeval = (data.eventtime - datetime(1970,1,1)).total_seconds()
-                dataset.append({'x': index, 'y': data.mct})
-                index += 1
+                timeval = (data.eventtime - datetime(1970,1,1)).total_seconds()
+                dataset.append({'x': timeval, 'y': data.mct})
             return dataset
         else:
             return []
