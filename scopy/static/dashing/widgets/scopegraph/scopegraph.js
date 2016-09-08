@@ -56,9 +56,12 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
 
     var ticksTreatment = 'glow';
 
-    xAxis = new Rickshaw.Graph.Axis.Time({
+    xAxis = new Rickshaw.Graph.Axis.X({
         graph: graph,
-        ticksTreatment: ticksTreatment
+        ticksTreatment: ticksTreatment,
+        tickFormat: function(x) {
+            return new Date(x *1000).toLocaleTimeString();
+        }
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
         graph: graph,
@@ -68,7 +71,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
     hoverDetail = new Rickshaw.Graph.HoverDetail({
         graph: graph,
         xFormatter: function(x) {
-            return new Date(x * 1000).toString();
+            return new Date(x * 1000).toLocaleTimeString();
         }
     });
     xAxis.render();
