@@ -6,11 +6,13 @@ Scope Device
 {% endblock %}
 
 {% block stylesheets %}
+<link rel="stylesheet" href="{% static 'scopemenu/scopemenu.css' %}">
 <link rel="stylesheet" href="{% static 'dashing/widgets/scopedevice/scopedevice.css' %}">
 <link rel="stylesheet" href="{% static 'dashing/widgets/scopegraph/scopegraph.css' %}">
 {% endblock %}
 
 {% block templates %}
+<link rel="resource" type="text/html" href="{% static 'scopemenu/scopemenu.html' %}">
 <link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopedevice/scopedevice.html' %}" data-widget="scopedevice">
 <link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopegraph/scopegraph.html' %}" data-widget="scopegraph">
 {% endblock %}
