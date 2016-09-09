@@ -13,6 +13,7 @@ job_control.py
     Manage Job activities and send corresponding Scope message to the server
 """
 
+import pytz
 from datetime import datetime
 from djcelery.models import IntervalSchedule, PeriodicTask
 from lxml import etree
@@ -459,7 +460,7 @@ def test_epoch_sec():
         dataset = []
         last_10_cycles_r = reversed(last_10_cycles)
         for data in last_10_cycles_r:
-            timeval = int((data.eventtime - datetime(1970,1,1)).total_seconds())
+            timeval = int((data.eventtime - datetime(1970,1,1,tzinfo=pytz.utc)).total_seconds())
             dataset.append({'x': timeval, 'y': data.mct})
         print dataset
     else:
