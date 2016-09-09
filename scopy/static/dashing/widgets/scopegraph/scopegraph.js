@@ -28,7 +28,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
         // added `|| data.whatever` for backward compatibility
         beforeRender = this.model.beforeRender || data.beforeRender,
         afterRender = this.model.afterRender || data.afterRender,
-        xFormat = this.model.xFormat || data.xFormat,
+        //xFormat = this.model.xFormat || data.xFormat,
         yFormat = this.model.yFormat || data.yFormat,
         properties = this.model.properties || {};
 
