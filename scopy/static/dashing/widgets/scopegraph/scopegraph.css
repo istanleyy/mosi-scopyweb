@@ -56,3 +56,9 @@
 .widget-scopegraph .tick {
     stroke: transparent !important;
 }
+
+.widget-scopegraph .x_label {
+    border: none;
+    background: transparent;
+    color: rgba(0, 0, 0, 0.4);
+}
