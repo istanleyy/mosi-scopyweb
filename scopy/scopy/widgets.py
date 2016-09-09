@@ -49,7 +49,7 @@ class MachineCycleWidget(Widget):
             epoch = datetime(1970,1,1)
             last_10_cycles_r = reversed(last_10_cycles)
             for data in last_10_cycles_r:
-                timeval = (data.eventtime - epoch).total_seconds()
+                timeval = int((data.eventtime - epoch).total_seconds())
                 dataset.append({'x': timeval, 'y': data.mct})
             return dataset
         else:
