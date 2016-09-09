@@ -59,7 +59,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
         graph: graph,
         ticksTreatment: ticksTreatment,
         tickFormat: function(x) {
-            return new Date(x * 1000).toUTCString();
+            return new Date(x * 1000).toTimeString();
         }
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
