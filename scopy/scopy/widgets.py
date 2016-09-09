@@ -25,7 +25,7 @@ class JobCountWidget(NumberWidget):
 
     def get_detail(self):
         # Complete count
-        return '{} completed'.format(Job.objects.filter(jobid__gt=0, active=False).count())
+        return '{} finished'.format(Job.objects.filter(jobid__gt=0, active=False).count())
 
     def get_more_info(self):
         # Total count
@@ -46,9 +46,10 @@ class MachineCycleWidget(Widget):
         last_10_cycles = ProductionDataTS.objects.all().order_by('-eventtime')[:10]
         if last_10_cycles:
             dataset = []
+            epoch = datetime(1970,1,1)
             last_10_cycles_r = reversed(last_10_cycles)
             for data in last_10_cycles_r:
-                timeval = (data.eventtime - datetime(1970,1,1)).total_seconds()
+                timeval = (data.eventtime - epoch).total_seconds()
                 dataset.append({'x': timeval, 'y': data.mct})
             return dataset
         else:
