@@ -1,3 +1,4 @@
+import pytz
 from datetime import datetime
 from dashing.widgets import Widget
 from dashing.widgets import NumberWidget
@@ -46,10 +47,9 @@ class MachineCycleWidget(Widget):
         last_10_cycles = ProductionDataTS.objects.all().order_by('-eventtime')[:10]
         if last_10_cycles:
             dataset = []
-            epoch = datetime(1970,1,1)
             last_10_cycles_r = reversed(last_10_cycles)
             for data in last_10_cycles_r:
-                timeval = int((data.eventtime - epoch).total_seconds())
+                timeval = int((data.eventtime - datetime(1970,1,1,tzinfo=pytz.utc)).total_seconds())
                 dataset.append({'x': timeval, 'y': data.mct})
             return dataset
         else:
