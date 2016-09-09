@@ -28,7 +28,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
         // added `|| data.whatever` for backward compatibility
         beforeRender = this.model.beforeRender || data.beforeRender,
         afterRender = this.model.afterRender || data.afterRender,
-        //xFormat = this.model.xFormat || data.xFormat,
+        xFormat = this.model.xFormat || data.xFormat,
         yFormat = this.model.yFormat || data.yFormat,
         properties = this.model.properties || {};
 
@@ -56,12 +56,10 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
 
     var ticksTreatment = 'glow';
 
-    xAxis = new Rickshaw.Graph.Axis.X({
+    xAxis = new Rickshaw.Graph.Axis.Time({
         graph: graph,
         ticksTreatment: ticksTreatment,
-        tickFormat: function(x) {
-            return new Date(x * 1000).toString();
-        }
+        timeFixture: new Rickshaw.Fixtures.Time.Local()
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
         graph: graph,
