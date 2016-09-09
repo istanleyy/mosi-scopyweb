@@ -22,6 +22,7 @@ class ScopeCoreConfig(AppConfig):
         if scopeDevice.isConnected:
             job_control.init()
             pollDeviceStatus.delay()
+            job_control.test_epoch_sec()
         else:
             print "!!! Unable to connect to device {} !!!".format(scopeDevice.id)
             job_control.processQueryResult('app', 'fail')

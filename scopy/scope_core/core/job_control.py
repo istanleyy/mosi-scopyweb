@@ -452,3 +452,15 @@ def performChangeOverByID(id):
     else:
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
+
+def test_epoch_sec():
+    last_10_cycles = ProductionDataTS.objects.all().order_by('-eventtime')[:10]
+    if last_10_cycles:
+        dataset = []
+        last_10_cycles_r = reversed(last_10_cycles)
+        for data in last_10_cycles_r:
+            timeval = int((data.eventtime - datetime(1970,1,1)).total_seconds())
+            dataset.append({'x': timeval, 'y': data.mct})
+        print dataset
+    else:
+        print 'No data!'
