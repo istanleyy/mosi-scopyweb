@@ -12,9 +12,12 @@ Scope Device
 {% endblock %}
 
 {% block templates %}
-<link rel="resource" type="text/html" href="{% static 'scopemenu/scopemenu.html' %}">
 <link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopedevice/scopedevice.html' %}" data-widget="scopedevice">
 <link rel="resource" type="text/html" href="{% static 'dashing/widgets/scopegraph/scopegraph.html' %}" data-widget="scopegraph">
+{% endblock %}
+
+{% block main_container %}
+<link rel="resource" type="text/html" href="{% static 'scopemenu/scopemenu.html' %}">
 {% endblock %}
 
 {% block scripts %}
