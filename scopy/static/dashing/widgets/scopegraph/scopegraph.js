@@ -1,4 +1,4 @@
-/* global $, Dashing, Rickshaw, rivets */
+/* global $, Dashing, Rickshaw, rivets, Date */
 
 Dashing.widgets.Scopegraph = function (dashboard) {
     var self = this;
@@ -60,7 +60,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
         graph: graph,
         ticksTreatment: ticksTreatment,
         tickFormat: function(x) {
-            return new Date(x * 1000).toLocaleTimeString();
+            return new Date(x * 1000).toString();
         }
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
@@ -71,7 +71,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
     hoverDetail = new Rickshaw.Graph.HoverDetail({
         graph: graph,
         xFormatter: function(x) {
-            return new Date(x * 1000).toLocaleTimeString();
+            return new Date(x * 1000).toString();
         }
     });
     xAxis.render();
