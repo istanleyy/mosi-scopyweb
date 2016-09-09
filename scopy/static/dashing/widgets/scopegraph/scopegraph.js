@@ -16,7 +16,6 @@ Dashing.widgets.Scopegraph = function (dashboard) {
 };
 
 rivets.binders['dashing-graph'] = function binder(el, data) {
-    console.log(data);
     if (!data) return;
     if (!window.Rickshaw) {
         $(document).on('libs/rickshaw/loaded',
@@ -56,10 +55,12 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
 
     var ticksTreatment = 'glow';
 
-    xAxis = new Rickshaw.Graph.Axis.Time({
+    xAxis = new Rickshaw.Graph.Axis.X({
         graph: graph,
         ticksTreatment: ticksTreatment,
-        timeFixture: new Rickshaw.Fixtures.Time.Local()
+        tickFormat: function(x) {
+            return new Date(x * 1000).toUTCString();
+        }
     });
     yAxis = new Rickshaw.Graph.Axis.Y({
         graph: graph,
@@ -69,7 +70,7 @@ rivets.binders['dashing-graph'] = function binder(el, data) {
     hoverDetail = new Rickshaw.Graph.HoverDetail({
         graph: graph,
         xFormatter: function(x) {
-            return new Date(x * 1000).toString();
+            return new Date(x * 1000).toUTCString();
         }
     });
     xAxis.render();
