@@ -16,8 +16,8 @@ $(window).load(function() {
             $scope_menu_menu.fadeIn($menu_fade_speed);
         },
         function() { //mouse out
-            $fl_menu_label.fadeTo($menu_fade_speed, $closed_menu_opacity);
-            $fl_menu_menu.fadeOut($menu_fade_speed);
+            $scope_menu_label.fadeTo($menu_fade_speed, $closed_menu_opacity);
+            $scope_menu_menu.fadeOut($menu_fade_speed);
         }
     );
 });
@@ -29,7 +29,7 @@ $(window).scroll(function () {
 function FloatMenu() {
     var scrollAmount = $(document).scrollTop();
     var newPosition = menuPosition+scrollAmount;
-    if ($(window).height() < $fl_menu.height() + $scope_menu_menu.height()) {
+    if ($(window).height() < $scope_menu.height() + $scope_menu_menu.height()) {
         $scope_menu.css("top", menuPosition);
     } else {
         $scope_menu.stop().animate({top: newPosition}, $float_speed, $float_easing);
