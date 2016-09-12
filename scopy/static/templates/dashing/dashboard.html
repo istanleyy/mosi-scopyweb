@@ -18,6 +18,14 @@ Scope Device
 
 {% block main_container %}
 <div id="container">
+    <div id="scope_menu">
+        <div class="label">MENU</div>
+        <div class="menu">
+            <a href="#" class="menu_item">Admin Page</a>
+            <a href="#" class="menu_item">Download Activity Log</a>
+            <a href="#" class="menu_item">Reset ScopePi</a>
+        </div>
+    </div>
     <div class="gridster fade" rv-each-grid="grids" rv-gridsterify="grid" rv-class-in="grid.active"><ul></ul></div>
 </div>
 <div id="overlayContainer">
