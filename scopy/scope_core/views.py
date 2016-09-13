@@ -18,7 +18,7 @@ def getlog(request, logname):
     response = HttpResponse()
     response['Content-Type'] = ""
     if logname == 'activity':
-        url = 'protected/celery_worker.log'
+        url = '/protected/celery_worker.log'
         response['X-Accel-Redirect'] = url
         return response
     else:
