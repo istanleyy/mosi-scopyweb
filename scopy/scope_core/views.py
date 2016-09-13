@@ -1,6 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from .models import ProductionDataTS, Document
+from django.http import HttpResponse, HttpResponseNotFound
+from .models import ProductionDataTS
 
 def index(request):
     return HttpResponse("Welcome to the Scope Device microserver!")
@@ -14,9 +14,12 @@ def hist(request, job_id):
         return HttpResponse(job_history)
 
 @login_required
-def getlog(request):
+def getlog(request, logname):
     response = HttpResponse()
-    url = 'protected/celery_worker.log'
     response['Content-Type'] = ""
-    response['X-Accel-Redirect'] = url
-    return response
+    if logname == 'activity':
+        url = 'protected/celery_worker.log'
+        response['X-Accel-Redirect'] = url
+        return response
+    else:
+        return HttpResponseNotFound()
