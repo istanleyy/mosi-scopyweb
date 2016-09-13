@@ -19,7 +19,9 @@ Scope Device
 {% block main_container %}
 <div id="container">
     <div id="scope_menu">
-        <div class="label">MENU</div>
+        <div class="label">
+            <img src="{% media 'scope-logo.png' %}" alt="MENU" height="42">
+        </div>
         <div class="menu">
             <a href="{% url 'admin:index' %}" class="menu_item">Admin Page</a>
             <a href="{% url 'scopecore:log' logname='activity' %}" class="menu_item">Activity Log</a>
