@@ -18,6 +18,7 @@ def getlog(request, logname):
     response['Content-Type'] = ""
     if logname == 'activity':
         url = '/protected/celery_worker.log'
+        response['Content-Disposition'] = "attachment; filename={0}".format("scopepi.log")
         response['X-Accel-Redirect'] = url
         return response
     else:
