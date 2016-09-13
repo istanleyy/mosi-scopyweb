@@ -8,8 +8,10 @@
 }
 
 #scope_menu .label {
+    padding-top: 9px;
+    padding-bottom: 9px;
     padding-left: 20px;
-    line-height: 50px;
+    line-height: 80px;
     font-family: "Arial Black", Arial, Helvetica, sans-serif;
     font-size: 14px;
     font-weight: bold;
