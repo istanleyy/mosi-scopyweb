@@ -25,7 +25,7 @@ router.register(MachineCycleWidget, 'machinecycle_widget')
 router.register(MachineStatusWidget, 'machinestatus_widget')
 
 urlpatterns = [
-    url(r'^favicon\.ico$', RedirectView.as_view('/static/favicon.ico', permanent=True)),
+    url(r'^favicon\.ico$', RedirectView.as_view('/static/favicon.ico')),
     url(r'^admin/', admin.site.urls),
     url(r'^scope_core/', include('scope_core.urls')),
     url(r'^rest-api/', include('rest_framework.urls')),
