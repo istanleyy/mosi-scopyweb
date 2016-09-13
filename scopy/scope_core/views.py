@@ -13,7 +13,6 @@ def hist(request, job_id):
     else:
         return HttpResponse(job_history)
 
-@login_required
 def getlog(request, logname):
     response = HttpResponse()
     response['Content-Type'] = ""
