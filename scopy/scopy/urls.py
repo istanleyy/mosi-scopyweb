@@ -20,7 +20,7 @@ from rest_framework import routers, serializers, viewsets
 from dashing.utils import router as dash_router
 from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, MachineStatusWidget
 
-class Userserializer(serializers.HyperlinkedModelSerializer):
+class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
         fields = ('url', 'username', 'email', 'is_staff')
