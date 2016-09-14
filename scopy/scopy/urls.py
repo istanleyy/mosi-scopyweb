@@ -14,20 +14,33 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import include, url
-from django.views.generic.base import RedirectView
 from django.contrib import admin
-from dashing.utils import router
+from django.contrib.auth.models import User
+from rest_framework import routers, serializers, viewsets
+from dashing.utils import router as dash_router
 from .widgets import JobListWidget, JobCountWidget, MachineCycleWidget, MachineStatusWidget
 
-router.register(JobListWidget, 'joblist_widget')
-router.register(JobCountWidget, 'jobcount_widget')
-router.register(MachineCycleWidget, 'machinecycle_widget')
-router.register(MachineStatusWidget, 'machinestatus_widget')
+class Userserializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ('url', 'username', 'email', 'is_staff')
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+rest_router = routers.DefaultRouter()
+rest_router.register(r'users', UserViewSet)
+
+dash_router.register(JobListWidget, 'joblist_widget')
+dash_router.register(JobCountWidget, 'jobcount_widget')
+dash_router.register(MachineCycleWidget, 'machinecycle_widget')
+dash_router.register(MachineStatusWidget, 'machinestatus_widget')
 
 urlpatterns = [
-    url(r'^favicon\.ico$', RedirectView.as_view(url='/static/favicon.ico')),
+    url(r'^', include(rest_router.urls)),
     url(r'^admin/', admin.site.urls),
     url(r'^scope_core/', include('scope_core.urls')),
-    url(r'^rest-api/', include('rest_framework.urls')),
-    url(r'^dashboard/', include(router.urls)),
+    url(r'^api-auth/', include('rest_framework.urls')),
+    url(r'^dashboard/', include(dash_router.urls)),
 ]
