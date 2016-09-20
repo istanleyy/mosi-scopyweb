@@ -129,8 +129,8 @@ class SocketServer(Thread):
         self.cancelled = False
         
         self.bs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
-        bs.setblocking(0)
+        self.bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
+        self.bs.setblocking(0)
         start_new_thread(self.listen_bcast, (self.bs,))
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
