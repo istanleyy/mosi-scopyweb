@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound
-from .models import ProductionDataTS
+from .models import ProductionDataTS, Job, SessionManagement, Machine
 
 def index(request):
     return HttpResponse("Welcome to the Scope Device microserver!")
@@ -25,4 +25,16 @@ def getlog(request, logname):
         return HttpResponseNotFound()
 
 def softreset(request):
-    pass
+    # Set all jobs inactive
+    active_jobs = Job.objects.filter(active=True)
+    active_jobs.update(active=False)
+    for job in active_jobs:
+        job.save()
+    
+    # Reset session
+    session = SessionManagement.objects.first()
+    session.reset()
+
+    # Reset machine
+    machine = Machine.objects.first()
+    machine.reset()

@@ -27,6 +27,11 @@ class Machine(models.Model):
     cooverride = models.BooleanField(default=False)
     commerr = models.BooleanField(default=False)
 
+    def reset(self):
+        self.cooverride = False
+        self.commerr = False
+        self.save()
+
 @python_2_unicode_compatible
 class Job(models.Model):
     jobid = models.IntegerField(default=0)
@@ -59,6 +64,13 @@ class SessionManagement(models.Model):
     errid = models.CharField(max_length=3, default='X2')
     errflag = models.BooleanField(default=False)
     msgsync = models.BooleanField(default=False)
+
+    def reset(self):
+        self.job = Job.objects.get(jobid=0)
+        self.errid = 'X2'
+        self.errflag = False
+        self.msgsync = False
+        self.save()
 
 class UserActivity(models.Model):
     uid = models.CharField(max_length=10, default='UNKNOWN')
