@@ -1,7 +1,7 @@
 $float_speed = 1000; //milliseconds
 $float_easing = "easeOutQuint";
 $menu_fade_speed = 500; //milliseconds
-$closed_menu_opacity = 0.66;
+$closed_menu_opacity = 0.5;
 
 $scope_menu = $("#scope_menu");
 $scope_menu_menu = $("#scope_menu .menu");
@@ -21,7 +21,7 @@ $(window).load(function() {
         }
     );
 });
- 
+
 $(window).scroll(function () {
     FloatMenu();
 });

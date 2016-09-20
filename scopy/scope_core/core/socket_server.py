@@ -10,7 +10,7 @@ socket_server.py
     Simple socket server using threads to communicate with Scope server
 """
  
-import socket
+import socket, select
 import sys
 from thread import *
 from threading import Thread
@@ -94,10 +94,17 @@ class SocketServer(Thread):
      
             conn.sendall(reply)
             #print 'Local reply: ' + reply
-     
-        # Close socket when done
-        conn.close()
-        
+
+    def listen_bcast(self, sock):
+        print 'Broadcast listener created...'
+        while True:
+            result = select.select([sock],[],[])
+            msg = result[0][0].recv(1024)
+            msg = msg.strip(' \t\n\r')
+            if msg == 'ServerMsg:alive check':
+                print 'Received broadcast message: {0}'.format(msg)
+                pass
+
     # Over-rides Thread.run
     def run(self):
         print 'Socket now listening...\n'
@@ -107,9 +114,10 @@ class SocketServer(Thread):
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
      
             # start new thread takes 1st argument as a function name to be run, second is the tuple of arguments to the function.
-            start_new_thread(self.clientthread ,(conn,))
+            start_new_thread(self.clientthread, (conn,))
  
         self.s.close()
+        self.bs.close()
         
     # Ends the running server thread
     def cancel(self):
@@ -120,6 +128,11 @@ class SocketServer(Thread):
         self.daemon = True
         self.cancelled = False
         
+        self.bs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
+        bs.setblocking(0)
+        start_new_thread(self.listen_bcast, (self.bs,))
+
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print 'Message socket created...'
  
