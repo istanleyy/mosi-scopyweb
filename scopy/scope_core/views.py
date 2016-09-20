@@ -23,3 +23,6 @@ def getlog(request, logname):
         return response
     else:
         return HttpResponseNotFound()
+
+def softreset(request):
+    pass

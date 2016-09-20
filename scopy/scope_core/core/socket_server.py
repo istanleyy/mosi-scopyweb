@@ -9,7 +9,7 @@ solutions. Implemented using python and django framework.
 socket_server.py
     Simple socket server using threads to communicate with Scope server
 """
- 
+
 import socket, select
 import sys
 from thread import *

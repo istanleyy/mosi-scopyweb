@@ -6,7 +6,7 @@ $closed_menu_opacity = 0.5;
 $scope_menu = $("#scope_menu");
 $scope_menu_menu = $("#scope_menu .menu");
 $scope_menu_label = $("#scope_menu .label");
- 
+
 $(window).load(function() {
     menuPosition=$('#scope_menu').position().top;
     FloatMenu();
@@ -25,7 +25,7 @@ $(window).load(function() {
 $(window).scroll(function () {
     FloatMenu();
 });
- 
+
 function FloatMenu() {
     var scrollAmount = $(document).scrollTop();
     var newPosition = menuPosition+scrollAmount;

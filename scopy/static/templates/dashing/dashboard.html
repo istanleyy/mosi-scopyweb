@@ -25,7 +25,7 @@ Scope Device
         <div class="menu">
             <a href="{% url 'admin:index' %}" class="menu_item">Admin Page</a>
             <a href="{% url 'scopecore:log' logname='activity' %}" class="menu_item">Activity Log</a>
-            <a href="#" class="menu_item">Reset ScopePi</a>
+            <a href="#" class="menu_item" onclick="return confirm('This will clear ALL data. Are you sure?')">Reset ScopePi</a>
         </div>
     </div>
     <div class="gridster fade" rv-each-grid="grids" rv-gridsterify="grid" rv-class-in="grid.active"><ul></ul></div>
