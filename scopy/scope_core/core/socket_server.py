@@ -129,13 +129,13 @@ class SocketServer(Thread):
         self.cancelled = False
         
         self.bs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.bs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
         self.bs.setblocking(0)
         start_new_thread(self.listen_bcast, (self.bs,))
 
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         print 'Message socket created...'
- 
         #Bind socket to local host and port
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
