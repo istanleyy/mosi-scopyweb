@@ -27,14 +27,15 @@ def getlog(request, logname):
 def softreset(request):
     # Set all jobs inactive
     active_jobs = Job.objects.filter(active=True)
-    active_jobs.update(active=False)
-    for job in active_jobs:
-        job.save()
-    
+    if active_jobs:
+        active_jobs.update(active=False)
+        for job in active_jobs:
+            job.save()
     # Reset session
     session = SessionManagement.objects.first()
     session.reset()
-
     # Reset machine
     machine = Machine.objects.first()
     machine.reset()
+    # Reload dashboard
+    return HttpResponseRedirect('/dashboard')
