@@ -38,4 +38,4 @@ def softreset(request):
     machine = Machine.objects.first()
     machine.reset()
     # Reload dashboard
-    return HttpResponseRedirect('/dashboard')
+    return HttpResponseRedirect('/dashboard/')
