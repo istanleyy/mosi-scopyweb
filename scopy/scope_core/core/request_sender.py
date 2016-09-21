@@ -18,9 +18,9 @@ def sendPostRequest(msg, errHandle=False):
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
         if errHandle:
-            url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['ERR_HANDLE']
+            url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['ERR_HANDLE']
         else:
-            url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+            url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['PATH']
     
     headers = {'Content-Type': 'application/json'}
     payload = {
@@ -46,12 +46,27 @@ def sendGetRequest():
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
-        url = settings.SCOPE_SERVER['IP'] + settings.SCOPE_SERVER['PATH']
+        url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['PATH']
     
     param = {'station': settings.DEVICE_INFO['NAME']}
     try:
         print '-----> sending request to ' + url
         r = requests.get(url, params=param, timeout=5)
+        print '<----- remote response: ' + r.content
+        return r.content
+    except requests.exceptions.RequestException as e:
+        print e
+        return None
+
+def sendBcastReply():
+    if settings.DEBUG:
+        url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
+    else:
+        url = settings.SCOPE_SERVER['BCAST_REPLY']
+    
+    try:
+        print '-----> sending request to ' + url
+        r = requests.get(url, timeout=5)
         print '<----- remote response: ' + r.content
         return r.content
     except requests.exceptions.RequestException as e:

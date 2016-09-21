@@ -17,6 +17,7 @@ from threading import Thread
 from scope_core.config import settings
 from . import xmlparser
 from . import job_control
+from . import request_sender
 
 class SocketServer(Thread):
     # For testing
@@ -102,8 +103,9 @@ class SocketServer(Thread):
             msg = result[0][0].recv(1024)
             msg = msg.strip(' \t\n\r')
             if msg == 'ServerMsg:alive check':
+                request_sender.sendBcastReply()
+            else:
                 print 'Received broadcast message: {0}'.format(msg)
-                pass
 
     # Over-rides Thread.run
     def run(self):
