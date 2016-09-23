@@ -29,7 +29,7 @@ def sendPostRequest(msg, errHandle=False):
     }
     try:
         print '-----> sending request to ' + url
-        r = requests.post(url, json=payload, headers=headers, timeout=5)
+        r = requests.post(url, json=payload, headers=headers, timeout=15)
         print '<----- remote response: ' + r.content
         if r.content == 'ServerError:msg sync':
             return None
@@ -51,7 +51,7 @@ def sendGetRequest():
     param = {'station': settings.DEVICE_INFO['NAME']}
     try:
         print '-----> sending request to ' + url
-        r = requests.get(url, params=param, timeout=5)
+        r = requests.get(url, params=param, timeout=15)
         print '<----- remote response: ' + r.content
         return r.content
     except requests.exceptions.RequestException as e:
@@ -66,7 +66,7 @@ def sendBcastReply():
     
     try:
         print '-----> sending request to ' + url
-        r = requests.get(url, timeout=5)
+        r = requests.get(url, timeout=15)
         print '<----- remote response: ' + r.content
         return r.content
     except requests.exceptions.RequestException as e:

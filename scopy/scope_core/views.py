@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
 from .models import ProductionDataTS, Job, SessionManagement, Machine
+from scope_core.core import xmlparser
 
 def index(request):
     return HttpResponse("Welcome to the Scope Device microserver!")
@@ -37,5 +38,7 @@ def softreset(request):
     # Reset machine
     machine = Machine.objects.first()
     machine.reset()
+    # Clear message buffer
+    xmlparser.flushUnsyncMsg()
     # Reload dashboard
     return HttpResponseRedirect('/dashboard/')

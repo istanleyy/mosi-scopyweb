@@ -338,11 +338,13 @@ def performChangeOver(session, task, moldserial=None):
                     task.save()        
                 return True
         else:
-            print '\033[91m' + '[Scopy] Unable to find next job matching mold ID: ' + moldserial + '\033[0m'
+            print '\033[91m' + '[Scopy] No scheduled jobs for this machine.' + '\033[0m'
             return False
             
     # Warn unable to find new job
     else:
+        session.job = Job.objects.get(jobid=0)
+        session.save()
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
 
