@@ -42,12 +42,14 @@ class SocketServer(Thread):
                 if msgContent[0] == 'ServerError':
                     print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
                     if msgContent[1] == 'msg sync':
-                        job_control.sendMsgBuffer()
+                        job_control.setMsgBlock()
                     reply = 'false:errorAck'
                 elif msgContent[0] == 'ServerMsg':
                     print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
                     if msgContent[1] == 'alive check':
                         job_control.sendUpdateMsg()
+                    elif msgContent[1] == 'sync ok':
+                        job_control.resetMsgBlock()
                     reply = 'false:ok'
                 elif msgContent[0] == 'ScanManager':
                     print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
