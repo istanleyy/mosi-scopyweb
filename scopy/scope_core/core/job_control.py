@@ -203,11 +203,12 @@ def sendUpdateMsg(pcs=None, mct=None):
     return sendRequest(scopemsg)
 
 def sendRequest(msg):
-    if SessionManagement.objects.first().msgblock:
+    session = SessionManagement.objects.first()
+    if session.msgblock:
         xmlparser.logUnsyncMsg(msg)
         return True
     else:
-        if SessionManagement.objects.first().msgsync:
+        if session.msgsync:
             xmlparser.logUnsyncMsg(msg)
             return sendMsgBuffer()
         else:
