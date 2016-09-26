@@ -119,7 +119,7 @@ class MachineStatusWidget(Widget):
     def get_coflag(self):
         return Machine.objects.first().cooverride
 
-    def get_msgblk(self):
+    def get_syncblk(self):
         return SessionManagement.objects.first().msgblock
 
     def get_context(self):
@@ -130,6 +130,6 @@ class MachineStatusWidget(Widget):
             'detail': self.get_detail(),
             'value': self.get_value(),
             'commerr': self.get_commerr(),
-            'msgblk': self.get_msgblk(),
+            'syncblk': self.get_syncblk(),
             'coflag': self.get_coflag()
         }
