@@ -31,16 +31,14 @@ def sendPostRequest(msg, errHandle=False):
         print '-----> sending request to ' + url
         r = requests.post(url, json=payload, headers=headers, timeout=15)
         print '<----- remote response: ' + r.content
-        if r.content == 'ServerError:msg sync':
-            return None
-        elif r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
+        if r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
             return False
         else:
             return True
     except requests.exceptions.RequestException as e:
         print e
         print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
-        return False
+        return None
 
 def sendGetRequest():
     if settings.DEBUG:

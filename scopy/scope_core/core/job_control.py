@@ -205,18 +205,17 @@ def sendUpdateMsg(pcs=None, mct=None):
 def sendRequest(msg):
     if SessionManagement.objects.first().msgblock:
         xmlparser.logUnsyncMsg(msg)
+        return True
     else:
         if SessionManagement.objects.first().msgsync:
             xmlparser.logUnsyncMsg(msg)
-            sendMsgBuffer()
+            return sendMsgBuffer()
         else:
             result = request_sender.sendPostRequest(msg)
             if result is None:
                 xmlparser.logUnsyncMsg(msg)
-                sendMsgBuffer()
+                return False
             else:
-                if not result:
-                    xmlparser.logUnsyncMsg(msg)
                 # return result of the request True/False
                 return result
 
@@ -244,6 +243,7 @@ def sendMsgBuffer():
     else:
         # prevent endless sending of msg buffer
         setMsgBlock()
+    return result
     
 def modelCheck():
     print '******************************'

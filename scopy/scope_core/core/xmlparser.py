@@ -233,8 +233,9 @@ def logUnsyncMsg(xmlstring):
     # need to set msgsync flag to trigger message sync procedure to prevent
     # data lost due to out-of-sync message sequemce
     session = SessionManagement.objects.first()
-    session.msgsync = True
-    session.save()
+    if not session.msgsync:
+        session.msgsync = True
+        session.save()
 
     try:
         dom = etree.fromstring(xmlstring)
