@@ -223,23 +223,18 @@ def setMsgBlock():
     SessionManagement.objects.first().set_msg_block()
     print '\033[91m' + '[Scopy] Blocking data transfer to server due to fail recovery error.' + '\033[0m'
 
-def resetMsgBlock():
-    SessionManagement.objects.first().rst_msg_block()
-    print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
-
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
     if result:
-        # Reset msgsync flag
+        # Reset msgsync and msgblock flag
         session = SessionManagement.objects.first()
-        if session.msgsync:
-            session.sync = False
-            session.save()
-        if session.msgblock:
-            resetMsgBlock()
+        session.sync = False
+        session.msgblock = False
+        session.save()
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
+        print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
     else:
         # prevent endless sending of msg buffer
         setMsgBlock()
