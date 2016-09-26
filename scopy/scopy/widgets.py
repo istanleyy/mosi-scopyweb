@@ -119,6 +119,9 @@ class MachineStatusWidget(Widget):
     def get_coflag(self):
         return Machine.objects.first().cooverride
 
+    def get_msgblk(self):
+        return Machine.objects.first().msgblock
+
     def get_context(self):
         return {
             'title': self.get_title(),
@@ -127,5 +130,6 @@ class MachineStatusWidget(Widget):
             'detail': self.get_detail(),
             'value': self.get_value(),
             'commerr': self.get_commerr(),
+            'msgblk': self.get_msgblk(),
             'coflag': self.get_coflag()
         }
