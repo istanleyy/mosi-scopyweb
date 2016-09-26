@@ -191,7 +191,7 @@ def processQueryResult(source, data, task=None):
 
 def sendEventMsg(evttype, code="", user="", data=""):
     scopemsg = xmlparser.getJobEventXml(evttype, code, user, data)
-    sendRequest(scopemsg)
+    return sendRequest(scopemsg)
 
 def sendUpdateMsg(pcs=None, mct=None):
     if pcs is None:
@@ -200,7 +200,7 @@ def sendUpdateMsg(pcs=None, mct=None):
         mct = ProductionDataTS.objects.last().mct
 
     scopemsg = xmlparser.getJobUpdateXml(pcs, mct)
-    sendRequest(scopemsg)
+    return sendRequest(scopemsg)
 
 def sendRequest(msg):
     if SessionManagement.objects.first().msgblock:
@@ -217,6 +217,8 @@ def sendRequest(msg):
             else:
                 if not result:
                     xmlparser.logUnsyncMsg(msg)
+                # return result of the request True/False
+                return result
 
 def setMsgBlock():
     SessionManagement.objects.first().set_msg_block()
