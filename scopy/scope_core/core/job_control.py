@@ -232,7 +232,7 @@ def sendMsgBuffer():
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
     if result:
         # Reset msgsync flag
-        session = SessionManagement.objects.frist()
+        session = SessionManagement.objects.first()
         if session.msgsync:
             session.sync = False
             session.save()
