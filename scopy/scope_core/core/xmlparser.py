@@ -229,13 +229,12 @@ def createJobList(xmldom):
         return False
 
 def logUnsyncMsg(xmlstring):
-    # If the frist message of the day cannot be delivered to the server,
+    # If message cannot be delivered to the server,
     # need to set msgsync flag to trigger message sync procedure to prevent
     # data lost due to out-of-sync message sequemce
     session = SessionManagement.objects.first()
-    if session and session.msgid == 1:
-        session.msgsync = True
-        session.save()
+    session.msgsync = True
+    session.save()
 
     try:
         dom = etree.fromstring(xmlstring)
