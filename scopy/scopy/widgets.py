@@ -4,7 +4,7 @@ from dashing.widgets import Widget
 from dashing.widgets import NumberWidget
 from dashing.widgets import ListWidget
 from dashing.widgets import GraphWidget
-from scope_core.models import Job, ProductionDataTS, Machine
+from scope_core.models import Job, ProductionDataTS, Machine, SessionManagement
 from scope_core.config import settings
 
 class JobListWidget(ListWidget):
@@ -120,7 +120,7 @@ class MachineStatusWidget(Widget):
         return Machine.objects.first().cooverride
 
     def get_msgblk(self):
-        return Machine.objects.first().msgblock
+        return SessionManagement.objects.first().msgblock
 
     def get_context(self):
         return {
