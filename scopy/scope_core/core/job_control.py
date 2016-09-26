@@ -231,7 +231,7 @@ def resetMsgBlock():
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
-    if result == 'ServerMsg:ok':
+    if result:
         # Reset msgsync flag
         session = SessionManagement.objects.frist()
         if session.msgsync:
@@ -241,6 +241,9 @@ def sendMsgBuffer():
             resetMsgBlock()
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
+    else:
+        # prevent endless sending of msg buffer
+        setMsgBlock()
     
 def modelCheck():
     print '******************************'
