@@ -76,7 +76,7 @@ class SessionManagement(models.Model):
 
     def set_msg_block(self):
         self.msgblock = True
-        self.save
+        self.save()
 
     def rst_msg_block(self):
         self.msgblock = False

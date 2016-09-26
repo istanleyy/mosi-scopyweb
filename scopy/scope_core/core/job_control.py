@@ -220,9 +220,11 @@ def sendRequest(msg):
 
 def setMsgBlock():
     SessionManagement.objects.first().set_msg_block()
+    print '\033[91m' + '[Scopy] Blocking data transfer to server due to fail recovery error.' + '\033[0m'
 
 def resetMsgBlock():
     SessionManagement.objects.first().rst_msg_block()
+    print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
 
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
