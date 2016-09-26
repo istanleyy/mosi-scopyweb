@@ -49,7 +49,7 @@ class SocketServer(Thread):
                     if msgContent[1] == 'alive check':
                         job_control.sendUpdateMsg()
                     elif msgContent[1] == 'sync ok':
-                        job_control.resetMsgBlock()
+                        job_control.sendMsgBuffer()
                     reply = 'false:ok'
                 elif msgContent[0] == 'ScanManager':
                     print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'

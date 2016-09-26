@@ -235,6 +235,8 @@ def sendMsgBuffer():
         if session.msgsync:
             session.sync = False
             session.save()
+        if session.msgblock:
+            resetMsgBlock()
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
     
