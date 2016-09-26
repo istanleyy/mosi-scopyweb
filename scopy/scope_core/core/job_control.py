@@ -230,7 +230,7 @@ def sendMsgBuffer():
     if result:
         # Reset msgsync and msgblock flag
         session = SessionManagement.objects.first()
-        session.sync = False
+        session.msgsync = False
         session.msgblock = False
         session.save()
         # Clear unsync message buffer
