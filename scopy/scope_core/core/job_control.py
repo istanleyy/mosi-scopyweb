@@ -212,7 +212,7 @@ def sendRequest(msg):
             return sendMsgBuffer()
         else:
             result = request_sender.sendPostRequest(msg)
-            if result is None:
+            if result[0] is None:
                 xmlparser.logUnsyncMsg(msg)
                 return False
             else:
@@ -226,7 +226,7 @@ def setMsgBlock():
 def sendMsgBuffer():
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
-    if result:
+    if result[0]:
         # Reset msgsync and msgblock flag
         session = SessionManagement.objects.first()
         session.msgsync = False
@@ -236,6 +236,8 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
         print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
     else:
+        if result[1] == 'ServerError:sync fail':
+            setMsgBlock()
         print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
     return result
     

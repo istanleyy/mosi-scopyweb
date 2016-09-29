@@ -32,13 +32,13 @@ def sendPostRequest(msg, errHandle=False):
         r = requests.post(url, json=payload, headers=headers, timeout=15)
         print '<----- remote response: ' + r.content
         if r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
-            return False
+            return (False, r.content)
         else:
-            return True
+            return (True, r.content)
     except requests.exceptions.RequestException as e:
         print e
         print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
-        return None
+        return (None, 'RequestException')
 
 def sendGetRequest():
     if settings.DEBUG:
