@@ -32,15 +32,14 @@ def processQueryResult(source, data, task=None):
         if not machine.commerr:
             machine.commerr = True
             machine.save()
-            if session.job.inprogress:
+            if session.job.inprogress and source != 'app':
                 # If communication error is detected when a job is in progress,
                 # notify server with code=X5
                 sendEventMsg(4, 'X5')
             else:
                 # If communication error is detected when a job is not running,
                 # send 'bye' message to server to hang up the job
-                if source != 'app':
-                    request_sender.sendPostRequest('false:bye')
+                request_sender.sendPostRequest('false:bye')
     else:
         if machine.commerr:
             machine.commerr = False
@@ -237,8 +236,7 @@ def sendMsgBuffer():
         xmlparser.flushUnsyncMsg()
         print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
     else:
-        # prevent endless sending of msg buffer
-        setMsgBlock()
+        print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
     return result
     
 def modelCheck():
@@ -363,31 +361,31 @@ def processBarcodeActivity(data):
         data = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
-        if sendEventMsg(uid, activity):
-            if activity == 'LOGIN':
-                tLogin = datetime.now()
-                user = UserActivity.objects.filter(uid=uid)
-                if not user:
-                    UserActivity.objects.create(uid=uid, lastLogin=tLogin, lastLogout=None)
-                else:
-                    user[0].lastLogin = tLogin
-                    user[0].lastLogout = None
-                    user[0].save()
-                print "Users: ", UserActivity.objects.filter(lastLogout=None)
+        sendEventMsg(uid, activity):
+        if activity == 'LOGIN':
+            tLogin = datetime.now()
+            user = UserActivity.objects.filter(uid=uid)
+            if not user:
+                UserActivity.objects.create(uid=uid, lastLogin=tLogin, lastLogout=None)
             else:
-                try:
-                    user = UserActivity.objects.get(uid=uid)
-                    user.lastLogout = datetime.now()
-                    user.save()
-                except DoesNotExist:
-                    pass
-                except MultipleObjectsReturned:
-                    pass
-                finally:
-                    print "Users: ", UserActivity.objects.filter(lastLogout=None)
-            return True
+                user[0].lastLogin = tLogin
+                user[0].lastLogout = None
+                user[0].save()
+            print "Users: ", UserActivity.objects.filter(lastLogout=None)
         else:
-            return False
+            try:
+                user = UserActivity.objects.get(uid=uid)
+                user.lastLogout = datetime.now()
+                user.save()
+            except DoesNotExist:
+                print 'User {0} did not logged in.'.format(uid)
+                return False
+            except MultipleObjectsReturned:
+                print 'ScopePi login process error.'
+                return False
+            finally:
+                print "Users: ", UserActivity.objects.filter(lastLogout=None)
+        return True
     else:
         # If performing change-over procedure
         if activity == 'CHGOVR':
