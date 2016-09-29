@@ -361,7 +361,7 @@ def processBarcodeActivity(data):
         data = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
-        sendEventMsg(uid, activity):
+        sendEventMsg(uid, activity)
         if activity == 'LOGIN':
             tLogin = datetime.now()
             user = UserActivity.objects.filter(uid=uid)
