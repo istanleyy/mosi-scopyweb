@@ -94,7 +94,7 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
         userTag = etree.SubElement(jobEvent, "user")
         userTag.text = user
     if data != "":
-        if data[0] == 'W':
+        if data[0] == 'C':
             refList = data.split('-')
             for ref in refList:
                 serialTag = etree.SubElement(jobEvent, "ref_serial")

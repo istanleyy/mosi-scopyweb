@@ -403,7 +403,7 @@ def processBarcodeActivity(data):
                     machine.cooverride = False
                     machine.save()
                     
-        return sendEventMsg(activity, 'WS', uid, data)
+        return sendEventMsg(activity, 'WS', uid, data)[0]
 
 def processServerAction(data):
     actparam = data.split(',')
