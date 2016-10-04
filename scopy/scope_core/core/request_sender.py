@@ -11,9 +11,13 @@ request_sender.py
 """
 
 import requests
+import logging
 from scope_core.config import settings
 
+logger = logging.getLogger('scopepi.messaging')
+
 def sendPostRequest(msg, errHandle=False):
+    global logger
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
@@ -28,19 +32,20 @@ def sendPostRequest(msg, errHandle=False):
         'message': msg
     }
     try:
-        print '-----> sending request to ' + url
+        logger.info('-----> sending request to {0}'.foramt(url))
         r = requests.post(url, json=payload, headers=headers, timeout=15)
-        print '<----- remote response: ' + r.content
+        logger.info('<----- remote response: {0}'.format(r.content))
         if r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
             return (False, r.content)
         else:
             return (True, r.content)
     except requests.exceptions.RequestException as e:
-        print e
-        print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
+        logger.exception('request_handler cannot send POST request to server.\n{0}'.format(msg))
+        #print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
         return (None, 'RequestException')
 
 def sendGetRequest():
+    global logger
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
@@ -48,25 +53,26 @@ def sendGetRequest():
     
     param = {'station': settings.DEVICE_INFO['NAME']}
     try:
-        print '-----> sending request to ' + url
+        logger.info('-----> sending request to {0}'.format(url))
         r = requests.get(url, params=param, timeout=15)
-        print '<----- remote response: ' + r.content
+        logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
     except requests.exceptions.RequestException as e:
-        print e
+        logger.exception('request_handler cannot send GET request to server.')
         return None
 
 def sendBcastReply():
+    global logger
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
         url = settings.SCOPE_SERVER['BCAST_REPLY']
     
     try:
-        print '-----> sending request to ' + url
+        logger.info('-----> sending request to {0}'.format(url))
         r = requests.get(url, timeout=15)
-        print '<----- remote response: ' + r.content
+        logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
     except requests.exceptions.RequestException as e:
-        print e
+        logger.exception('request_handler cannot reply to broadcast.')
         return None

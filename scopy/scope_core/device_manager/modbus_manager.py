@@ -50,4 +50,3 @@ class ModbusConnectionManager(AbstractConnectionManager):
             return result
         except modbus_tk.modbus.ModbusError as error:
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
-    

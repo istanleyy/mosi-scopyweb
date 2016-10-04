@@ -14,6 +14,7 @@ job_control.py
 """
 
 import pytz
+import logging
 from datetime import datetime
 from djcelery.models import IntervalSchedule, PeriodicTask
 from lxml import etree
@@ -22,6 +23,8 @@ from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser
 from . import request_sender
+
+logger = logging.getLogger('scopepi.debug')
 
 def processQueryResult(source, data, task=None):
     session = SessionManagement.objects.first()
@@ -220,10 +223,13 @@ def sendRequest(msg):
                 return result
 
 def setMsgBlock():
+    global logger
     SessionManagement.objects.first().set_msg_block()
+    logger.warning('Blocking data transfer due to fail recovery error.')
     print '\033[91m' + '[Scopy] Blocking data transfer to server due to fail recovery error.' + '\033[0m'
 
 def sendMsgBuffer():
+    global logger
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
     if result[0]:
@@ -234,11 +240,13 @@ def sendMsgBuffer():
         session.save()
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
+        logger.warning('Resumed data transfer to server.')
         print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
     else:
         if result[1] == 'ServerError:sync fail':
             setMsgBlock()
-        print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
+            logger.warning('Message sync failed.')
+        #print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
     return result
     
 def modelCheck():
@@ -314,6 +322,7 @@ def evalCOCondition(machine, session):
     return 'nochange'
 
 def performChangeOver(session, task, moldserial=None):
+    global logger
     # Set current job inactive
     oldJob = session.job
     oldJob.inprogress = False
@@ -329,7 +338,7 @@ def performChangeOver(session, task, moldserial=None):
             session.job = newJob[0]
             session.save()
             if task is None:
-                print '!!! Unable to update task period due to missing argument !!!'
+                logger.error('Cannot update task period of new job.')
                 return False
             else:
                 # Compare polling period with retrieved mct value
@@ -355,6 +364,7 @@ def performChangeOver(session, task, moldserial=None):
         return False
 
 def processBarcodeActivity(data):
+    global logger
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -380,10 +390,10 @@ def processBarcodeActivity(data):
                 user.lastLogout = datetime.now()
                 user.save()
             except DoesNotExist:
-                print 'User {0} did not logged in.'.format(uid)
+                logger.exception('User {0} did not logged in.'.format(uid))
                 return False
             except MultipleObjectsReturned:
-                print 'ScopePi login process error.'
+                logger.exception('ScopePi login process error.')
                 return False
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
@@ -397,7 +407,7 @@ def processBarcodeActivity(data):
                 if not machine.cooverride:
                     machine.cooverride = True
                     machine.save()
-                    print '***** barcode CO *****'
+                    #print '***** barcode CO *****'
                 else:
                     # Barcode event to signal end of mold-change procedure
                     machine.cooverride = False
@@ -420,6 +430,7 @@ def processServerAction(data):
         return False
 
 def performChangeOverByID(id):
+    global logger
     session = SessionManagement.objects.first()
     # Don't change job if current JobId matches
     if session.job.jobid != int(id):
@@ -439,7 +450,7 @@ def performChangeOverByID(id):
                 session.job = newJob[0]
                 session.save()
                 if task is None:
-                    print '!!! Unable to update task period due to missing argument !!!'
+                    logger.error('Cannot update task period of new job.')
                     return False
                 else:
                     # Compare polling period with retrieved mct value
@@ -452,13 +463,16 @@ def performChangeOverByID(id):
                             )
                         task.interval_id = intv.id
                         task.save()
+                    logger.warning('Server forced CO.')
                     print '\033[93m' + '[Scopy] Server force CO.' + '\033[0m'
                     return True
             else:
-                print '\033[91m' + '[Scopy] Unable to find next job matching mold ID: ' + moldserial + '\033[0m'
+                logger.error('Cannot find job matching id {0}.'.format(id))
+                print '\033[91m' + '[Scopy] Unable to find next job matching ID: ' + id + '\033[0m'
                 return False
     # Warn unable to find new job
     else:
+        logger.error('Cannot obtain job info in CO process.')
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
 

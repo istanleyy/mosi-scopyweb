@@ -12,6 +12,7 @@ socket_server.py
 
 import socket, select
 import sys
+import logging
 from thread import *
 from threading import Thread
 from scope_core.config import settings
@@ -20,6 +21,8 @@ from . import job_control
 from . import request_sender
 
 class SocketServer(Thread):
+    logger = logging.getLogger('scopepi.messaging')
+
     # For testing
     isCO = False
     isDT = False
@@ -35,24 +38,27 @@ class SocketServer(Thread):
             if not data:
                 break
             elif msg == 'bye':
-                print 'Magic word received, closing connection...'
+                self.logger.info('Magic word received, closing connection.')
                 break
             elif msg[0] != '<':
                 msgContent = msg.split(':', 1)
                 if msgContent[0] == 'ServerError':
-                    print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
+                    #print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
+                    self.logger.warning('[ServerError] {0}'.format(msgContent[1]))
                     if msgContent[1] == 'msg sync':
                         job_control.setMsgBlock()
                     reply = 'false:errorAck'
                 elif msgContent[0] == 'ServerMsg':
-                    print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
+                    #print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
+                    self.logger.info('[ServerMessage] {0}'.format(msgContent[1]))
                     if msgContent[1] == 'alive check':
                         job_control.sendUpdateMsg()
                     elif msgContent[1] == 'sync ok':
                         job_control.sendMsgBuffer()
                     reply = 'false:ok'
                 elif msgContent[0] == 'ScanManager':
-                    print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
+                    #print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
+                    self.logger.info('[BarcodeActivity] {0}'.format(msgContent[1]))
                     if msgContent[1] == 'initiate':
                         reply = 'scan'
                     if job_control.processBarcodeActivity(msgContent[1]):
@@ -60,7 +66,8 @@ class SocketServer(Thread):
                     else:
                         reply = 'fail'
                 elif msgContent[0] == 'ServerAction':
-                    print '\033[93m' + '[ServerAction] ' + msgContent[1] + '\033[0m'
+                    #print '\033[93m' + '[ServerAction] ' + msgContent[1] + '\033[0m'
+                    self.logger.warning('[ServerAction] {0}'.format(msgContent[1]))
                     if job_control.processServerAction(msgContent[1]):
                         reply = 'false:ok'
                     else:
@@ -88,9 +95,11 @@ class SocketServer(Thread):
                     job_control.sendEventMsg(1)
                     reply = 'false:test'
                 else:
-                    print 'Received unknown message: ' + msg
+                    #print 'Received unknown message: ' + msg
+                    self.logger.error('Socket server received unknown message: {0}'.format(msg))
             elif xmlparser.isScopeXml(msg):
-                print 'Received Scope message.'
+                #print 'Received Scope message.'
+                self.logger.info('Received Scope message.')
                 reply = 'false:ok'
             else:
                 break
@@ -107,7 +116,8 @@ class SocketServer(Thread):
             if msg == 'ServerMsg:alive check':
                 request_sender.sendBcastReply()
             else:
-                print 'Received broadcast message: {0}'.format(msg)
+                #print 'Received broadcast message: {0}'.format(msg)
+                self.logger.info('Received broadcast message: ' + msg)
 
     # Over-rides Thread.run
     def run(self):
@@ -147,6 +157,7 @@ class SocketServer(Thread):
         except socket.error as msg:
             if msg[0] != 48 and msg[0] != 98:
                 print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
+                self.logger.exception('Bind failed. Error Code: {0} Message: {1}'.format(msg[0], msg[1]))
                 sys.exit()
      
         print 'Socket bind complete!'

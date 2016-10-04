@@ -159,6 +159,59 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 import djcelery
 djcelery.setup_loader()
 
+
+# Logging configs, using template from django doc
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'filters': {
+        'require_debug_true': {
+            '()': 'django.utils.log.RequireDebugTrue',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'INFO',
+            'filters': ['require_debug_true'],
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'WARNING',
+            'class': 'logging.FileHandler',
+            'formatter': 'verbose',
+            'filename': '/home/mosidev/sandbox/scopyweb/log/scopepi_debug.log'
+        }
+    },
+    'loggers': {
+        'scopepi': {
+            'handlers': ['console'],
+            'propagate': True,
+        },
+        'scopepi.debug': {
+            'handlers': ['file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'scopepi.messaging': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        }
+    }
+}
+
+# Dashing configs
+
 DASHING = {
     'INSTALLED_WIDGETS': (
         'number', 
