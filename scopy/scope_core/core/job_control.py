@@ -247,7 +247,7 @@ def sendMsgBuffer():
             setMsgBlock()
             logger.warning('Message sync failed.')
         #print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
-    return result
+    return result[0]
     
 def modelCheck():
     print '******************************'
@@ -413,7 +413,7 @@ def processBarcodeActivity(data):
                     machine.cooverride = False
                     machine.save()
                     
-        return sendEventMsg(activity, 'WS', uid, data)[0]
+        return sendEventMsg(activity, 'WS', uid, data)
 
 def processServerAction(data):
     actparam = data.split(',')
