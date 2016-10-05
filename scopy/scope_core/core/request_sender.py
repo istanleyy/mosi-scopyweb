@@ -32,7 +32,7 @@ def sendPostRequest(msg, errHandle=False):
         'message': msg
     }
     try:
-        logger.info('-----> sending request to {0}'.foramt(url))
+        logger.info('-----> sending request to {0}'.format(url))
         r = requests.post(url, json=payload, headers=headers, timeout=15)
         logger.info('<----- remote response: {0}'.format(r.content))
         if r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
