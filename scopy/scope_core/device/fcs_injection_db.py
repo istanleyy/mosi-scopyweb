@@ -16,6 +16,7 @@ fcs_injection_db.py
     FCSInjectionDevice_db class
 """
 
+import logging
 import platform
 import device_definition as const
 from abstract_device import AbstractDevice
@@ -62,6 +63,7 @@ class FCSInjectionDevice_db(AbstractDevice):
     # Module specific properties and methods
     ##############################################
 
+    logger = None
     id = 'not_set'
     isConnected = False
 
@@ -147,6 +149,7 @@ class FCSInjectionDevice_db(AbstractDevice):
                 machine.save()
             return (self.mode, self.status, moldid)
         else:
+            self.logger.error('Cannot query machine status.')
             return "fail"
     
     def getAlarmStatus(self):
@@ -164,6 +167,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             else:
                 return ('', False)
         else:
+            self.logger.error('Cannot query alarm status.')
             return "fail"
             
     def getProductionStatus(self):
@@ -176,9 +180,11 @@ class FCSInjectionDevice_db(AbstractDevice):
             # FCS server updates data every minute.
             return (60, result[1])
         else:
+            self.logger.error('Cannot query production status.')
             return "fail"
 
     def __init__(self, id):
+        self.logger = logging.getLogger('scopepi.debug')
         self.id = id
         self.mode = const.OFFLINE
         self.status = const.IDLE
@@ -190,6 +196,8 @@ class FCSInjectionDevice_db(AbstractDevice):
                 print('Device is {}, Module version {}\n'.format(self.name, self.version))
             else:
                 print("Device doesn't exist!")
+                self.logger.error("FCS machine doesn't exist.")
                 self.disconnect()
         else:
+            self.logger.error('Cannot connect to FCS server.')
             print("Connection failed!")

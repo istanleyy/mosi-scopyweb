@@ -21,8 +21,7 @@ from . import job_control
 from . import request_sender
 
 class SocketServer(Thread):
-    logger = logging.getLogger('scopepi.messaging')
-
+    logger = None
     # For testing
     isCO = False
     isDT = False
@@ -139,6 +138,7 @@ class SocketServer(Thread):
 
     def __init__(self):
         super(SocketServer, self).__init__()
+        self.logger = logging.getLogger('scopepi.messaging')
         self.daemon = True
         self.cancelled = False
         

@@ -10,6 +10,7 @@ mysql_manager.py
     A connection manager to query a MySQL server using Oracle's python connector
 """
 
+import logging
 import mysql.connector
 import mysql.connector.pooling
 from mysql.connector import errorcode
@@ -17,14 +18,16 @@ from abstract_manager import AbstractConnectionManager
 from scope_core.config import settings
 
 class MySqlConnectionManager(AbstractConnectionManager):
+    logger = None
     cnxpool = None
     connection = None    
     
     def __init__(self):
+        self.logger = logging.getLogger('scopepi.debug')
         try:
             self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", **settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
-            print(err)
+            self.logger.exception(err.message)
 
     def connect(self):
         result = False
@@ -39,6 +42,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 cursor.close()
                 result = True
         except mysql.connector.Error as err:
+            self.logger.exception(err.message)
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
                 print("Invalid username or password!")
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
