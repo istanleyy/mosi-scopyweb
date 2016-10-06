@@ -17,9 +17,14 @@ def hist(request, job_id):
 def getlog(request, logname):
     response = HttpResponse()
     response['Content-Type'] = ""
-    if logname == 'activity':
-        url = '/protected/celery_worker.log'
-        response['Content-Disposition'] = "attachment; filename={0}".format("scopepi.log")
+    if logname == 'activity' or logname == 'debug':
+        if logname == 'activity':
+            filename = 'scopepi.log'
+            url = '/protected/celery_worker.log'
+        else:
+            filename = 'scopepi_debug.log'
+            url = '/protected/scopepi_debug.log'
+        response['Content-Disposition'] = "attachment; filename={0}".format(filename)
         response['X-Accel-Redirect'] = url
         return response
     else:
