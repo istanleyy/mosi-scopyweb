@@ -133,6 +133,7 @@ class ModbusDevice(AbstractDevice):
                     print('Device in semi-auto mode.')
             elif modeval[0] == 8192:
                 self.mode = const.AUTO_MODE
+                self.tLastUpdate = datetime.now()
                 if machine.opmode != 3:
                     machine.opmode = 3
                     modechange = True
