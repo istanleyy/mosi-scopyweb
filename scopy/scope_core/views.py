@@ -30,6 +30,9 @@ def getlog(request, logname):
     else:
         return HttpResponseNotFound()
 
+def clearlogs(request):
+    return HttpResponse("clear logs")
+
 def softreset(request):
     # Set all jobs inactive
     active_jobs = Job.objects.filter(active=True)

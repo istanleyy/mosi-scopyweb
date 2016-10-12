@@ -25,6 +25,8 @@ from . import xmlparser
 from . import request_sender
 
 logger = logging.getLogger('scopepi.debug')
+lastOutput = 0
+cycleCount = 0
 
 def processQueryResult(source, data, task=None):
     session = SessionManagement.objects.first()
@@ -156,6 +158,10 @@ def processQueryResult(source, data, task=None):
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
         
+        if idleDetect(pcs):
+            sendEventMsg(2)
+            logger.warning('job_control detect machine idle.')
+
         if session.job.inprogress:
             # Log event only when there are actual outputs from the machine
             if ProductionDataTS.objects.last() is None or pcs != ProductionDataTS.objects.last().output:
@@ -290,6 +296,18 @@ def getJobsFromServer():
                 return xmlparser.isScopeXml(result)
     else:
         return True
+
+def idleDetect(pcs):
+    global lastOutput
+    global cycleCount
+    if lastOutput != pcs:
+        lastOutput = pcs
+        cycleCount = 0
+    else:
+        cycleCount += 1
+        if cycleCount == settings.IDLE_CYCLE:
+            return True
+    return False
 
 def evalCOCondition(machine, session):
     # Evaluate CO condition only if machine is not offline nor in auto mode

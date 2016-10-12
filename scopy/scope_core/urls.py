@@ -9,6 +9,8 @@ urlpatterns = [
     url(r'^hist/(?P<job_id>[^/]+)/$', views.hist, name='history'),
     # /scope_core/getlog/activity
     url(r'^getlog/(?P<logname>[^/]+)/$', views.getlog, name='log'),
+    # /scope_core/clearlogs
+    url(r'^clearlogs/$', views.clearlogs, name='clrlog'),
     # /scope_core/softreset
     url(r'^softreset/$', views.softreset, name='reset'),
 ]
