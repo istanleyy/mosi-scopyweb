@@ -158,7 +158,7 @@ def processQueryResult(source, data, task=None):
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
         
-        if idleDetect(pcs) and not session.errflag and machine.opmode != 0:
+        if idleDetect(pcs) and not session.errflag and machine.opmode != 0 and machine.opstatus != 2:
             sendEventMsg(2)
             logger.warning('job_control detect machine idle.')
 
