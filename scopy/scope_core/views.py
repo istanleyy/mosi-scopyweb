@@ -20,7 +20,7 @@ def getlog(request, logname):
     if logname == 'activity' or logname == 'debug':
         if logname == 'activity':
             filename = 'scopepi.log'
-            url = '/protected/celery_worker.log'
+            url = '/protected/celery_err.log'
         else:
             filename = 'scopepi_debug.log'
             url = '/protected/scopepi_debug.log'
