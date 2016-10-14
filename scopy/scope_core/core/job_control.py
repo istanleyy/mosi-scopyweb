@@ -82,22 +82,20 @@ def processQueryResult(source, data, task=None):
                     job.save()
 
                     if machine.lastHaltReason == const.CHG_MOLD:
-                        machine.cooverride = False
-                        machine.lastHaltReason = 0
-                        machine.save()
                         # If previous machine status is CHG_MOLD, need to send CO end message
+                        machine.cooverride = False
                         sendEventMsg(6, 'ED')
-
                     elif (machine.lastHaltReason == const.CHG_MATERIAL or 
                             machine.lastHaltReason == const.SETUP):
-                        machine.lastHaltReason = 0
-                        machine.save()
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
-
                     else:
                         # Sends normal job start message
                         sendEventMsg(1)
+
+                    # Clear halt states
+                    machine.lastHaltReason = 0
+                    machine.save()
                 
                 else:
                     # Cannot load new job, simply clear any halt states
@@ -114,7 +112,7 @@ def processQueryResult(source, data, task=None):
         else:
             # Machine enters line change (change mold)        
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
-                if machine.lastHaltReason != const.CHG_MOLD:
+                if machine.lastHaltReason != const.CHG_MOLD and machine.lastHaltReason != const.NOJOB:
                     print 'CO_OVERRIDE: ' + str(machine.cooverride)
                     # perform change-over
                     if performChangeOver(session, task, str(data[2])):
@@ -125,9 +123,10 @@ def processQueryResult(source, data, task=None):
                     else:
                         # Error in CO procedure, send message to server to end current job without next job
                         sendEventMsg(6, 'NJ')
+                        machine.lastHaltReason = const.NOJOB
                         if machine.cooverride:
                             machine.cooverride = False
-                            machine.save()
+                        machine.save()
         
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:

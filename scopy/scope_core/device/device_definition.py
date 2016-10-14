@@ -22,6 +22,7 @@ RUNNING = 1
 CHG_MOLD = 2
 CHG_MATERIAL = 3
 SETUP = 4
+NOJOB = 5
 
 # Machine error code definitions
 ERROR_LIST = {
