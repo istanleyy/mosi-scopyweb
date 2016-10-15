@@ -40,7 +40,7 @@ def sendPostRequest(msg, errHandle=False):
         else:
             return (True, r.content)
     except requests.exceptions.RequestException as e:
-        logger.exception('request_handler cannot send POST request to server.\n{0}'.format(msg))
+        logger.exception('request_handler cannot send POST request to server.')
         #print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
         return (None, 'RequestException')
 
