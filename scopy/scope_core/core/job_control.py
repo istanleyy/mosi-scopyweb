@@ -292,7 +292,7 @@ def getJobsFromServer():
             if result == 'ServerMsg:no more job':
                 return False
             else:
-                logger.info(result)
+                print result
                 return xmlparser.isScopeXml(result)
     else:
         return True
