@@ -156,12 +156,15 @@ def processQueryResult(source, data, task=None):
         #moldSerial = str(data[2])
         #if evalCOCondition(machine, session) == 'mold':
         #    performChangeOver(session, task, moldSerial)
-        
-        if idleDetect(pcs) and not session.errflag and machine.opmode != 0 and machine.opstatus != 2:
-            sendEventMsg(2)
-            logger.warning('job_control detect machine idle.')
 
         if session.job.inprogress:
+            # Machine idle check
+            # If machine is not down nor changing mold, and the output has not change
+            # in defined number of cycles, then the machine is idling
+            if idleDetect(pcs) and not session.errflag and machine.opstatus != 2:
+                sendEventMsg(2)
+                logger.warning('job_control detect machine idle.')
+
             # Log event only when there are actual outputs from the machine
             if ProductionDataTS.objects.last() is None or pcs != ProductionDataTS.objects.last().output:
                 dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
