@@ -33,7 +33,8 @@ class SocketServer(Thread):
             # Receiving from client
             data = conn.recv(2048)
             msg = data.strip(' \t\n\r')
-            print "Socket received:\n{0}".format(msg)
+            if len(msg) > 0:
+                print "Socket received:\n{0}".format(msg)
             reply = 'true:unknown message'
             if not data:
                 break
