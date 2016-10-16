@@ -208,7 +208,6 @@ def getXmlTimeVal():
     return (msgIdText, timeText)
     
 def createJobList(xmldom):
-    print xmldom
     try:
         for element in xmldom.iter("job_item"):
             if not Job.objects.filter(jobid=int(element[0].text)):
