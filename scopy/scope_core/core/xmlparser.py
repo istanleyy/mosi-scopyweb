@@ -321,7 +321,7 @@ def updateOperatorList(list):
     print OPERATOR_LIST
 
 def clearJobModel():
-    jobs = Job.objects.exclude(jobid=0, quantity=0, ct=0)
+    currentjid = SessionManagement.objects.first().job.jobid
+    jobs = Job.objects.filter(jobid__gt=0, active=True).exclude(jobid=currentjid)
     for job in jobs:
-        job.active = False
-        job.save()
+        job.delete()
