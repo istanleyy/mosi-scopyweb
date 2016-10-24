@@ -25,7 +25,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
     def __init__(self):
         self.logger = logging.getLogger('scopepi.debug')
         try:
-            self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", **settings.MYSQL_CONFIG)
+            self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", pool_size=3, **settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
             self.logger.exception(err.message)
 
@@ -62,7 +62,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
             cursor = None
             if self.connection:
                 self.connect()
-                cursor = self.connection.cursor()
+            cursor = self.connection.cursor()
         except mysql.connector.Error:
             if self.cnxpool:
                 self.connection = self.cnxpool.get_connection()

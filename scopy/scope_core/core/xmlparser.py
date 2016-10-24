@@ -14,6 +14,7 @@ import os
 import os.path
 import threading
 import time
+import logging
 from decimal import Decimal
 from io import BytesIO
 from datetime import date
@@ -22,6 +23,7 @@ from scope_core.models import Job, SessionManagement, UserActivity
 from scope_core.config import settings
 
 LOCK = threading.Lock()
+logger = logging.getLogger('scopepi.debug')
 
 def isScopeXml(str):
     try:
@@ -325,3 +327,4 @@ def clearJobModel():
     jobs = Job.objects.filter(jobid__gt=0, active=True).exclude(jobid=currentjid)
     for job in jobs:
         job.delete()
+        logger.warning('Job {0} ({1}) deleted.'.format(job.jobid, job.productid))

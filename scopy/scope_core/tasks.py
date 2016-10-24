@@ -10,9 +10,9 @@ from core import device_manager as device
 
 
 logger = get_task_logger(__name__)
-P_PRIOR_HIGH = 9
-P_PRIOR_MID = 11
-P_PRIOR_LOW = 17
+P_PRIOR_HIGH = 60
+P_PRIOR_MID = 90
+P_PRIOR_LOW = 120
 LOCK_EXPIRE = 60
 LOCK_ID = "shared-lock"
 
