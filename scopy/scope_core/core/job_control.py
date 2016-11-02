@@ -424,21 +424,16 @@ def processBarcodeActivity(data):
         if activity == 'CHGOVR':
             machine = Machine.objects.first()
             # Barcode CO event over-rides machine's mold change status
-            if machine.opmode != 3:
-                if not machine.cooverride:
-                    machine.cooverride = True
-                    machine.save()
-                    #print '***** barcode CO *****'
-                else:
-                    # Barcode event to signal end of mold-change procedure
-                    machine.cooverride = False
-                    machine.save()
+            if machine.opmode != 3 and not machine.cooverride:
+                machine.cooverride = True
+                machine.save()
+                #print '***** barcode CO *****'
         
         # If performing mold trial, need to quit CO procedure without machine
         # switching to auto mode
         if activity == 'A1065':
             machine = Machine.objects.first()
-            machine.cooverride = True
+            machine.cooverride = False
             machine.save()
                     
         return sendEventMsg(activity, 'WS', uid, data)

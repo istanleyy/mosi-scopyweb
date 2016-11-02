@@ -223,6 +223,11 @@ def createJobList(xmldom):
                 newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
                 newJob.moldid = element[6].text
                 newJob.save()
+            else:
+                resurrectjob = Job.objects.get(jobid=int(element[0].text))
+                if resurrectjob:
+                    resurrectjob.active = True
+                    resurrectjob.save()
             
         print '\033[93m' + '[Scopy] New jobs added.' + '\033[0m'
         return True
