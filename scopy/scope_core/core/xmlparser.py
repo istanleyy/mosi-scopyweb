@@ -225,11 +225,11 @@ def createJobList(xmldom):
                 newJob.save()
             else:
                 resurrectjob = Job.objects.get(jobid=int(element[0].text))
-                if resurrectjob:
+                if resurrectjob and not resurrectjob.active:
                     resurrectjob.active = True
                     resurrectjob.save()
             
-        print '\033[93m' + '[Scopy] New jobs added.' + '\033[0m'
+        print '\033[93m' + '[Scopy] Job list updated.' + '\033[0m'
         return True
     except (etree.XMLSyntaxError, IndexError, ValueError):
         print '\033[91m' + '[Scopy] Cannot add new job. Check message format!' + msgContent[1] + '\033[0m'
