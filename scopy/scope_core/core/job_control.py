@@ -64,8 +64,8 @@ def processQueryResult(source, data, task=None):
                 job.save()
                 request_sender.sendPostRequest('false:bye')
         
-        # If the machine has been switched to AUTO_MODE
-        elif machine.opmode == 3:
+        # If the machine has been switched to AUTO_MODE or SEMI_AUTO_MODE
+        elif machine.opmode > 1:
             # Machine is in ready-to-produce status (RUNNING)
             if machine.opstatus == const.RUNNING or machine.opstatus == const.IDLE:
                 # Check job status for current session
@@ -104,11 +104,11 @@ def processQueryResult(source, data, task=None):
                     machine.save()
             
             else:
-                # When the machine is in auto mode, it cannot be changing mold or
+                # When the machine is in auto or semi-auto mode, it cannot be changing mold or
                 # material, so the system should ignore such mode-status combinations
                 pass
         
-        # Machine is in MANUAL or SEMI_AUTO mode
+        # Machine is in MANUAL mode
         else:
             # Machine enters line change (change mold)        
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
@@ -435,7 +435,7 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             machine.cooverride = False
             machine.save()
-                    
+
         return sendEventMsg(activity, 'WS', uid, data)
 
 def processServerAction(data):
