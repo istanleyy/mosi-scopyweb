@@ -448,7 +448,10 @@ def processBarcodeActivity(data):
             machine.cooverride = False
             machine.save()
 
-        return sendEventMsg(activity, 'WS', uid, data)[0]
+        if sendEventMsg(activity, 'WS', uid, data)[0]:
+            return 'ok'
+        else:
+            return 'fail'
 
 def processServerAction(data):
     actparam = data.split(',')
