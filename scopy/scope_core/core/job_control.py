@@ -412,13 +412,13 @@ def processBarcodeActivity(data):
                 user.save()
             except DoesNotExist:
                 logger.exception('User {0} did not logged in.'.format(uid))
-                return False
+                return 'fail'
             except MultipleObjectsReturned:
                 logger.exception('ScopePi login process error.')
-                return False
+                return 'fail'
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
-        return True
+        return 'ok'
     else:
         # If receiving request from barcode activity
         if activity == 'req':
