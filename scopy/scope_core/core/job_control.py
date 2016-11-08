@@ -420,6 +420,18 @@ def processBarcodeActivity(data):
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
         return True
     else:
+        # If receiving request from barcode activity
+        if activity == 'req':
+            if data[0] == 'T':
+                # Received mould serial check request
+                job = SessionManagement.objects.first().job
+                if data == job.moldid or data == 'T0000000':
+                    return job.multiplier
+                else:
+                    return 0
+            else:
+                return 'unknown'
+
         # If performing change-over procedure
         if activity == 'CHGOVR':
             machine = Machine.objects.first()
