@@ -430,7 +430,7 @@ def processBarcodeActivity(data):
                 else:
                     return str(0)
             else:
-                return 'unknown'
+                return data
 
         # If performing change-over procedure
         if activity == 'CHGOVR':

@@ -105,8 +105,6 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
             mouldInfo = data.split('-')
             mouldTag = etree.SubElement(jobEvent, "mould")
             mouldTag.text = mouldInfo[0]
-            multiplierTag = etree.SubElement(jobEvent, "multiplier")
-            multiplierTag.text = mouldInfo[1]
         elif typeTag.text == 'MULCHG':
             multiplierTag = etree.SubElement(jobEvent, "multiplier")
             multiplierTag.text = data
