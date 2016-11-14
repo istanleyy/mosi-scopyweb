@@ -443,7 +443,7 @@ def processBarcodeActivity(data):
         
         # If performing mold trial, need to quit CO procedure without machine
         # switching to auto mode
-        if activity == 'A1065':
+        if activity == '1065':
             machine = Machine.objects.first()
             machine.cooverride = False
             machine.save()
