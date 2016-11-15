@@ -172,7 +172,9 @@ def processQueryResult(source, data, task=None):
             
             ct = int(session.job.ct)
             if ct == 0:
-                ct = 1
+                ct = 60
+                session.job.ct = ct
+                session.job.save()
             if task.interval.every != ct:
                 intv, created = IntervalSchedule.objects.get_or_create(
                     every=ct, period='seconds'
@@ -365,7 +367,9 @@ def performChangeOver(session, task, moldserial=None):
                 # Compare polling period with retrieved mct value
                 ct = int(session.job.ct)
                 if ct == 0:
-                    ct = 1
+                    ct = 60
+                    session.job.ct = ct
+                    session.job.save()
                 if ct != task.interval.every:
                     intv, created = IntervalSchedule.objects.get_or_create(
                         every=ct, period='seconds'
@@ -447,6 +451,10 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             machine.cooverride = False
             machine.save()
+        
+        # If recieved multiplier change event, need to update job multiplier and CT
+        if activity == 'MULCHG':
+            updateMultiplier(data)
 
         if sendEventMsg(activity, 'WS', uid, data)[0]:
             return 'ok'
@@ -466,6 +474,14 @@ def processServerAction(data):
         return True
     else:
         return False
+
+def updateMultiplier(multi):
+    currJob = SessionManagement.objects.first().job
+    oldCT = currJob.ct
+    oldMulti = currJob.multiplier
+    currJob.multiplier = multi
+    currJob.ct = multi*(oldCT/oldMulti)
+    currJob.save()
 
 def performChangeOverByID(id):
     global logger
@@ -494,7 +510,9 @@ def performChangeOverByID(id):
                     # Compare polling period with retrieved mct value
                     ct = int(session.job.ct)
                     if ct == 0:
-                        ct = 1
+                        ct = 60
+                        session.job.ct = ct
+                        session.job.save()
                     if ct != task.interval.every:
                         intv, created = IntervalSchedule.objects.get_or_create(
                             every=ct, period='seconds'
