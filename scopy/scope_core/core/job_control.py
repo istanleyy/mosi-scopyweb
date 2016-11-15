@@ -425,7 +425,7 @@ def processBarcodeActivity(data):
             if data[0] == 'T':
                 # Received mould serial check request
                 job = SessionManagement.objects.first().job
-                if data == job.moldid or data == 'T000000':
+                if data == job.moldid or data == 'TZZZZZZZZZ':
                     return str(job.multiplier)
                 else:
                     return str(0)
