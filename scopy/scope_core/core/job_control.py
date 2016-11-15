@@ -454,7 +454,7 @@ def processBarcodeActivity(data):
         
         # If recieved multiplier change event, need to update job multiplier and CT
         if activity == 'MULCHG':
-            updateMultiplier(data)
+            updateMultiplier(int(data))
 
         if sendEventMsg(activity, 'WS', uid, data)[0]:
             return 'ok'
@@ -480,8 +480,10 @@ def updateMultiplier(multi):
     oldCT = currJob.ct
     oldMulti = currJob.multiplier
     currJob.multiplier = multi
-    currJob.ct = multi*(oldCT/oldMulti)
+    newCT = multi*(oldCT/oldMulti)
+    currJob.ct = newCT
     currJob.save()
+    logger.warning('Updated multiplier and CT. ({0},{1})'.format(multi, newCT))
 
 def performChangeOverByID(id):
     global logger
