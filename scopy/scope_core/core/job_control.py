@@ -451,6 +451,13 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             machine.cooverride = False
             machine.save()
+
+        # If received TERM message during CO, end CO
+        if activity == 'TERM' and Machine.objects.first().opstatus == 2:
+            machine = Machine.objects.first()
+            if machine.cooverride:
+                machine.cooverride = False
+                machine.save()
         
         # If recieved multiplier change event, need to update job multiplier and CT
         if activity == 'MULCHG':
