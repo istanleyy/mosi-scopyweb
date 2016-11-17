@@ -205,6 +205,10 @@ def getXmlTimeVal():
         session.save()
         
         timeText = time.strftime("%Y%m%d%H%M%S")
+        # Check for valid date, if the year is less than 2000,
+        # return invalid date string of zeroes.
+        if timeText[0] != 2:
+            timeText = '00000000000000'
         msgIdText = timeText[2:-6] + "-" + str(session.msgid)
     finally:
         LOCK.release()
