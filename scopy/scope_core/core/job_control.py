@@ -471,12 +471,13 @@ def processBarcodeActivity(data):
 def processServerAction(data):
     actparam = data.split(',')
     if actparam[0] == 'co':
-        if performChangeOverByID(actparam[1]):
+        result = performChangeOverByID(actparam[1])
+        if result == 0:
             sendEventMsg(6, 'BG')
             machine = Machine.objects.first()
             machine.lastHaltReason = const.CHG_MOLD
             machine.save()
-        else:
+        elif result > 0:
             sendEventMsg(6, 'NJ')
         return True
     else:
@@ -514,7 +515,7 @@ def performChangeOverByID(id):
                 session.save()
                 if task is None:
                     logger.error('Cannot update task period of new job.')
-                    return False
+                    return 1
                 else:
                     # Compare polling period with retrieved mct value
                     ct = int(session.job.ct)
@@ -530,16 +531,16 @@ def performChangeOverByID(id):
                         task.save()
                     logger.warning('Server forced CO.')
                     print '\033[93m' + '[Scopy] Server force CO.' + '\033[0m'
-                    return True
+                    return 0
             else:
                 logger.error('Cannot find job matching id {0}.'.format(id))
                 print '\033[91m' + '[Scopy] Unable to find next job matching ID: ' + id + '\033[0m'
-                return False
+                return 2
     # Warn unable to find new job
     else:
-        logger.error('Cannot obtain job info in CO process.')
-        print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
-        return False
+        logger.error('Ignore CO request for repeated job ({0}).'.format(id))
+        print '\033[91m' + '[Scopy] Ignoring CO request for repeated job.' + '\033[0m'
+        return -1
 
 """
 def test_epoch_sec():
