@@ -412,8 +412,10 @@ def processBarcodeActivity(data):
         else:
             try:
                 user = UserActivity.objects.get(uid=uid)
-                user.lastLogout = datetime.now()
-                user.save()
+                if user:
+                    user.lastLogout = datetime.now()
+                    user.save()
+                    socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1}'.format(settings.DEVICE_INFO['ID'], data))
             except DoesNotExist:
                 logger.exception('User {0} did not logged in.'.format(uid))
                 return 'fail'
@@ -422,7 +424,6 @@ def processBarcodeActivity(data):
                 return 'fail'
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
-                socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1}'.format(settings.DEVICE_INFO['ID'], data))
         return 'ok'
     else:
         # If receiving request from barcode activity
