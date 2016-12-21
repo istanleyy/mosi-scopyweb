@@ -22,8 +22,7 @@ from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement,
 from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser
-from . import request_sender
-from .socket_server import *
+from . import request_sender, socket_server
 
 logger = logging.getLogger('scopepi.debug')
 lastOutput = 0
@@ -423,7 +422,7 @@ def processBarcodeActivity(data):
                 return 'fail'
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
-                SocketServer.getInstance().send_bcast('PeerMsg:{}'.format(barcodes))
+                socket_server.SocketServer.getInstance().send_bcast('PeerMsg:{}'.format(barcodes))
         return 'ok'
     else:
         # If receiving request from barcode activity
