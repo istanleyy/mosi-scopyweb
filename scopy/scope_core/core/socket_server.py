@@ -17,8 +17,8 @@ from thread import *
 from threading import Thread
 from scope_core.config import settings
 from . import xmlparser
-import job_control
 from . import request_sender
+import job_control
 
 class SocketServer(Thread):
     __instance = None
@@ -116,8 +116,12 @@ class SocketServer(Thread):
             if msg == 'ServerMsg:alive check':
                 request_sender.sendBcastReply()
             elif msg[:7] == 'PeerMsg':
-                data = msg.split(':')
-                result = job_control.processBarcodeActivity(data[1])
+                msgdecode = msg.split(':')
+                header = msgdecode[0]
+                body = msgdecode[1]
+                sender = header.split('-')[1]
+                if sender != settings.DEVICE_INFO['ID']:
+                    result = job_control.processBarcodeActivity(body)
             else:
                 #print 'Received broadcast message: {0}'.format(msg)
                 self.logger.info('Received broadcast message: ' + msg)

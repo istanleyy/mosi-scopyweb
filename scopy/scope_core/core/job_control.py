@@ -422,7 +422,7 @@ def processBarcodeActivity(data):
                 return 'fail'
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
-                socket_server.SocketServer.getInstance().send_bcast('PeerMsg:{}'.format(barcodes))
+                socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1}'.format(settings.DEVICE_INFO['ID'], barcodes))
         return 'ok'
     else:
         # If receiving request from barcode activity
