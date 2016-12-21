@@ -201,8 +201,8 @@ def processQueryResult(source, data, task=None):
     else:
         pass
 
-def sendEventMsg(evttype, code="", user="", data=""):
-    scopemsg = xmlparser.getJobEventXml(evttype, code, user, data)
+def sendEventMsg(evttype, code="", user="", params=""):
+    scopemsg = xmlparser.getJobEventXml(evttype, code, user, params)
     return sendRequest(scopemsg)
 
 def sendUpdateMsg(pcs=None, mct=None):
@@ -393,9 +393,9 @@ def processBarcodeActivity(data):
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
-    data = ""
+    params = ""
     if len(barcodes) > 2:
-        data = barcodes[2]
+        params = barcodes[2]
 
     if activity == 'LOGIN' or activity == 'LOGOUT':
         sendEventMsg(uid, activity)
@@ -427,10 +427,10 @@ def processBarcodeActivity(data):
     else:
         # If receiving request from barcode activity
         if activity == 'req':
-            if data[0] == 'T':
+            if params[0] == 'T':
                 # Received mould serial check request
                 job = SessionManagement.objects.first().job
-                if data == job.moldid or data == 'TZZZZZZZZZ':
+                if params == job.moldid or params == 'TZZZZZZZZZ':
                     return str(job.multiplier)
                 else:
                     return str(0)
@@ -462,9 +462,9 @@ def processBarcodeActivity(data):
         
         # If recieved multiplier change event, need to update job multiplier and CT
         if activity == 'MULCHG':
-            updateMultiplier(int(data))
+            updateMultiplier(int(params))
 
-        if sendEventMsg(activity, 'WS', uid, data)[0]:
+        if sendEventMsg(activity, 'WS', uid, params)[0]:
             return 'ok'
         else:
             return 'fail'
