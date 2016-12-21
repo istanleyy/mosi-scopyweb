@@ -412,7 +412,7 @@ def processBarcodeActivity(data):
         else:
             try:
                 user = UserActivity.objects.get(uid=uid)
-                if user:
+                if user and user.lastLogout == None:
                     user.lastLogout = datetime.now()
                     user.save()
                     socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1}'.format(settings.DEVICE_INFO['ID'], data))
