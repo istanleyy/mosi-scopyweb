@@ -223,20 +223,26 @@ def createJobList(xmldom):
                 if element[1].text == 'yes':
                     newJob.urgent = True
                 newJob.quantity = int(element[2].text)
-                newJob.productid = element[3].text
+                if element[3].text is not None:
+                    newJob.productid = element[3].text
                 newJob.ct = Decimal(element[4].text) if element[4].text is not None else 20.0
                 newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
                 newJob.moldid = element[6].text
                 newJob.save()
             else:
-                resurrectjob = Job.objects.get(jobid=int(element[0].text))
-                if resurrectjob and not resurrectjob.active:
-                    resurrectjob.active = True
-                    resurrectjob.save()
+                if element[0].text != '0':
+                    resurrectjob = Job.objects.get(jobid=int(element[0].text))
+                    if resurrectjob and not resurrectjob.active:
+                        resurrectjob.active = True
+                        resurrectjob.save()
             
         print '\033[93m' + '[Scopy] Job list updated.' + '\033[0m'
         return True
     except (etree.XMLSyntaxError, IndexError, ValueError):
+        # Remove job with incomplete data
+        obsoleteJob = Job.objects.last()
+        if obsoleteJob.jobid == 0:
+            obsoleteJob.delete()
         print '\033[91m' + '[Scopy] Cannot add new job. Check message format!' + msgContent[1] + '\033[0m'
         return False
 

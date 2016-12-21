@@ -21,6 +21,7 @@ from . import job_control
 from . import request_sender
 
 class SocketServer(Thread):
+    __instance = None
     logger = None
     # For testing
     isCO = False
@@ -109,14 +110,20 @@ class SocketServer(Thread):
     def listen_bcast(self, sock):
         print 'Broadcast listener created...'
         while True:
-            result = select.select([sock],[],[])
-            msg = result[0][0].recv(1024)
+            bmsg = select.select([sock],[],[])
+            msg = bmsg[0][0].recv(1024)
             msg = msg.strip(' \t\n\r')
             if msg == 'ServerMsg:alive check':
                 request_sender.sendBcastReply()
+            elif msg[:7] == 'PeerMsg':
+                data = msg.split(':')
+                result = job_control.processBarcodeActivity(data[1])
             else:
                 #print 'Received broadcast message: {0}'.format(msg)
                 self.logger.info('Received broadcast message: ' + msg)
+
+    def send_bcast(self, msg):
+        self.bs.sendto(msg, (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
 
     # Over-rides Thread.run
     def run(self):
@@ -136,31 +143,42 @@ class SocketServer(Thread):
     def cancel(self):
         self.cancelled = True
 
+    @staticmethod
+    def getInstance():
+        if SocketServer.__instance == None:
+            SocketServer()
+        return SocketServer.__instance
+
     def __init__(self):
         super(SocketServer, self).__init__()
-        self.logger = logging.getLogger('scopepi.messaging')
-        self.daemon = True
-        self.cancelled = False
+        if SocketServer.__instance != None:
+            # Throw exception maybe?
+            pass
+        else:
+            SocketServer.__instance = self
+            self.logger = logging.getLogger('scopepi.messaging')
+            self.daemon = True
+            self.cancelled = False
         
-        self.bs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.bs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        self.bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
-        self.bs.setblocking(0)
-        start_new_thread(self.listen_bcast, (self.bs,))
+            self.bs = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            self.bs.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.bs.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+            self.bs.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
+            self.bs.setblocking(0)
+            start_new_thread(self.listen_bcast, (self.bs,))
 
-        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print 'Message socket created...'
-        #Bind socket to local host and port
-        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        try:
-            self.s.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
-        except socket.error as msg:
-            if msg[0] != 48 and msg[0] != 98:
-                print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
-                self.logger.exception('Bind failed. Error Code: {0} Message: {1}'.format(msg[0], msg[1]))
-                sys.exit()
-     
-        print 'Socket bind complete!'
- 
-        #Start listening on socket
-        self.s.listen(5)
+            self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            print 'Message socket created...'
+            # Bind socket to local host and port
+            self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            try:
+                self.s.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+            except socket.error as msg:
+                if msg[0] != 48 and msg[0] != 98:
+                    print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
+                    self.logger.exception('Bind failed. Error Code: {0} Message: {1}'.format(msg[0], msg[1]))
+                    sys.exit()
+        
+            print 'Socket bind complete!'
+            # Start listening on socket
+            self.s.listen(5)
