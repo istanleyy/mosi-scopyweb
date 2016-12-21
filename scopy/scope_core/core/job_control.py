@@ -23,7 +23,7 @@ from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser
 from . import request_sender
-from .socket_server import SocketServer
+from .socket_server import *
 
 logger = logging.getLogger('scopepi.debug')
 lastOutput = 0
