@@ -128,6 +128,7 @@ class SocketServer(Thread):
 
     def send_bcast(self, msg):
         self.bs.sendto(msg, (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
+        print('Send notification to peers: {}'.format(msg))
 
     # Over-rides Thread.run
     def run(self):
