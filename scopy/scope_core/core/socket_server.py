@@ -17,7 +17,7 @@ from thread import *
 from threading import Thread
 from scope_core.config import settings
 from . import xmlparser
-from . import job_control
+import job_control
 from . import request_sender
 
 class SocketServer(Thread):
