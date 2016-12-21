@@ -22,7 +22,8 @@ from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement,
 from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser
-from . import request_sender, socket_server.SocketServer
+from . import request_sender
+from .socket_server import SocketServer
 
 logger = logging.getLogger('scopepi.debug')
 lastOutput = 0
