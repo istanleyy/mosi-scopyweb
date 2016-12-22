@@ -123,8 +123,8 @@ class SocketServer(Thread):
                 if sender != settings.DEVICE_INFO['ID']:
                     result = job_control.processBarcodeActivity(body)
             else:
-                #print 'Received broadcast message: {0}'.format(msg)
-                self.logger.info('Received broadcast message: ' + msg)
+                print 'Received broadcast message: {0}'.format(msg)
+                #self.logger.info('Received broadcast message: ' + msg)
 
     def send_bcast(self, msg):
         self.bs.sendto(msg, (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
