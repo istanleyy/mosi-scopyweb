@@ -112,7 +112,7 @@ def processQueryResult(source, data, task=None):
         else:
             # Machine enters line change (change mold)        
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
-                if machine.lastHaltReason != const.CHG_MOLD and machine.lastHaltReason != const.NOJOB:
+                if machine.lastHaltReason != const.CHG_MOLD and machine.lastHaltReason:
                     print 'CO_OVERRIDE: ' + str(machine.cooverride)
                     # perform change-over
                     if performChangeOver(session, task, str(data[2])):
@@ -383,8 +383,9 @@ def performChangeOver(session, task, moldserial=None):
             
     # Warn unable to find new job
     else:
-        session.job = Job.objects.get(jobid=0)
-        session.save()
+        if settings.JOBID0LOG:
+            session.job = Job.objects.get(jobid=0)
+            session.save()
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
         return False
 
