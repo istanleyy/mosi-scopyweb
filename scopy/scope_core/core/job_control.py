@@ -112,7 +112,7 @@ def processQueryResult(source, data, task=None):
         else:
             # Machine enters line change (change mold)        
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
-                if machine.lastHaltReason != const.CHG_MOLD and machine.lastHaltReason:
+                if machine.lastHaltReason != const.CHG_MOLD:
                     print 'CO_OVERRIDE: ' + str(machine.cooverride)
                     # perform change-over
                     if performChangeOver(session, task, str(data[2])):
