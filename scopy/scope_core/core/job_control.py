@@ -419,10 +419,10 @@ def processBarcodeActivity(data):
                     sendEventMsg(uid, 'LOGOUT')
                     if activity == 'ALLOUT':
                         socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT'))
-            except DoesNotExist:
+            except UserActivity.DoesNotExist:
                 logger.exception('User {0} did not logged in.'.format(uid))
                 return 'fail'
-            except MultipleObjectsReturned:
+            except UserActivity.MultipleObjectsReturned:
                 logger.exception('ScopePi login process error.')
                 return 'fail'
             finally:
