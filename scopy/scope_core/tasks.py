@@ -16,7 +16,7 @@ P_PRIOR_LOW = 120
 LOCK_EXPIRE = 60
 LOCK_ID = "shared-lock"
 
-@periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_HIGH))
 def pollDeviceStatus():
     global LOCK_ID
     LOCK_ID = '{0}-lock'.format('statustask')
@@ -24,7 +24,7 @@ def pollDeviceStatus():
     release_lock = lambda: cache.delete(LOCK_ID)
     
     if acquire_lock():
-        logger.info("Polling device status (p={})...".format(P_PRIOR_MID))
+        logger.info("Polling device status (p={})...".format(P_PRIOR_HIGH))
         try:
             result = device.getDeviceInstance().getDeviceStatus()
             pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
@@ -34,7 +34,7 @@ def pollDeviceStatus():
     else:
         logger.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
-@periodic_task(run_every=timedelta(seconds=P_PRIOR_HIGH))
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
 def pollAlarmStatus():
     global LOCK_ID
     LOCK_ID = '{0}-lock'.format('alarmtask')
@@ -42,7 +42,7 @@ def pollAlarmStatus():
     release_lock = lambda: cache.delete(LOCK_ID)
     
     if acquire_lock():
-        logger.info("Polling alarm status (p={})...".format(P_PRIOR_HIGH))
+        logger.info("Polling alarm status (p={})...".format(P_PRIOR_LOW))
         try:
             result = device.getDeviceInstance().getAlarmStatus()
             if result is not None:
@@ -52,7 +52,7 @@ def pollAlarmStatus():
     else:
         logger.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
-@periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
+@periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
 def pollProdStatus():
     global LOCK_ID
     lock_id = '{0}-lock'.format('infotask')
