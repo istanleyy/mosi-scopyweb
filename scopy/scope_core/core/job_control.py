@@ -384,6 +384,7 @@ def performChangeOver(session, task, moldserial=None):
     # Warn unable to find new job
     else:
         if settings.JOBID0LOG:
+            # Track unscheduled production activities with jobid=0
             session.job = Job.objects.get(jobid=0)
             session.save()
         print '\033[91m' + '[Scopy] Unable to obtain job info in CO process!' + '\033[0m'
