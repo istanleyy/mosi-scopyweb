@@ -435,7 +435,8 @@ def processBarcodeActivity(data):
             if params[0] == 'T':
                 # Received mould serial check request
                 job = SessionManagement.objects.first().job
-                if params == job.moldid or params == 'TZZZZZZZZZ':
+                mold = job.moldid.strip(' \t\n\r')
+                if params == mold or params == 'TZZZZZZZZZ':
                     return str(job.multiplier)
                 else:
                     return str(0)
