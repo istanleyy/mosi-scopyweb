@@ -409,7 +409,7 @@ def processBarcodeActivity(data):
                 user[0].lastLogin = tLogin
                 user[0].lastLogout = None
                 user[0].save()
-                sendEventMsg(uid, activity)
+            sendEventMsg(uid, activity)
             print "Users: ", UserActivity.objects.filter(lastLogout=None)
         else:
             try:
