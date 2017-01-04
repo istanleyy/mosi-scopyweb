@@ -30,7 +30,6 @@ ALLOWED_HOSTS = [
     '*',
 ]
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -88,7 +87,6 @@ REST_FRAMEWORK = {
     ]
 }
 
-
 # Celery settings
 
 BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
@@ -101,7 +99,6 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Taipei'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -111,7 +108,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'scopyweb.db'),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
@@ -131,7 +127,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/1.9/topics/i18n/
 
@@ -145,7 +140,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
@@ -154,12 +148,14 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
 
 # Additional djcelery settings
 
 import djcelery
 djcelery.setup_loader()
-
 
 # Logging configs, using template from django doc
 
