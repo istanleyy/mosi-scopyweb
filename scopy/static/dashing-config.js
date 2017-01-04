@@ -1,4 +1,4 @@
-/* Customized dashboard for Scope Device */
+/* global $, Dashboard */
 
 var dashboard = new Dashboard();
 
