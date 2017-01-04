@@ -7,8 +7,8 @@ from .models import SessionManagement
 from .models import UserActivity
 from .models import ProductionDataTS
 
-admin.site.site_header = 'ScopeDevice Admin'
-admin.site.site_title = 'Device Admin'
+admin.site.site_header = 'ScopeDevice Administration'
+admin.site.site_title = 'Device admin'
 
 admin.site.register(Machine)
 admin.site.register(Job)
