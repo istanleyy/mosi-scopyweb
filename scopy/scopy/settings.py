@@ -155,6 +155,9 @@ djcelery.setup_loader()
 
 # Logging configs, using template from django doc
 
+LOGFILE_SIZE = 30*1024*1024
+LOGFILE_NAME = '/home/mosidev/sandbox/scopyweb/log/scopepi_debug.log'
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -182,7 +185,9 @@ LOGGING = {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
             'formatter': 'verbose',
-            'filename': '/home/mosidev/sandbox/scopyweb/log/scopepi_debug.log'
+            'filename': LOGFILE_NAME,
+            'maxBytes': LOGFILE_SIZE,
+            'backupCount': 2
         }
     },
     'loggers': {
