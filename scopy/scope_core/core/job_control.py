@@ -3,7 +3,7 @@
 
 """
 MOSi Scope Device Framework:
-Make real world manufacturing machines highly interoperable with different IT 
+Make real world manufacturing machines highly interoperable with different IT
 solutions. Implemented using python and django framework.
 
 (C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
@@ -54,16 +54,16 @@ def processQueryResult(source, data, task=None):
 
     if source == 'opStatus' and data != 'fail':
         job = SessionManagement.objects.first().job
-        
+
         print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
-        # If the machine is detected to be OFFLINE (FCS DB device), 
+        # If the machine is detected to be OFFLINE (FCS DB device),
         # send corresponding message to server
         if machine.opmode == 0:
             if job.inprogress:
                 job.inprogress = False
                 job.save()
                 request_sender.sendPostRequest('false:bye')
-        
+
         # If the machine has been switched to AUTO_MODE or SEMI_AUTO_MODE
         elif machine.opmode > 1:
             # Machine is in ready-to-produce status (RUNNING)
@@ -75,7 +75,7 @@ def processQueryResult(source, data, task=None):
                     if performChangeOver(session, task, str(data[2])):
                         # Update job reference
                         job = SessionManagement.objects.first().job
-                        
+
                 # Start the job if it has not been started
                 if not job.inprogress and job.active:
                     job.inprogress = True
@@ -85,8 +85,7 @@ def processQueryResult(source, data, task=None):
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         machine.cooverride = False
                         sendEventMsg(6, 'ED')
-                    elif (machine.lastHaltReason == const.CHG_MATERIAL or 
-                            machine.lastHaltReason == const.SETUP):
+                    elif (machine.lastHaltReason == const.CHG_MATERIAL or machine.lastHaltReason == const.SETUP):
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
                     else:
@@ -96,21 +95,21 @@ def processQueryResult(source, data, task=None):
                     # Clear halt states
                     machine.lastHaltReason = 0
                     machine.save()
-                
+
                 else:
                     # Cannot load new job, simply clear any halt states
                     machine.cooverride = False
                     machine.lastHaltReason = 0
                     machine.save()
-            
+
             else:
                 # When the machine is in auto or semi-auto mode, it cannot be changing mold or
                 # material, so the system should ignore such mode-status combinations
                 pass
-        
+
         # Machine is in MANUAL mode
         else:
-            # Machine enters line change (change mold)        
+            # Machine enters line change (change mold)
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
                 if machine.lastHaltReason != const.CHG_MOLD:
                     print 'CO_OVERRIDE: ' + str(machine.cooverride)
@@ -127,7 +126,7 @@ def processQueryResult(source, data, task=None):
                         if machine.cooverride:
                             machine.cooverride = False
                         machine.save()
-        
+
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:
                 if machine.lastHaltReason != const.CHG_MATERIAL:
@@ -139,17 +138,17 @@ def processQueryResult(source, data, task=None):
 
                     machine.lastHaltReason = const.CHG_MATERIAL
                     machine.save()
-            
+
             # Machine is under SETUP
             elif machine.opstatus == const.SETUP:
                 if machine.lastHaltReason != const.SETUP:
                     machine.lastHaltReason = const.SETUP
                     machine.save()
-            
+
             # Machine in RUNNING or IDLE state
             else:
                 pass
-        
+
     elif source == 'opMetrics' and data != 'fail':
         mct = data[0]
         pcs = data[1]
@@ -169,7 +168,7 @@ def processQueryResult(source, data, task=None):
             if ProductionDataTS.objects.last() is None or pcs != ProductionDataTS.objects.last().output:
                 dataEntry = ProductionDataTS.objects.create(job=session.job, output=pcs, mct=mct)
                 sendUpdateMsg(pcs, mct)
-            
+
             ct = int(session.job.ct)
             if ct == 0:
                 ct = 60
@@ -258,7 +257,7 @@ def sendMsgBuffer():
             logger.warning('Message sync failed.')
         #print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
     return result[0]
-    
+
 def modelCheck():
     print '******************************'
     print 'Checking models...'
@@ -282,11 +281,11 @@ def modelCheck():
         Machine.objects.create()
     print 'done!'
     print '******************************'
-    
+
 def init():
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
-    
+
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server
     # Function returns True if there are executable jobs, False otherwise
@@ -316,32 +315,32 @@ def idleDetect(pcs):
 
 def evalCOCondition(machine, session):
     # Evaluate CO condition only if machine is not offline nor in auto mode
-    if (0 < machine.opmode < 3):
-    
+    if 0 < machine.opmode < 3:
+
         # Conditions for the machine to enter mold change status:
         #   - current job's demanded quantity has been made
         #   - machine is not having erronous downtime
         #   - motor of the machine is switched OFF
         if (ProductionDataTS.objects.last().output >= session.job.quantity and
-            not session.errflag and
-            not Machine.objects.first().moldChangeStatus):
+                not session.errflag and
+                not Machine.objects.first().moldChangeStatus):
             return 'mold'
-        
+
         # Conditions for the machine to enter material pipe cleaning status:
         #   - machine is not having erronous downtime
         #   - machine's mold adjustment switch is ON
-        elif (not session.errflag and Machine.objects.first().setupStatus):
+        elif not session.errflag and Machine.objects.first().setupStatus:
             return 'moldadjust'
-        
+
         # Conditions for the machine to enter material pipe cleaning status:
         #   - machine is not having erronous downtime
         #   - machine's material pipe cleaning switch is ON
-        elif (not session.errflag and Machine.objects.first().matChangeStatus):
+        elif not session.errflag and Machine.objects.first().matChangeStatus:
             return 'material'
-        
+
         else:
             pass
-    
+
     return 'nochange'
 
 def performChangeOver(session, task, moldserial=None):
@@ -351,10 +350,10 @@ def performChangeOver(session, task, moldserial=None):
     oldJob.inprogress = False
     oldJob.active = False
     oldJob.save()
-    
+
     # Load new job information only if we can find executable jobs in the db
     if getJobsFromServer():
-        # If the mold id of the production data has changed, 
+        # If the mold id of the production data has changed,
         # need to update session reference to the job using the new mold.
         newJob = Job.objects.filter(active=True)
         if newJob:
@@ -375,12 +374,12 @@ def performChangeOver(session, task, moldserial=None):
                         every=ct, period='seconds'
                         )
                     task.interval_id = intv.id
-                    task.save()        
+                    task.save()
                 return True
         else:
             print '\033[91m' + '[Scopy] No scheduled jobs for this machine.' + '\033[0m'
             return False
-            
+
     # Warn unable to find new job
     else:
         if settings.JOBID0LOG:
@@ -414,12 +413,14 @@ def processBarcodeActivity(data):
         else:
             try:
                 user = UserActivity.objects.get(uid=uid)
-                if user and user.lastLogout == None:
+                if user and user.lastLogout is None:
                     user.lastLogout = datetime.now()
                     user.save()
                     sendEventMsg(uid, 'LOGOUT')
                     if activity == 'ALLOUT':
-                        socket_server.SocketServer.getInstance().send_bcast('PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT'))
+                        socket_server.SocketServer.getInstance().send_bcast(
+                            'PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT')
+                            )
             except UserActivity.DoesNotExist:
                 logger.exception('User {0} did not logged in.'.format(uid))
                 return 'fail'
@@ -451,7 +452,7 @@ def processBarcodeActivity(data):
                 machine.cooverride = True
                 machine.save()
                 #print '***** barcode CO *****'
-        
+
         # If performing mold trial, need to quit CO procedure without machine
         # switching to auto mode
         if activity == '1065':
@@ -465,7 +466,7 @@ def processBarcodeActivity(data):
             if machine.cooverride:
                 machine.cooverride = False
                 machine.save()
-        
+
         # If recieved multiplier change event, need to update job multiplier and CT
         if activity == 'MULCHG':
             updateMultiplier(int(params))
@@ -510,11 +511,11 @@ def performChangeOverByID(id):
         oldJob.inprogress = False
         oldJob.active = False
         oldJob.save()
-        
+
         # Load new job information only if we can find executable jobs in the db
         if getJobsFromServer():
             task = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
-            # If the mold id of the production data has changed, 
+            # If the mold id of the production data has changed,
             # need to update session reference to the job using the new mold.
             newJob = Job.objects.filter(jobid=int(id), active=True)
             if newJob:

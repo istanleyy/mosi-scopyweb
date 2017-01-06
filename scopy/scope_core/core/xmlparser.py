@@ -31,7 +31,7 @@ def isScopeXml(str):
     except etree.XMLSyntaxError:
         print '\033[91m' + '[Scopy] XMLSyntaxError exception!' + '\033[0m'
         return False
-        
+
     if dom.tag == 'scope_job':
         if settings.CLEAR_JOBLIST:
             with open(settings.JOBLIST_PATH, "w"): pass
@@ -47,7 +47,7 @@ def isScopeXml(str):
         return True
     else:
         return False
-        
+
 def getJobUpdateXml(actualPcs, mct):
     global OPERATOR_LIST
     msgId, timeText = getXmlTimeVal()
@@ -59,7 +59,7 @@ def getJobUpdateXml(actualPcs, mct):
     timeTag = etree.SubElement(jobUpdate, "time")
     actualPcsTag = etree.SubElement(jobUpdate, "actual_pcs")
     mctTag = etree.SubElement(jobUpdate, "mct")
-    
+
     # Get planned pcs (quantity) from models.Job
     session = SessionManagement.objects.first()
     doneTag.text = '1' if actualPcs >= session.job.quantity else '0'
@@ -74,7 +74,7 @@ def getJobUpdateXml(actualPcs, mct):
         for user in users:
             userTag = etree.SubElement(jobUpdate, "user")
             userTag.text = user.uid
-    
+
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
@@ -86,7 +86,7 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
     stationTag = etree.SubElement(jobEvent, "station")
     timeTag = etree.SubElement(jobEvent, "time")
     typeTag = etree.SubElement(jobEvent, "type", code=eventCode)
-    
+
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
     stationTag.text = settings.DEVICE_INFO['NAME']
@@ -111,10 +111,10 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
         else:
             qtyTag = etree.SubElement(jobEvent, "stock_qty")
             qtyTag.text = data
-    
+
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
-    
+
 # Job start message follows B2MML JobOrder schema
 def getJobStartXml():
     msgId, timeText = getXmlTimeVal()
@@ -132,7 +132,7 @@ def getJobStartXml():
     cmdTag = etree.SubElement(jobOrder, "Command")
     cmdRuleTag = etree.SubElement(jobOrder, "CommandRule")
     dispatchTag = etree.SubElement(jobOrder, "DispatchStatus")
-    
+
     joParam = etree.SubElement(jobOrder, "JobOrderParameter")
     jopIdTag = etree.SubElement(joParam, "ID")
     val1 = etree.SubElement(joParam, "Value")
@@ -147,9 +147,9 @@ def getJobStartXml():
     key2 = etree.SubElement(val2, "Key")
     jopDescTag = etree.SubElement(joParam, "Description")
     jopParamTag = etree.SubElement(joParam, "Parameter")
-    
+
     personReq = etree.SubElement(jobOrder, "PersonnelRequirement")
-    
+
     equipReq = etree.SubElement(jobOrder, "EquipmentRequirement")
     equipClsId = etree.SubElement(equipReq, "EquipmentClassID")
     equipId = etree.SubElement(equipReq, "EquipmentID")
@@ -160,10 +160,10 @@ def getJobStartXml():
     equipLevel = etree.SubElement(equipReq, "EquipmentLevel")
     equipReqProp = etree.SubElement(equipReq, "EquipmentRequirementProperty")
     equipRRS = etree.SubElement(equipReq, "RequiredByRequestedSegment")
-    
+
     phyAssetReq = etree.SubElement(jobOrder, "PhysicalAssetRequirement")
     materialReq = etree.SubElement(jobOrder, "MaterialRequirement")
-    
+
     session = SessionManagement.objects.first()
     jobIdTag.text = str(session.job.jobid)
     jopIdTag.text = session.job.productid
@@ -178,7 +178,7 @@ def getJobStartXml():
     uom2.text = 'sec'
     key2.text = 'CycleTime'
     equipId.text = settings.DEVICE_INFO['NAME']
-    
+
     print etree.tostring(docRoot, encoding='utf-8', pretty_print=True)
     return etree.tostring(docRoot, encoding='utf-8', xml_declaration=True)
 
@@ -203,7 +203,7 @@ def getXmlTimeVal():
         else:
             session.msgid += 1
         session.save()
-        
+
         timeText = time.strftime("%Y%m%d%H%M%S")
         # Check for valid date, if the year is less than 2000,
         # return invalid date string of zeroes.
@@ -213,7 +213,7 @@ def getXmlTimeVal():
     finally:
         LOCK.release()
     return (msgIdText, timeText)
-    
+
 def createJobList(xmldom):
     try:
         for element in xmldom.iter("job_item"):
@@ -235,7 +235,7 @@ def createJobList(xmldom):
                     if resurrectjob and not resurrectjob.active:
                         resurrectjob.active = True
                         resurrectjob.save()
-            
+
         print '\033[93m' + '[Scopy] Job list updated.' + '\033[0m'
         return True
     except (etree.XMLSyntaxError, IndexError, ValueError):
@@ -269,29 +269,29 @@ def logUnsyncMsg(xmlstring):
             file.close()
         else:
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
-        
+
         # Log only event or update messages
         if dom[0].tag == 'job_event' or dom[0].tag == 'job_update':
             insertpos = xmltree.find(".//unsync_messages")
         else:
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
-        
+
         insertmsg = insertpos.append(dom[0])
         #print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
-        
+
         file = open(settings.UNSYNC_MSG_PATH, "w")
         file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()
         return True
-        
+
     except etree.XMLSyntaxError:
         print '\033[91m' + '[Scopy] XML syntax error in logUnsyncMsg()' + '\033[0m'
         return False
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return False
-        
+
 def getUnsyncMsgStr():
     try:
         parser = etree.XMLParser(remove_blank_text=True)
@@ -306,17 +306,17 @@ def getUnsyncMsgStr():
             file.close()
         else:
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
-        
+
         print etree.tostring(xmltree, encoding='utf-8', pretty_print=True)    
         return etree.tostring(xmltree, xml_declaration=True, encoding='utf-8')
-    
+
     except etree.XMLSyntaxError:
         print '\033[91m' + '[Scopy] XML syntax error in getUnsyncMsgStr()' + '\033[0m'
         return None
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return None
-        
+
 def flushUnsyncMsg():
     try:
         parser = etree.XMLParser(remove_blank_text=True)
@@ -328,7 +328,7 @@ def flushUnsyncMsg():
         file = open(settings.UNSYNC_MSG_PATH, "w")
         file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()
-    
+
     except IOError:
         print '\033[91m' + '[Scopy] Cannot access unsync message log file!' + '\033[0m'
         return None
@@ -344,3 +344,4 @@ def clearJobModel():
     for job in jobs:
         job.delete()
         logger.warning('Job {0} ({1}) deleted.'.format(job.jobid, job.productid))
+        
