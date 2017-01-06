@@ -178,12 +178,11 @@ class SocketServer(Thread):
             self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             try:
                 self.s.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+                print 'Socket bind complete!'
+                # Start listening on socket
+                self.s.listen(5)
             except socket.error as msg:
                 if msg[0] != 48 and msg[0] != 98:
                     print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
                     self.logger.exception('Bind failed. Error Code: {0} Message: {1}'.format(msg[0], msg[1]))
                     sys.exit()
-        
-            print 'Socket bind complete!'
-            # Start listening on socket
-            self.s.listen(5)
