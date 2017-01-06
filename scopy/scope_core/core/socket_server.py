@@ -185,4 +185,4 @@ class SocketServer(Thread):
                 if msg[0] != 48 and msg[0] != 98:
                     print 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
                     self.logger.exception('Bind failed. Error Code: {0} Message: {1}'.format(msg[0], msg[1]))
-                    sys.exit()
+                    sys.exit(1)
