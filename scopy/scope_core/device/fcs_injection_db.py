@@ -3,7 +3,7 @@
 
 """
 MOSi Scope Device Framework:
-Make real world manufacturing machines highly interoperable with different IT 
+Make real world manufacturing machines highly interoperable with different IT
 solutions. Implemented using python and django framework.
 
 (C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
@@ -17,15 +17,11 @@ fcs_injection_db.py
 """
 
 import logging
-import platform
 import device_definition as const
 from abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 from scope_core.models import Machine
 from scope_core.config import settings
-
-#if platform.system() != 'Darwin':
-#    import RPi.GPIO as GPIO
 
 class FCSInjectionDevice_db(AbstractDevice):
 
@@ -49,39 +45,37 @@ class FCSInjectionDevice_db(AbstractDevice):
     def description(self):
         return 'A device implementation to collect data from MWeb database for a single FCS injection mold machine.'
 
-    _connectionManager = MySqlConnectionManager()
+    _connection_manager = MySqlConnectionManager()
 
     @property
     def connectionManager(self):
-        return self._connectionManager
+        return self._connection_manager
 
     @connectionManager.setter
     def connectionManager(self, newObj):
-        self._connectionManager = newObj
+        self._connection_manager = newObj
 
     ##############################################
     # Module specific properties and methods
     ##############################################
 
     logger = None
-    id = 'not_set'
-    isConnected = False
-
-    # Setup RPi GPIO
-    #if platform.system() != 'Darwin':
-    #    GPIO.setmode(GPIO.BCM)
-    #    GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    did = 'not_set'
+    is_connected = False
 
     def connect(self):
-        return self._connectionManager.connect()
-    
+        """Connects to FCS DB via a connection manager."""
+        return self._connection_manager.connect()
+
     def disconnect(self):
-        self._connectionManager.disconnect()
-        self.isConnected = False
-        
-    def checkDeviceExists(self):
-        query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self.id))
-        result = self._connectionManager.query(query)
+        """Disconnect from a FCS DB server."""
+        self._connection_manager.disconnect()
+        self.is_connected = False
+
+    def check_device_exists(self):
+        """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
+        query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self.did))
+        result = self._connection_manager.query(query)
         if result is not None and result[0] > 0:
             return True
         else:
@@ -89,56 +83,44 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getDeviceStatus(self):
         query = (
-            "SELECT MachineStatus,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.did)
             )
-        result = self._connectionManager.query(query)
+        result = self._connection_manager.query(query)
         if result is not None:
             if settings.DEBUG:
-                print(result)
+                print result
             machine = Machine.objects.first()
-            moldid = result[1]
+            modnum = result[1]
+            moldid = result[2]
             statuschange = False
             modechange = False
-            """
-            if platform.system() != 'Darwin':
-                coswitch = GPIO.input(23)
-            else:
-                # Testing on OSX
-                coswitch = True
-
-            if not coswitch:
-                status = const.CHG_MOLD
-                if not machine.moldAdjustStatus:
-                    machine.moldAdjustStatus = True
-                    statuschange = True
-            else:
-                status = const.RUNNING if result[0] != 0 else const.IDLE
-                if machine.moldAdjustStatus:
-                    machine.moldAdjustStatus = False
-                    statuschange = True
-            """
             modestr = result[0].encode('utf-8', 'ignore')
+
+            if machine.opstatus == const.CHG_MOLD:
+                self.last_modnum = modnum
+                self.total_modnum = 0
+
             if modestr[0] == '1':
                 self.mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
-                    print('Device in manual mode.')
+                    print 'Device in manual mode.'
             elif modestr[0] == '2':
                 self.mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
-                    print('Device in semi-auto mode.')
+                    print 'Device in semi-auto mode.'
             elif modestr[0] == '3':
                 self.mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
                     machine.opstatus = const.RUNNING
                     modechange = True
-                    print('Device in auto mode.')
+                    print 'Device in auto mode.'
             else:
-                print('Device is offline!')
+                print 'Device is offline!'
                 self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
@@ -151,53 +133,68 @@ class FCSInjectionDevice_db(AbstractDevice):
         else:
             self.logger.error('Cannot query machine status.')
             return "fail"
-    
+
     def getAlarmStatus(self):
         query = (
-            "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.id)
+            "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.did)
             )
-        result = self._connectionManager.query(query)
+        result = self._connection_manager.query(query)
         if result is not None:
-            print(result)
+            print result
             if result[1] == 1:
                 for errtag, errcode in const.ERROR_LIST.iteritems():
                     if result[0] == errcode:
-		                return (errtag, True)
+                        return (errtag, True)
                 return ('X2', True)
             else:
                 return ('', False)
         else:
             self.logger.error('Cannot query alarm status.')
             return "fail"
-            
+
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.id)
+            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.did)
             )
-        result = self._connectionManager.query(query)
-        print(result)
+        result = self._connection_manager.query(query)
+        print result
         if result is not None:
             # FCS server updates data every minute.
-            return (60, result[1])
+            return (60, self.calc_mod_num(result[1]))
         else:
             self.logger.error('Cannot query production status.')
             return "fail"
 
-    def __init__(self, id):
+    def calc_mod_num(self, raw_data):
+        """
+        Calculates how many molds has the machine completed.
+        Arguments:
+        raw_data -- the counter value of completed molds obtained from FCS DB query.
+        """
+        if raw_data != 0:
+            mod_diff = raw_data - self.last_modnum
+            self.total_modnum += mod_diff
+        self.last_modnum = raw_data
+        return self.total_modnum
+
+    def __init__(self, did):
         self.logger = logging.getLogger('scopepi.debug')
-        self.id = id
+        self.did = did
         self.mode = const.OFFLINE
         self.status = const.IDLE
+        self.last_modnum = 0
+        self.total_modnum = 0
+
         if self.connect():
-            print("DB connected. Check device ID={}...".format(id))
-            if self.checkDeviceExists():
-                self.isConnected = True
-                print("Device found. Ready to proceed...")
-                print('Device is {}, Module version {}\n'.format(self.name, self.version))
+            print "DB connected. Check device ID={}...".format(did)
+            if self.check_device_exists():
+                self.is_connected = True
+                print "Device found. Ready to proceed..."
+                print 'Device is {}, Module version {}\n'.format(self.name, self.version)
             else:
-                print("Device doesn't exist!")
+                print "Device doesn't exist!"
                 self.logger.error("FCS machine doesn't exist.")
                 self.disconnect()
         else:
             self.logger.error('Cannot connect to FCS server.')
-            print("Connection failed!")
+            print "Connection failed!"

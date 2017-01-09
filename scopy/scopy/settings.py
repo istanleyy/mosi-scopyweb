@@ -148,11 +148,6 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Additional djcelery settings
-
-import djcelery
-djcelery.setup_loader()
-
 # Logging configs, using template from django doc
 
 LOGFILE_SIZE = 30*1024*1024
@@ -212,8 +207,8 @@ LOGGING = {
 
 DASHING = {
     'INSTALLED_WIDGETS': (
-        'number', 
-        'list', 
+        'number',
+        'list',
         'scopegraph',
         'scopedevice',
     ),
@@ -221,3 +216,8 @@ DASHING = {
         'dashing.permissions.AllowAny',
     )
 }
+
+# Additional djcelery settings
+
+import djcelery
+djcelery.setup_loader()
