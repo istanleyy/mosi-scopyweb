@@ -184,7 +184,7 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = raw_data
                     self.total_output = 0
                 # Calc mct only if the output has changed
-                if raw_data != self.lastOutput and raw_data != 0:
+                if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.outpcs = self.calc_mod_num(raw_data)
             print (self.mct, self.outpcs)
@@ -198,9 +198,11 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         raw_data -- the counter value of completed molds obtained from FCS DB query.
         """
-        if raw_data != 0:
+        if raw_data > self.lastOutput:
             mod_diff = raw_data - self.lastOutput
             self.total_output += mod_diff
+        else:
+            self.total_output += raw_data
         self.lastOutput = raw_data
         return self.total_output
 
