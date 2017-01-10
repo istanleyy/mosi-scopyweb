@@ -22,7 +22,7 @@ class ScopeCoreConfig(AppConfig):
         socketServer = SocketServer.getInstance()
         socketServer.start()
         scopeDevice = device.getDeviceInstance()
-        if scopeDevice.isConnected:
+        if scopeDevice._isConnected:
             job_control.init()
             pollDeviceStatus.delay()
         else:

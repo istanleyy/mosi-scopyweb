@@ -60,8 +60,8 @@ class FCSInjectionDevice_db(AbstractDevice):
     ##############################################
 
     logger = None
-    did = 'not_set'
-    is_connected = False
+    _did = 'not_set'
+    _isConnected = False
 
     def connect(self):
         """Connects to FCS DB via a connection manager."""
@@ -70,11 +70,11 @@ class FCSInjectionDevice_db(AbstractDevice):
     def disconnect(self):
         """Disconnect from a FCS DB server."""
         self._connection_manager.disconnect()
-        self.is_connected = False
+        self._isConnected = False
 
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
-        query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self.did))
+        query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self._did))
         result = self._connection_manager.query(query)
         if result is not None and result[0] > 0:
             return True
@@ -83,7 +83,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getDeviceStatus(self):
         query = (
-            "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.did)
+            "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
             )
         result = self._connection_manager.query(query)
         if result is not None:
@@ -136,7 +136,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getAlarmStatus(self):
         query = (
-            "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self.did)
+            "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self._did)
             )
         result = self._connection_manager.query(query)
         if result is not None:
@@ -154,7 +154,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def getProductionStatus(self):
         query = (
-            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self.did)
+            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
             )
         result = self._connection_manager.query(query)
         print result
@@ -179,7 +179,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def __init__(self, did):
         self.logger = logging.getLogger('scopepi.debug')
-        self.did = did
+        self._did = did
         self.mode = const.OFFLINE
         self.status = const.IDLE
         self.last_modnum = 0
@@ -188,7 +188,7 @@ class FCSInjectionDevice_db(AbstractDevice):
         if self.connect():
             print "DB connected. Check device ID={}...".format(did)
             if self.check_device_exists():
-                self.is_connected = True
+                self._isConnected = True
                 print "Device found. Ready to proceed..."
                 print 'Device is {}, Module version {}\n'.format(self.name, self.version)
             else:
