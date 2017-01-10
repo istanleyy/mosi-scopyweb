@@ -171,9 +171,11 @@ class FCSInjectionDevice_db(AbstractDevice):
         Arguments:
         raw_data -- the counter value of completed molds obtained from FCS DB query.
         """
-        if raw_data != 0:
+        if raw_data > self.last_modnum:
             mod_diff = raw_data - self.last_modnum
             self.total_modnum += mod_diff
+        else:
+            self.total_modnum += raw_data
         self.last_modnum = raw_data
         return self.total_modnum
 
