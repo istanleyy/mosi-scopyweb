@@ -227,7 +227,7 @@ def createJobList(xmldom):
                     newJob.productid = element[3].text
                 newJob.ct = Decimal(element[4].text) if element[4].text is not None else 20.0
                 newJob.multiplier = int(element[5].text) if element[5].text is not None else 1
-                newJob.moldid = element[6].text
+                newJob.moldid = element[6].text if element[6].text is not None else 'TZZZZZZZZZ'
                 newJob.save()
             else:
                 if element[0].text != '0':
@@ -307,7 +307,7 @@ def getUnsyncMsgStr():
         else:
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
 
-        print etree.tostring(xmltree, encoding='utf-8', pretty_print=True)    
+        print etree.tostring(xmltree, encoding='utf-8', pretty_print=True)
         return etree.tostring(xmltree, xml_declaration=True, encoding='utf-8')
 
     except etree.XMLSyntaxError:

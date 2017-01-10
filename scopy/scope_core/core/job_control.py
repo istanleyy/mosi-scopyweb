@@ -120,12 +120,14 @@ def processQueryResult(source, data, task=None):
                         machine.lastHaltReason = const.CHG_MOLD
                         machine.save()
                     else:
-                        # Error in CO procedure, send message to server to end current job without next job
-                        sendEventMsg(6, 'NJ')
-                        machine.lastHaltReason = const.NOJOB
-                        if machine.cooverride:
-                            machine.cooverride = False
-                        machine.save()
+                        if machine.lastHaltReason != const.NOJOB:
+                            # Error in CO procedure, send message to server to
+                            # end current job without next job
+                            sendEventMsg(6, 'NJ')
+                            machine.lastHaltReason = const.NOJOB
+                            if machine.cooverride:
+                                machine.cooverride = False
+                            machine.save()
 
             # Machine is changing material
             elif machine.opstatus == const.CHG_MATERIAL:
