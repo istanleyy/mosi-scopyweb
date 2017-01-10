@@ -56,18 +56,16 @@ class ModbusDevice(AbstractDevice):
     # Module specific properties and methods
     ##############################################
 
-    id = 'not_set'
-    isConnected = False
-    outpcs = 0
-    mct = 0
+    _did = 'not_set'
+    _isConnected = False
 
     def connect(self):
         return self._connectionManager.connect()
-    
+
     def disconnect(self):
         self._connectionManager.disconnect()
-        self.isConnected = False
-        
+        self._isConnected = False
+
     def checkDeviceExists(self):
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
@@ -85,22 +83,22 @@ class ModbusDevice(AbstractDevice):
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
         except socket_error:
             return 'fail'
-        
+
         if result is not None:
             if settings.DEBUG:
-                print(result)
+                print result
             machine = Machine.objects.first()
             jobserial = self.hextostr(result[10:16])
             moldid = self.hextostr(result[20:26])
-            print('jobserial: ' + jobserial + ' moldid: ' + moldid)
+            print 'jobserial: ' + jobserial + ' moldid: ' + moldid
             statuschange = False
             modechange = False
-            
+
             modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
- 
+
             if result[0] == 2:
                 self.status = const.CHG_MOLD
-                self.outpcs = 0        
+                self.outpcs = 0
             elif result[0] == 3:
                 self.status = const.CHG_MATERIAL
             elif result[0] == 4:
@@ -140,14 +138,14 @@ class ModbusDevice(AbstractDevice):
                     print('Device in auto mode.')
             else:
                 pass
-            
+
             if statuschange or modechange:
                 machine.save()
                 print (self.mode, self.status)
             return (self.mode, self.status, moldid)
         else:
             return "fail"
-    
+
     def getAlarmStatus(self):
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
@@ -165,7 +163,7 @@ class ModbusDevice(AbstractDevice):
             return ('', False)
         else:
             return "fail"
-            
+
     def getProductionStatus(self):
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
@@ -176,20 +174,34 @@ class ModbusDevice(AbstractDevice):
             pcshex = [result[1], result[0]]
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
-                self.outpcs = self.outpcs+1 if random.random() < 0.7 else self.outpcs
+                self.outpcs = self.outpcs+1 if random.random() < 0.8 else self.outpcs
                 if self.outpcs != self.lastOutput:
                     self.mct = self.getmct()
                     self.lastOutput = self.outpcs
             else:
-                self.outpcs = self.hextoint32(pcshex)
+                raw_data = self.hextoint32(pcshex)
+                if self.status = const.CHG_MOLD:
+                    self.lastOutput = raw_data
                 # Calc mct only if the output has changed
-                if self.outpcs != self.lastOutput:
+                if raw_data != self.lastOutput and raw_data != 0:
                     self.mct = self.getmct()
-                    self.lastOutput = self.outpcs
+                    self.outpcs = self.calc_mod_num(raw_data)
             print (self.mct, self.outpcs)
             return (self.mct, self.outpcs)
         else:
             return "fail"
+
+    def calc_mod_num(self, raw_data):
+        """
+        Calculates how many molds has the machine completed.
+        Arguments:
+        raw_data -- the counter value of completed molds obtained from FCS DB query.
+        """
+        if raw_data != 0:
+            mod_diff = raw_data - self.lastOutput
+            self.total_output += mod_diff
+        self.lastOutput = raw_data
+        return self.total_output
 
     def getmct(self):
         now = datetime.now()
@@ -207,25 +219,29 @@ class ModbusDevice(AbstractDevice):
         return result.strip(' \t\n\r')
 
     def hextoint32(self, registers):
-	    if registers[0] != 0:
-	        return registers[0] << 16 | registers[1]
-	    else:
-	        return registers[1]
+        if registers[0] != 0:
+            return registers[0] << 16 | registers[1]
+        else:
+            return registers[1]
 
-    def __init__(self, id):
-        self.id = id
+    def __init__(self, did):
+        self._did = did
         self.mode = const.OFFLINE
         self.status = const.IDLE
+        self.outpcs = 0
+        self.mct = 0
+        self.total_output = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
+
         if self.connect():
-            print("Host connected. Check device ID={}...".format(id))
+            print "Host connected. Check device ID={}...".format(did)
             if self.checkDeviceExists():
-                self.isConnected = True
-                print("Device found. Ready to proceed...")
-                print('Device is {}, Module version {}\n'.format(self.name, self.version))
+                self._isConnected = True
+                print "Device found. Ready to proceed..."
+                print "Device is {}, Module version {}\n".format(self.name, self.version)
             else:
-                print("Device doesn't exist!")
+                print "Device doesn't exist!"
                 self.disconnect()
         else:
-            print("Connection failed!")
+            print "Connection failed!"
