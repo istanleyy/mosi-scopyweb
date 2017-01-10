@@ -180,7 +180,7 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = self.outpcs
             else:
                 raw_data = self.hextoint32(pcshex)
-                if self.status = const.CHG_MOLD:
+                if self.status == const.CHG_MOLD:
                     self.lastOutput = raw_data
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput and raw_data != 0:
