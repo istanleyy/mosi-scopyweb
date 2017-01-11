@@ -495,7 +495,10 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        device_manager.getDeviceInstance().total_output = 0
+        device = device_manager.getDeviceInstance()
+        print 'Reset device output counter. Current={}'.format(device.total_output)
+        device.total_output = 0
+        print 'Updated output counter={}'.format(device.total_output)
         return True
     else:
         return False
