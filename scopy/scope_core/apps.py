@@ -22,14 +22,14 @@ class ScopeCoreConfig(AppConfig):
         socketServer = SocketServer.getInstance()
         socketServer.start()
         scopeDevice = device.getDeviceInstance()
-        if scopeDevice.is_connected():
+        if scopeDevice.is_connected:
             job_control.init()
             if job_control.lastOutput != 0:
                 scopeDevice.total_output(job_control.lastOutput)
             pollDeviceStatus.delay()
         else:
-            logger.critical("Unable to connect to device {}".format(scopeDevice.device_id()))
-            print "!!! Unable to connect to device {} !!!".format(scopeDevice.device_id())
+            logger.critical("Unable to connect to device {}".format(scopeDevice.device_id)
+            print "!!! Unable to connect to device {} !!!".format(scopeDevice.device_id)
             job_control.processQueryResult('app', 'fail')
             if not settings.DEBUG:
                 sys.exit(1)
