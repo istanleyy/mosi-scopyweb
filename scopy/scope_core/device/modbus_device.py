@@ -196,7 +196,6 @@ class ModbusDevice(AbstractDevice):
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
                 self._total_output += 1 if random.random() < 0.8 else 0
-                outpcs = self._total_output
                 if self._total_output != self.lastOutput:
                     self.mct = self.getmct()
                     self.lastOutput = self._total_output
@@ -208,9 +207,9 @@ class ModbusDevice(AbstractDevice):
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
-                    outpcs = self.calc_output(raw_data)
-            print (self.mct, outpcs)
-            return (self.mct, outpcs)
+                    self.calc_output(raw_data)
+            print (self.mct, self._total_output)
+            return (self.mct, self._total_output)
         else:
             return "fail"
 
