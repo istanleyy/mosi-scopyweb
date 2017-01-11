@@ -29,6 +29,7 @@ class ModbusDevice(AbstractDevice):
     _did = 'not_set'
     _is_connected = False
     _total_output = 0
+    _status = const.IDLE
 
     @property
     def name(self):
@@ -118,17 +119,17 @@ class ModbusDevice(AbstractDevice):
             modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
 
             if result[0] == 2:
-                self.status = const.CHG_MOLD
+                self._status = const.CHG_MOLD
                 self._total_output = 0
             elif result[0] == 3:
-                self.status = const.CHG_MATERIAL
+                self._status = const.CHG_MATERIAL
             elif result[0] == 4:
-                self.status = const.SETUP
+                self._status = const.SETUP
             else:
-                self.status = const.RUNNING if result[0] == 1 else const.IDLE
+                self._status = const.RUNNING if result[0] == 1 else const.IDLE
 
-            if machine.opstatus != self.status:
-                machine.opstatus = self.status
+            if machine.opstatus != self._status:
+                machine.opstatus = self._status
                 statuschange = True
 
             if modeval[0] == 1024:
@@ -162,8 +163,8 @@ class ModbusDevice(AbstractDevice):
 
             if statuschange or modechange:
                 machine.save()
-                print (self.mode, self.status)
-            return (self.mode, self.status, moldid)
+                print (self.mode, self._status)
+            return (self.mode, self._status, moldid)
         else:
             return "fail"
 
@@ -201,14 +202,14 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = self._total_output
             else:
                 raw_data = self.hextoint32(pcshex)
-                if self.status == const.CHG_MOLD:
+                if self._status == const.CHG_MOLD:
                     self.lastOutput = raw_data
                     self._total_output = 0
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
-            print (self.mct, self._total_output)
+            print ('device<{}>'.format(id(self)), self.mct, self._total_output)
             return (self.mct, self._total_output)
         else:
             return "fail"
@@ -251,7 +252,6 @@ class ModbusDevice(AbstractDevice):
     def __init__(self, did):
         self._did = did
         self.mode = const.OFFLINE
-        self.status = const.IDLE
         self.mct = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()

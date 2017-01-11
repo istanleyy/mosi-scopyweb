@@ -33,6 +33,7 @@ class FCSInjectionDevice_db(AbstractDevice):
     _did = 'not_set'
     _is_connected = False
     _total_output = 0
+    _status = const.IDLE
 
     @property
     def name(self):
@@ -149,7 +150,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
             if statuschange or modechange:
                 machine.save()
-            return (self.mode, self.status, moldid)
+            return (self.mode, self._status, moldid)
         else:
             self._logger.error('Cannot query machine status.')
             return "fail"
@@ -203,7 +204,6 @@ class FCSInjectionDevice_db(AbstractDevice):
         self._logger = logging.getLogger('scopepi.debug')
         self._did = did
         self.mode = const.OFFLINE
-        self.status = const.IDLE
         self.last_modnum = 0
 
         if self.connect():
