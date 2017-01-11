@@ -21,8 +21,7 @@ from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
 from scope_core.config import settings
-from . import xmlparser
-from . import request_sender, socket_server
+from . import xmlparser, request_sender, socket_server, device_manager
 
 logger = logging.getLogger('scopepi.debug')
 lastOutput = 0
@@ -293,7 +292,7 @@ def init():
     if (job.jobid == ProductionDataTS.objects.last().job.jobid) and job.active:
         lastOutput = ProductionDataTS.objects.last().output
         logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
-        print 'Resuming job output count at {} pcs.'.format(lastOutput)
+        print 'Resume job output counter at {} pcs.'.format(lastOutput)
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server
@@ -496,6 +495,7 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
+        device_manager.getDeviceInstance().total_output = 0
         return True
     else:
         return False

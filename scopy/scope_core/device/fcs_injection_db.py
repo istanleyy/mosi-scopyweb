@@ -96,6 +96,7 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connection_manager.query(query)
         if result is not None:
             self.last_modnum = result[0]
+            print "Device found, setting adjustment factor={}...".format(self.last_modnum)
             return True
         else:
             return False
