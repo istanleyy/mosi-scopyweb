@@ -186,7 +186,6 @@ class ModbusDevice(AbstractDevice):
             return "fail"
 
     def getProductionStatus(self):
-        outpcs = 0
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         except socket_error:
