@@ -28,7 +28,7 @@ class ScopeCoreConfig(AppConfig):
                 scopeDevice.total_output(job_control.lastOutput)
             pollDeviceStatus.delay()
         else:
-            logger.critical("Unable to connect to device {}".format(scopeDevice.device_id)
+            logger.critical("Unable to connect to device {}".format(scopeDevice.device_id))
             print "!!! Unable to connect to device {} !!!".format(scopeDevice.device_id)
             job_control.processQueryResult('app', 'fail')
             if not settings.DEBUG:
