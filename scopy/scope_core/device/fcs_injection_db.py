@@ -92,9 +92,10 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
-        query = ("SELECT COUNT(*) FROM cal_data2 WHERE colmachinenum='{}'".format(self._did))
+        query = ("SELECT ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did))
         result = self._connection_manager.query(query)
-        if result is not None and result[0] > 0:
+        if result is not None:
+            self.last_modnum = result[0]
             return True
         else:
             return False
@@ -189,7 +190,7 @@ class FCSInjectionDevice_db(AbstractDevice):
         Arguments:
         raw_data -- the counter value of completed molds obtained from FCS DB query.
         """
-        if raw_data > self.last_modnum:
+        if raw_data >= self.last_modnum:
             mod_diff = raw_data - self.last_modnum
             self._total_output += mod_diff
         else:

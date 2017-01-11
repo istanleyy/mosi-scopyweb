@@ -86,8 +86,10 @@ class ModbusDevice(AbstractDevice):
 
     def checkDeviceExists(self):
         try:
-            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
+            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
             if result is not None:
+                numhex = [result[1], result[0]]
+                self.lastOutput = self.hextoint32(numhex)
                 return True
             else:
                 return False
@@ -218,7 +220,7 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         raw_data -- the counter value of completed molds obtained from FCS DB query.
         """
-        if raw_data > self.lastOutput:
+        if raw_data >= self.lastOutput:
             mod_diff = raw_data - self.lastOutput
             self._total_output += mod_diff
         else:
