@@ -43,7 +43,7 @@ class Job(models.Model):
     urgent = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
     inprogress = models.BooleanField(default=False)
-    
+
     def __str__(self):
         idstr = str(self.jobid) + ':' + self.productid
         return idstr
@@ -53,7 +53,7 @@ class ProductionDataTS(models.Model):
     eventtime = models.DateTimeField(auto_now_add=True)
     output = models.IntegerField(default=0)
     mct = models.IntegerField(default=0)
-    
+
     def __str__(self):
         return self.eventtime.strftime('%Y-%m-%d %H:%M:%S')
 

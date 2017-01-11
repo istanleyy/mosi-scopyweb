@@ -285,8 +285,14 @@ def modelCheck():
     print '******************************'
 
 def init():
+    global logger
+    global lastOutput
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
+    job = SessionManagement.objects.last().job
+    if job.jobid == ProductionDataTS.objects.last().job.jobid and job.active:
+        lastOutput = ProductionDataTS.objects.last().output
+        logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server

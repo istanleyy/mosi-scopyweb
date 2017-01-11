@@ -46,6 +46,26 @@ class AbstractDevice(object):
         """Sets the connection manager for the concrete device"""
         return
 
+    @abc.abstractproperty
+    def is_connected(self):
+        """The connection status of the concrete device"""
+        return
+
+    @abc.abstractproperty
+    def total_output(self):
+        """Tracks the accumulated production output"""
+        return
+
+    @total_output.setter
+    def total_output(self, count):
+        """Sets the total output count"""
+        return
+
+    @abc.abstractproperty
+    def device_id(self):
+        """The ID of the concrete device instance"""
+        return
+
     @abc.abstractmethod
     def getDeviceStatus(self):
         """Retrieve device's operating status"""
@@ -59,4 +79,9 @@ class AbstractDevice(object):
     @abc.abstractmethod
     def getProductionStatus(self):
         """Retrieve device's production status"""
+        return
+
+    @abc.abstractmethod
+    def calc_output(self, raw_data):
+        """Calculates the total output according to device setup"""
         return

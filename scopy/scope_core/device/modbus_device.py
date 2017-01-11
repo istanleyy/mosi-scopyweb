@@ -25,6 +25,10 @@ class ModbusDevice(AbstractDevice):
     ##############################################
     # Define inherit properties and methods
     ##############################################
+    _connectionManager = ModbusConnectionManager('tcp')
+    _did = 'not_set'
+    _is_connected = False
+    _total_output = 0
 
     @property
     def name(self):
@@ -42,8 +46,6 @@ class ModbusDevice(AbstractDevice):
     def description(self):
         return 'A device implementation to collect data from a device using Modbus protocol.'
 
-    _connectionManager = ModbusConnectionManager('tcp')
-
     @property
     def connectionManager(self):
         return self._connectionManager
@@ -52,19 +54,35 @@ class ModbusDevice(AbstractDevice):
     def connectionManager(self, newObj):
         self._connectionManager = newObj
 
+    @property
+    def device_id(self):
+        return self._did
+
+    @property
+    def is_connected(self):
+        return self._is_connected
+
+    @property
+    def total_output(self):
+        return self._total_output
+
+    @total_output.setter
+    def total_output(self, count):
+        try:
+            self._total_output = int(count)
+        except ValueError, ex:
+            print '"%s" cannot be converted to int: %s' % (count, ex)
+
     ##############################################
     # Module specific properties and methods
     ##############################################
-
-    _did = 'not_set'
-    _isConnected = False
 
     def connect(self):
         return self._connectionManager.connect()
 
     def disconnect(self):
         self._connectionManager.disconnect()
-        self._isConnected = False
+        self._is_connected = False
 
     def checkDeviceExists(self):
         try:
@@ -98,7 +116,7 @@ class ModbusDevice(AbstractDevice):
 
             if result[0] == 2:
                 self.status = const.CHG_MOLD
-                self.outpcs = 0
+                self._total_output = 0
             elif result[0] == 3:
                 self.status = const.CHG_MATERIAL
             elif result[0] == 4:
@@ -165,6 +183,7 @@ class ModbusDevice(AbstractDevice):
             return "fail"
 
     def getProductionStatus(self):
+        outpcs = 0
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         except socket_error:
@@ -174,25 +193,26 @@ class ModbusDevice(AbstractDevice):
             pcshex = [result[1], result[0]]
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
-                self.outpcs = self.outpcs+1 if random.random() < 0.8 else self.outpcs
-                if self.outpcs != self.lastOutput:
+                self._total_output += 1 if random.random() < 0.8 else 0
+                outpcs = self._total_output
+                if self._total_output != self.lastOutput:
                     self.mct = self.getmct()
-                    self.lastOutput = self.outpcs
+                    self.lastOutput = self._total_output
             else:
                 raw_data = self.hextoint32(pcshex)
                 if self.status == const.CHG_MOLD:
                     self.lastOutput = raw_data
-                    self.total_output = 0
+                    self._total_output = 0
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
-                    self.outpcs = self.calc_mod_num(raw_data)
-            print (self.mct, self.outpcs)
-            return (self.mct, self.outpcs)
+                    outpcs = self.calc_output(raw_data)
+            print (self.mct, outpcs)
+            return (self.mct, outpcs)
         else:
             return "fail"
 
-    def calc_mod_num(self, raw_data):
+    def calc_output(self, raw_data):
         """
         Calculates how many molds has the machine completed.
         Arguments:
@@ -200,11 +220,11 @@ class ModbusDevice(AbstractDevice):
         """
         if raw_data > self.lastOutput:
             mod_diff = raw_data - self.lastOutput
-            self.total_output += mod_diff
+            self._total_output += mod_diff
         else:
-            self.total_output += raw_data
+            self._total_output += raw_data
         self.lastOutput = raw_data
-        return self.total_output
+        return self._total_output
 
     def getmct(self):
         now = datetime.now()
@@ -231,16 +251,14 @@ class ModbusDevice(AbstractDevice):
         self._did = did
         self.mode = const.OFFLINE
         self.status = const.IDLE
-        self.outpcs = 0
         self.mct = 0
-        self.total_output = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
             if self.checkDeviceExists():
-                self._isConnected = True
+                self._is_connected = True
                 print "Device found. Ready to proceed..."
                 print "Device is {}, Module version {}\n".format(self.name, self.version)
             else:
