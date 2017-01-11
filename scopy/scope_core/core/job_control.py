@@ -290,7 +290,7 @@ def init():
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     job = SessionManagement.objects.last().job
-    if job.jobid == ProductionDataTS.objects.last().job.jobid and job.active:
+    if (job.jobid == ProductionDataTS.objects.last().job.jobid) and job.active:
         lastOutput = ProductionDataTS.objects.last().output
         logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
         print 'Resuming job output count at {} pcs.'.format(lastOutput)
