@@ -293,6 +293,7 @@ def init():
     if job.jobid == ProductionDataTS.objects.last().job.jobid and job.active:
         lastOutput = ProductionDataTS.objects.last().output
         logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
+        print 'Resuming job output count at {} pcs.'.format(lastOutput)
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server

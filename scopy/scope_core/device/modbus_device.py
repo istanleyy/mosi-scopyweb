@@ -90,6 +90,7 @@ class ModbusDevice(AbstractDevice):
             if result is not None:
                 numhex = [result[1], result[0]]
                 self.lastOutput = self.hextoint32(numhex)
+                print "Device found, setting adjustment factor={}...".format(self.lastOutput)
                 return True
             else:
                 return False
@@ -261,7 +262,6 @@ class ModbusDevice(AbstractDevice):
             print "Host connected. Check device ID={}...".format(did)
             if self.checkDeviceExists():
                 self._is_connected = True
-                print "Device found. Ready to proceed..."
                 print "Device is {}, Module version {}\n".format(self.name, self.version)
             else:
                 print "Device doesn't exist!"
