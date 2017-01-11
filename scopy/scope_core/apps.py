@@ -25,7 +25,7 @@ class ScopeCoreConfig(AppConfig):
         if scopeDevice.is_connected:
             job_control.init()
             if job_control.lastOutput != 0:
-                scopeDevice.total_output(job_control.lastOutput)
+                scopeDevice.total_output = job_control.lastOutput
             pollDeviceStatus.delay()
         else:
             logger.critical("Unable to connect to device {}".format(scopeDevice.device_id))
