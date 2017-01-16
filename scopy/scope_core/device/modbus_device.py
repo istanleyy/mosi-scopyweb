@@ -253,17 +253,17 @@ class ModbusDevice(AbstractDevice):
             return registers[1]
 
     def __init__(self, did):
-        self.lock = threading.RLock()
+        self._connectionManager = ModbusConnectionManager('tcp')
         self._did = did
+        self._is_connected = False
+        self._total_output = 0
+        self._status = const.IDLE
+
+        self.lock = threading.RLock()
         self.mode = const.OFFLINE
         self.mct = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
-
-        self._connectionManager = ModbusConnectionManager('tcp')
-        self._is_connected = False
-        self._total_output = 0
-        self._status = const.IDLE
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)

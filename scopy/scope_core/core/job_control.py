@@ -26,6 +26,7 @@ from . import xmlparser, request_sender, socket_server, device_manager
 logger = logging.getLogger('scopepi.debug')
 lastOutput = 0
 cycleCount = 0
+device = None
 
 def processQueryResult(source, data, task=None):
     session = SessionManagement.objects.first()
@@ -283,9 +284,11 @@ def modelCheck():
     print 'done!'
     print '******************************'
 
-def init():
+def init(dev_inst):
     global logger
     global lastOutput
+    global device
+    device = dev_inst
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
     job = SessionManagement.objects.last().job
@@ -485,6 +488,7 @@ def processBarcodeActivity(data):
             return 'fail'
 
 def processServerAction(data):
+    global device
     actparam = data.split(',')
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
@@ -495,7 +499,6 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        device = device_manager.getDeviceInstance()
         print 'Reset device<{}> output counter. Current={}'.format(id(device), device.total_output)
         device.total_output = 0
         print 'Updated output counter={}'.format(device.total_output)
