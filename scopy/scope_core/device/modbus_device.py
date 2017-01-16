@@ -12,6 +12,7 @@ modbus_device.py
 """
 
 import random
+import threading
 import device_definition as const
 from socket import error as socket_error
 from datetime import datetime
@@ -65,14 +66,16 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def total_output(self):
-        return self._total_output
+        with self.lock:
+            return self._total_output
 
     @total_output.setter
     def total_output(self, count):
-        try:
-            self._total_output = int(count)
-        except ValueError, ex:
-            print '"%s" cannot be converted to int: %s' % (count, ex)
+        with self.lock:
+            try:
+                self._total_output = int(count)
+            except ValueError, ex:
+                print '"%s" cannot be converted to int: %s' % (count, ex)
 
     ##############################################
     # Module specific properties and methods
@@ -120,7 +123,7 @@ class ModbusDevice(AbstractDevice):
 
             if result[0] == 2:
                 self._status = const.CHG_MOLD
-                self._total_output = 0
+                self.total_output = 0
             elif result[0] == 3:
                 self._status = const.CHG_MATERIAL
             elif result[0] == 4:
@@ -196,23 +199,28 @@ class ModbusDevice(AbstractDevice):
             pcshex = [result[1], result[0]]
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
-                self._total_output += 1 if random.random() < 0.8 else 0
-                if self._total_output != self.lastOutput:
+                inc_val = 1 if random.random() < 0.8 else 0
+                self.inc_output(inc_val)
+                if self.total_output != self.lastOutput:
                     self.mct = self.getmct()
-                    self.lastOutput = self._total_output
+                    self.lastOutput = self.total_output
             else:
                 raw_data = self.hextoint32(pcshex)
                 if self._status == const.CHG_MOLD:
                     self.lastOutput = raw_data
-                    self._total_output = 0
+                    self.total_output = 0
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
-            print ('device<{}>'.format(id(self)), self.mct, self._total_output)
-            return (self.mct, self._total_output)
+            print ('device<{}>'.format(id(self)), self.mct, self.total_output)
+            return (self.mct, self.total_output)
         else:
             return "fail"
+
+    def inc_output(self, inc_val):
+        output = self.total_output
+        self.total_output = output + inc_val
 
     def calc_output(self, raw_data):
         """
@@ -222,11 +230,11 @@ class ModbusDevice(AbstractDevice):
         """
         if raw_data >= self.lastOutput:
             mod_diff = raw_data - self.lastOutput
-            self._total_output += mod_diff
+            self.inc_output(mod_diff)
         else:
-            self._total_output += raw_data
+            self.inc_output(raw_data)
         self.lastOutput = raw_data
-        return self._total_output
+        return self.total_output
 
     def getmct(self):
         now = datetime.now()
@@ -250,6 +258,7 @@ class ModbusDevice(AbstractDevice):
             return registers[1]
 
     def __init__(self, did):
+        self.lock = threading.RLock()
         self._did = did
         self.mode = const.OFFLINE
         self.mct = 0
