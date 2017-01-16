@@ -216,7 +216,10 @@ class ModbusDevice(AbstractDevice):
 
     def reset_output(self):
         """Resets _total_output counter"""
+        print 'Reset device<{}> output counter.'.format(id(self))
+        print 'Current={} lastOutput={}'.format(self.total_output, self.lastOutput)
         self.total_output = 0
+        print 'Updated output counter={}({})'.format(self.total_output, self._total_output)
 
     def inc_output(self, inc_val):
         """Increments _total_output by inc_val"""
@@ -236,7 +239,7 @@ class ModbusDevice(AbstractDevice):
         else:
             self.inc_output(val)
         self.lastOutput = val
-        print 'CALC raw_data:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
+        print 'CALC total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         return self.total_output
 
     def getmct(self):
