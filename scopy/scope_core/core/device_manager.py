@@ -26,4 +26,5 @@ def getDeviceInstance():
             deviceInstance = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
         else:
             pass
+        print 'Created device instance ID={}'.format(id(deviceInstance))
     return deviceInstance
