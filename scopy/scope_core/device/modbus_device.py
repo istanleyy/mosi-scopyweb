@@ -205,8 +205,8 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = raw_data
                     self.total_output = 0
                 # Calc mct only if the output has changed
+                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
                 if raw_data != self.lastOutput:
-                    print 'TASK raw_data:{} lastOutput:{}'.format(raw_data, self.lastOutput)
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
             print ('device<{}>'.format(id(self)), self.mct, self.total_output)
@@ -233,13 +233,14 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
+        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         if val >= self.lastOutput:
             mod_diff = val - self.lastOutput
             self.inc_output(mod_diff)
         else:
             self.inc_output(val)
         self.lastOutput = val
-        print 'CALC total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
+        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         return self.total_output
 
     def getmct(self):
