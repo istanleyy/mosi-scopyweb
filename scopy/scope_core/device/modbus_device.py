@@ -201,9 +201,10 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = self.total_output
             else:
                 raw_data = self.hextoint32(pcshex)
-                if self._status == const.CHG_MOLD:
+                if self._status == const.CHG_MOLD or self.fco_reset:
                     self.lastOutput = raw_data
                     self.total_output = 0
+                    self.fco_reset = False
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
                 if raw_data != self.lastOutput:
@@ -215,11 +216,8 @@ class ModbusDevice(AbstractDevice):
             return "fail"
 
     def reset_output(self):
-        """Resets _total_output counter"""
-        print 'Reset device<{}> output counter.'.format(id(self))
-        print 'Current={} lastOutput={}'.format(self.total_output, self.lastOutput)
-        self.total_output = 0
-        print 'Updated output counter={}({})'.format(self.total_output, self._total_output)
+        """Sets the force CO reset flag to True"""
+        self.fco_reset = True
 
     def inc_output(self, inc_val):
         """Increments _total_output by inc_val"""
@@ -276,6 +274,7 @@ class ModbusDevice(AbstractDevice):
         self.mct = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
+        self.fco_reset = False
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
