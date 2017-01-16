@@ -206,6 +206,7 @@ class ModbusDevice(AbstractDevice):
                     self.total_output = 0
                 # Calc mct only if the output has changed
                 if raw_data != self.lastOutput:
+                    print 'TASK raw_data:{} lastOutput:{}'.format(raw_data, self.lastOutput)
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
             print ('device<{}>'.format(id(self)), self.mct, self.total_output)
@@ -235,6 +236,7 @@ class ModbusDevice(AbstractDevice):
         else:
             self.inc_output(val)
         self.lastOutput = val
+        print 'CALC raw_data:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         return self.total_output
 
     def getmct(self):
