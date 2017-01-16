@@ -85,3 +85,8 @@ class AbstractDevice(object):
     def calc_output(self, raw_data):
         """Calculates the total output according to device setup"""
         return
+
+    @abc.abstractmethod
+    def reset_output(self):
+        """Resets the total output counter"""
+        return

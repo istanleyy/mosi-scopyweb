@@ -186,6 +186,10 @@ class FCSInjectionDevice_db(AbstractDevice):
             self._logger.error('Cannot query production status.')
             return "fail"
 
+    def reset_output(self):
+        """Resets _total_output counter"""
+        self.total_output = 0
+
     def calc_output(self, raw_data):
         """
         Calculates how many molds has the machine completed.

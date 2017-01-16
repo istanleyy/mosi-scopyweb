@@ -213,6 +213,10 @@ class ModbusDevice(AbstractDevice):
         else:
             return "fail"
 
+    def reset_output(self):
+        """Resets _total_output counter"""
+        self.total_output = 0
+
     def inc_output(self, inc_val):
         """Increments _total_output by inc_val"""
         with self.lock:
