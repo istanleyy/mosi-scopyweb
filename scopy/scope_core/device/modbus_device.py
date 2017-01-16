@@ -214,21 +214,23 @@ class ModbusDevice(AbstractDevice):
             return "fail"
 
     def inc_output(self, inc_val):
-        output = self.total_output
-        self.total_output = output + inc_val
+        """Increments _total_output by inc_val"""
+        with self.lock:
+            output = self.total_output
+            self.total_output = output + inc_val
 
-    def calc_output(self, raw_data):
+    def calc_output(self, val):
         """
         Calculates how many molds has the machine completed.
         Arguments:
-        raw_data -- the counter value of completed molds obtained from FCS DB query.
+        val -- the counter value of completed molds obtained from modbus query.
         """
-        if raw_data >= self.lastOutput:
-            mod_diff = raw_data - self.lastOutput
+        if val >= self.lastOutput:
+            mod_diff = val - self.lastOutput
             self.inc_output(mod_diff)
         else:
-            self.inc_output(raw_data)
-        self.lastOutput = raw_data
+            self.inc_output(val)
+        self.lastOutput = val
         return self.total_output
 
     def getmct(self):
