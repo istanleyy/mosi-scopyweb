@@ -205,6 +205,7 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = raw_data
                     self.total_output = 0
                     self.fco_reset = False
+                    print 'RESET done.'
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
                 if raw_data != self.lastOutput:
@@ -218,6 +219,7 @@ class ModbusDevice(AbstractDevice):
     def reset_output(self):
         """Sets the force CO reset flag to True"""
         self.fco_reset = True
+        print 'RESET total_output counter. (flag={})'.format(self.fco_reset)
 
     def inc_output(self, inc_val):
         """Increments _total_output by inc_val"""
