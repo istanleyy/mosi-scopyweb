@@ -26,11 +26,6 @@ class ModbusDevice(AbstractDevice):
     ##############################################
     # Define inherit properties and methods
     ##############################################
-    _connectionManager = ModbusConnectionManager('tcp')
-    _did = 'not_set'
-    _is_connected = False
-    _total_output = 0
-    _status = const.IDLE
 
     @property
     def name(self):
@@ -264,6 +259,11 @@ class ModbusDevice(AbstractDevice):
         self.mct = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
+
+        self._connectionManager = ModbusConnectionManager('tcp')
+        self._is_connected = False
+        self._total_output = 0
+        self._status = const.IDLE
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
