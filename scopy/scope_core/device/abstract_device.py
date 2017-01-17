@@ -56,6 +56,11 @@ class AbstractDevice(object):
         """Tracks the accumulated production output"""
         return
 
+    @total_output.setter
+    def total_output(self, val):
+        """Sets total_output to new val"""
+        return
+
     @abc.abstractproperty
     def device_id(self):
         """The ID of the concrete device instance"""

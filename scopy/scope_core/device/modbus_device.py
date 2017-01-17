@@ -62,6 +62,10 @@ class ModbusDevice(AbstractDevice):
     def total_output(self):
         return self._total_output
 
+    @total_output.setter
+    def total_output(self, new_val):
+        self._total_output = new_val
+
     @property
     def fco_flag(self):
         return self._fco_flag
