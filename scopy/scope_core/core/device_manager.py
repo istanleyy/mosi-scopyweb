@@ -13,17 +13,29 @@ device_manager.py
 
 from scope_core.config import settings
 
-deviceInstance = None
+class DeviceManager(object):
+    """
+    DeviceManager handles the creation of the device based on the type defined
+    in the settings file.
+    """
 
-def getDeviceInstance():
-    global deviceInstance
-    if deviceInstance is None:
-        if settings.CONNECTOR == 'modbus':
-	    from scope_core.device.modbus_device import ModbusDevice
-            deviceInstance = ModbusDevice(settings.DEVICE_INFO['ID'])
-        elif settings.CONNECTOR == 'fcsmysql':
-	    from scope_core.device.fcs_injection_db import FCSInjectionDevice_db
-            deviceInstance = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
-        else:
-            pass
-    return deviceInstance
+    def __init__(self):
+        self._device_instance = None
+        self.get_instance()
+
+    def get_instance(self):
+        """Returns the instance reference of the concrete device implementation"""
+        if self._device_instance is None:
+            if settings.CONNECTOR == 'modbus':
+                from scope_core.device.modbus_device import ModbusDevice
+                self._device_instance = ModbusDevice(settings.DEVICE_INFO['ID'])
+            elif settings.CONNECTOR == 'fcsmysql':
+                from scope_core.device.fcs_injection_db import FCSInjectionDevice_db
+                self._device_instance = FCSInjectionDevice_db(settings.DEVICE_INFO['ID'])
+            else:
+                pass
+        return self._device_instance
+
+    def get_did(self):
+        """Returns the device ID of the corresponding instance"""
+        return self._device_instance.device_id()

@@ -12,24 +12,22 @@ class ScopeCoreConfig(AppConfig):
     def ready(self):
         import logging
         from .tasks import pollDeviceStatus
-        from core import job_control
-        from core import device_manager as device
-        from core.socket_server import SocketServer
+        from scope_core.core import job_control
+        from scope_core.core.device_manager import DeviceManager
+        from scope_core.core.socket_server import SocketServer
 
         logger = logging.getLogger('scopepi.debug')
 
         job_control.modelCheck()
         socketServer = SocketServer.getInstance()
         socketServer.start()
-        scopeDevice = device.getDeviceInstance()
-        if scopeDevice.is_connected:
-            job_control.init()
-            if job_control.lastOutput != 0:
-                scopeDevice.total_output = job_control.lastOutput
+        scopeDevice = DeviceManager()
+        if scopeDevice.get_instance().is_connected:
+            job_control.init(scopeDevice)
             pollDeviceStatus.delay()
         else:
-            logger.critical("Unable to connect to device {}".format(scopeDevice.device_id))
-            print "!!! Unable to connect to device {} !!!".format(scopeDevice.device_id)
+            logger.critical("Unable to connect to device {}".format(scopeDevice.get_did()))
+            print "!!! Unable to connect to device {} !!!".format(scopeDevice.get_did())
             job_control.processQueryResult('app', 'fail')
             if not settings.DEBUG:
                 sys.exit(1)

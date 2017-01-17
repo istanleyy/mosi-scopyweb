@@ -24,6 +24,7 @@ from scope_core.config import settings
 from . import xmlparser, request_sender, socket_server, device_manager
 
 logger = logging.getLogger('scopepi.debug')
+device_reference = None
 lastOutput = 0
 cycleCount = 0
 
@@ -283,16 +284,28 @@ def modelCheck():
     print 'done!'
     print '******************************'
 
-def init():
+def init(device_ref):
+    """Initializes system environment:
+    1) Set device reference
+    2) Notify server node is up
+    3) Get jobs for this node from server
+    4) Check job state, resumer production output counter if necessary
+    """
     global logger
+    global device_reference
     global lastOutput
+
+    device_reference = device_ref
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
+
     job = SessionManagement.objects.last().job
     if (job.jobid == ProductionDataTS.objects.last().job.jobid) and job.active:
         lastOutput = ProductionDataTS.objects.last().output
         logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
         print 'Resume job output counter at {} pcs.'.format(lastOutput)
+    if lastOutput != 0:
+        device_reference.get_instance().total_output = lastOutput
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server
@@ -485,6 +498,7 @@ def processBarcodeActivity(data):
             return 'fail'
 
 def processServerAction(data):
+    global device_reference
     actparam = data.split(',')
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
@@ -495,8 +509,7 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        device = device_manager.getDeviceInstance()
-        device.reset_output()
+        job_control.device_reference.reset_output()
         return True
     else:
         return False
