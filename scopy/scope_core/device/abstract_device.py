@@ -51,21 +51,6 @@ class AbstractDevice(object):
         """The connection status of the concrete device"""
         return
 
-    @abc.abstractproperty
-    def total_output(self):
-        """Tracks the accumulated production output"""
-        return
-
-    @total_output.setter
-    def total_output(self, val):
-        """Sets total_output to new val"""
-        return
-
-    @abc.abstractproperty
-    def device_id(self):
-        """The ID of the concrete device instance"""
-        return
-
     @abc.abstractmethod
     def getDeviceStatus(self):
         """Retrieve device's operating status"""
@@ -82,8 +67,23 @@ class AbstractDevice(object):
         return
 
     @abc.abstractmethod
+    def device_id(self):
+        """Returns device id of the corresponding instance"""
+        return
+
+    @abc.abstractmethod
     def calc_output(self, raw_data):
         """Calculates the total output according to device setup"""
+        return
+
+    @abc.abstractmethod
+    def get_output(self):
+        """Returns total output counter value"""
+        return
+
+    @abc.abstractmethod
+    def update_output(self, new_val):
+        """Updates total output counter to new_val"""
         return
 
     @abc.abstractmethod

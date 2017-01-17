@@ -305,7 +305,7 @@ def init(device_ref):
         logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
         print 'Resume job output counter at {} pcs.'.format(lastOutput)
     if lastOutput != 0:
-        device_reference.get_instance().total_output = lastOutput
+        device_reference.get_instance().update_output(lastOutput)
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server

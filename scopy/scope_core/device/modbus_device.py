@@ -51,28 +51,8 @@ class ModbusDevice(AbstractDevice):
         self._connectionManager = newObj
 
     @property
-    def device_id(self):
-        return self._did
-
-    @property
     def is_connected(self):
         return self._is_connected
-
-    @property
-    def total_output(self):
-        return self._total_output
-
-    @total_output.setter
-    def total_output(self, new_val):
-        self._total_output = new_val
-
-    @property
-    def fco_flag(self):
-        return self._fco_flag
-
-    @fco_flag.setter
-    def fco_flag(self, val):
-        self._fco_flag = val
 
     ##############################################
     # Module specific properties and methods
@@ -98,6 +78,9 @@ class ModbusDevice(AbstractDevice):
         except socket_error:
             print 'Cannot connect to device!'
             return False
+
+    def device_id(self):
+        return self._did
 
     def getDeviceStatus(self):
         try:
@@ -202,26 +185,32 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = self._total_output
             else:
                 raw_data = self.hextoint32(pcshex)
-                if self._status == const.CHG_MOLD or self.fco_flag:
+                if self._status == const.CHG_MOLD or self._fco_flag:
                     self._total_output = 0
                     self.lastOutput = raw_data
                     self.fco_flag = False
                     print 'RESET done.'
                 # Calc mct only if the output has changed
-                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
+                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self._total_output)
                 print self.__dict__
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
-            print ('device<{}>'.format(id(self)), self.mct, self.total_output)
-            return (self.mct, self.total_output)
+            print ('device<{}>'.format(id(self)), self.mct, self._total_output)
+            return (self.mct, self._total_output)
         else:
             return "fail"
 
+    def get_output(self):
+        return self._total_output
+
+    def update_output(self, new_val):
+        self._total_output = new_val
+
     def reset_output(self):
         """Sets the force CO reset flag to True"""
-        self.fco_flag = True
-        print 'RESET total_output counter. (flag={})'.format(self.fco_flag)
+        self._fco_flag = True
+        print 'RESET total_output counter. (flag={})'.format(self._fco_flag)
         print self.__dict__
 
     def calc_output(self, val):
@@ -230,15 +219,15 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
-        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
+        print 'CALC IN total_output:{} lastOutput:{}'.format(self._total_output, self.lastOutput)
         if val >= self.lastOutput:
             mod_diff = val - self.lastOutput
             self._total_output += mod_diff
         else:
             self._total_output += val
         self.lastOutput = val
-        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
-        return self.total_output
+        print 'CALC OUT total_output:{} lastOutput:{}'.format(self._total_output, self.lastOutput)
+        return self._total_output
 
     def getmct(self):
         now = datetime.now()
