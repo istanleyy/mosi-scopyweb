@@ -25,8 +25,6 @@ class ModbusDevice(AbstractDevice):
     ##############################################
     # Define inherit properties and methods
     ##############################################
-    _total_output = 0
-    _fco_flag = False
 
     @property
     def name(self):
@@ -198,6 +196,7 @@ class ModbusDevice(AbstractDevice):
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self._total_output)
                 print self.__dict__
+                print type(self)
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
@@ -217,6 +216,7 @@ class ModbusDevice(AbstractDevice):
         self._fco_flag = True
         print 'RESET total_output counter. (flag={})'.format(self._fco_flag)
         print self.__dict__
+        print type(self)
 
     def calc_output(self, val):
         """
@@ -263,6 +263,8 @@ class ModbusDevice(AbstractDevice):
         self._did = did
         self._is_connected = False
         self._status = const.IDLE
+        self._total_output = 0
+        self._fco_flag = False
 
         self.mode = const.OFFLINE
         self.mct = 0
