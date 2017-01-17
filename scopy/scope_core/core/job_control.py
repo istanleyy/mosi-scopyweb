@@ -21,7 +21,7 @@ from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
 from scope_core.config import settings
-from . import xmlparser, request_sender, socket_server, device_manager
+from . import xmlparser, request_sender, socket_server
 
 logger = logging.getLogger('scopepi.debug')
 device_reference = None

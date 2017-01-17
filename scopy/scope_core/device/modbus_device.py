@@ -12,7 +12,6 @@ modbus_device.py
 """
 
 import random
-import threading
 import device_definition as const
 from socket import error as socket_error
 from datetime import datetime
@@ -20,10 +19,9 @@ from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
 from scope_core.config import settings
-from itertools import count
 
 class ModbusDevice(AbstractDevice):
-    _ids = count(0)
+
     ##############################################
     # Define inherit properties and methods
     ##############################################
@@ -62,16 +60,15 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def total_output(self):
-        with self.lock:
-            return self._total_output
+        return self._total_output
 
-    @total_output.setter
-    def total_output(self, count):
-        with self.lock:
-            try:
-                self._total_output = int(count)
-            except ValueError, ex:
-                print '"%s" cannot be converted to int: %s' % (count, ex)
+    @property
+    def fco_flag(self):
+        return self._fco_flag
+
+    @fco_flag.setter
+    def fco_flag(self, val):
+        self._fco_flag = val
 
     ##############################################
     # Module specific properties and methods
@@ -119,7 +116,7 @@ class ModbusDevice(AbstractDevice):
 
             if result[0] == 2:
                 self._status = const.CHG_MOLD
-                self.total_output = 0
+                self._total_output = 0
             elif result[0] == 3:
                 self._status = const.CHG_MATERIAL
             elif result[0] == 4:
@@ -132,7 +129,7 @@ class ModbusDevice(AbstractDevice):
                 statuschange = True
 
             if modeval[0] == 1024:
-                print('Device offline!')
+                print 'Device offline!'
                 self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
@@ -143,20 +140,20 @@ class ModbusDevice(AbstractDevice):
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
-                    print('Device in manual mode.')
+                    print 'Device in manual mode.'
             elif modeval[0] == 4096:
                 self.mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
-                    print('Device in semi-auto mode.')
+                    print 'Device in semi-auto mode.'
             elif modeval[0] == 8192:
                 self.mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3
                     modechange = True
                     self.tLastUpdate = datetime.now()
-                    print('Device in auto mode.')
+                    print 'Device in auto mode.'
             else:
                 pass
 
@@ -195,17 +192,16 @@ class ModbusDevice(AbstractDevice):
             pcshex = [result[1], result[0]]
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
-                inc_val = 1 if random.random() < 0.8 else 0
-                self.inc_output(inc_val)
-                if self.total_output != self.lastOutput:
+                self._total_output += 1 if random.random() < 0.8 else 0
+                if self._total_output != self.lastOutput:
                     self.mct = self.getmct()
-                    self.lastOutput = self.total_output
+                    self.lastOutput = self._total_output
             else:
                 raw_data = self.hextoint32(pcshex)
-                if self._status == const.CHG_MOLD or self.fco_reset:
+                if self._status == const.CHG_MOLD or self.fco_flag:
+                    self._total_output = 0
                     self.lastOutput = raw_data
-                    self.total_output = 0
-                    self.fco_reset = False
+                    self.fco_flag = False
                     print 'RESET done.'
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
@@ -220,15 +216,9 @@ class ModbusDevice(AbstractDevice):
 
     def reset_output(self):
         """Sets the force CO reset flag to True"""
-        self.fco_reset = True
-        print 'RESET total_output counter. (flag={})'.format(self.fco_reset)
+        self.fco_flag = True
+        print 'RESET total_output counter. (flag={})'.format(self.fco_flag)
         print self.__dict__
-
-    def inc_output(self, inc_val):
-        """Increments _total_output by inc_val"""
-        with self.lock:
-            output = self.total_output
-            self.total_output = output + inc_val
 
     def calc_output(self, val):
         """
@@ -239,9 +229,9 @@ class ModbusDevice(AbstractDevice):
         print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         if val >= self.lastOutput:
             mod_diff = val - self.lastOutput
-            self.inc_output(mod_diff)
+            self._total_output += mod_diff
         else:
-            self.inc_output(val)
+            self._total_output += val
         self.lastOutput = val
         print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         return self.total_output
@@ -268,19 +258,17 @@ class ModbusDevice(AbstractDevice):
             return registers[1]
 
     def __init__(self, did):
-        self.num = self._ids.next()
         self._connectionManager = ModbusConnectionManager('tcp')
         self._did = did
         self._is_connected = False
         self._total_output = 0
         self._status = const.IDLE
+        self._fco_flag = False
 
-        self.lock = threading.RLock()
         self.mode = const.OFFLINE
         self.mct = 0
         self.lastOutput = 0
         self.tLastUpdate = datetime.now()
-        self.fco_reset = False
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
