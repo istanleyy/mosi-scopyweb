@@ -208,6 +208,7 @@ class ModbusDevice(AbstractDevice):
                     print 'RESET done.'
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
+                print self.__dict__
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
