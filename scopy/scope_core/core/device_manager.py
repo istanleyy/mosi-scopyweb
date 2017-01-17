@@ -1,6 +1,6 @@
 """
 MOSi Scope Device Framework:
-Make real world manufacturing machines highly interoperable with different IT 
+Make real world manufacturing machines highly interoperable with different IT
 solutions. Implemented using python and django framework.
 
 (C) 2016 - Stanley Yeh - ihyeh@mosi.com.tw
@@ -8,7 +8,7 @@ solutions. Implemented using python and django framework.
 
 device_manager.py
     Managing device instance to provide abstraction for other
-    modules to disregard the actual class type of the device 
+    modules to disregard the actual class type of the device
 """
 
 from scope_core.config import settings

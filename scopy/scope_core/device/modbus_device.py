@@ -20,9 +20,10 @@ from abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
 from scope_core.config import settings
+from itertools import count
 
 class ModbusDevice(AbstractDevice):
-
+    _ids = count(0)
     ##############################################
     # Define inherit properties and methods
     ##############################################
@@ -267,6 +268,7 @@ class ModbusDevice(AbstractDevice):
             return registers[1]
 
     def __init__(self, did):
+        self.num = self._ids.next()
         self._connectionManager = ModbusConnectionManager('tcp')
         self._did = did
         self._is_connected = False
