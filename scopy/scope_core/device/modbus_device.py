@@ -12,19 +12,21 @@ modbus_device.py
 """
 
 import random
-import device_definition as const
 from socket import error as socket_error
 from datetime import datetime
-from abstract_device import AbstractDevice
+from scope_core.device import device_definition as const
+from scope_core.device.abstract_device import AbstractDevice
 from scope_core.device_manager.modbus_manager import ModbusConnectionManager
 from scope_core.models import Machine
 from scope_core.config import settings
 
 class ModbusDevice(AbstractDevice):
-
+    """Modbus device driver for ScopePi"""
     ##############################################
     # Define inherit properties and methods
     ##############################################
+    _total_output = 0
+    _fco_flag = False
 
     @property
     def name(self):
@@ -58,14 +60,20 @@ class ModbusDevice(AbstractDevice):
     # Module specific properties and methods
     ##############################################
 
+    def device_id(self):
+        return self._did
+
     def connect(self):
+        """Connects to the device data source via connectionManager"""
         return self._connectionManager.connect()
 
     def disconnect(self):
+        """Disconnects from the data source via connectionManager"""
         self._connectionManager.disconnect()
         self._is_connected = False
 
     def checkDeviceExists(self):
+        """Check if target device with given ID exists"""
         try:
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
             if result is not None:
@@ -78,9 +86,6 @@ class ModbusDevice(AbstractDevice):
         except socket_error:
             print 'Cannot connect to device!'
             return False
-
-    def device_id(self):
-        return self._did
 
     def getDeviceStatus(self):
         try:
@@ -188,7 +193,7 @@ class ModbusDevice(AbstractDevice):
                 if self._status == const.CHG_MOLD or self._fco_flag:
                     self._total_output = 0
                     self.lastOutput = raw_data
-                    self.fco_flag = False
+                    self._fco_flag = False
                     print 'RESET done.'
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self._total_output)
@@ -230,12 +235,14 @@ class ModbusDevice(AbstractDevice):
         return self._total_output
 
     def getmct(self):
+        """Calculates machine cycle time"""
         now = datetime.now()
         delta = now - self.tLastUpdate
         self.tLastUpdate = now
         return delta.seconds
 
     def hextostr(self, registers):
+        """Decodes hex in an array and join them to form a string"""
         #print registers
         result = ''
         for i in range(len(registers)):
@@ -245,6 +252,7 @@ class ModbusDevice(AbstractDevice):
         return result.strip(' \t\n\r')
 
     def hextoint32(self, registers):
+        """Converts and joins hex values in an array to form an integer number"""
         if registers[0] != 0:
             return registers[0] << 16 | registers[1]
         else:
@@ -254,9 +262,7 @@ class ModbusDevice(AbstractDevice):
         self._connectionManager = ModbusConnectionManager('tcp')
         self._did = did
         self._is_connected = False
-        self._total_output = 0
         self._status = const.IDLE
-        self._fco_flag = False
 
         self.mode = const.OFFLINE
         self.mct = 0
