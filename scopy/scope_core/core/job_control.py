@@ -509,7 +509,7 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        job_control.device_reference.reset_output()
+        device_reference.get_instance().reset_output()
         return True
     else:
         return False
