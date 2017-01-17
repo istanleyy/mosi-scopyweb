@@ -220,6 +220,7 @@ class ModbusDevice(AbstractDevice):
         """Sets the force CO reset flag to True"""
         self.fco_reset = True
         print 'RESET total_output counter. (flag={})'.format(self.fco_reset)
+        print self.__dict__
 
     def inc_output(self, inc_val):
         """Increments _total_output by inc_val"""
