@@ -119,7 +119,7 @@ class ModbusDevice(AbstractDevice):
 
             if result[0] == 2:
                 self._status = const.CHG_MOLD
-                self._total_output = 0
+                self.total_output = 0
             elif result[0] == 3:
                 self._status = const.CHG_MATERIAL
             elif result[0] == 4:
@@ -195,22 +195,22 @@ class ModbusDevice(AbstractDevice):
             pcshex = [result[1], result[0]]
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
-                self._total_output += 1 if random.random() < 0.8 else 0
-                if self._total_output != self.lastOutput:
+                self.total_output += 1 if random.random() < 0.8 else 0
+                if self.total_output != self.lastOutput:
                     self.mct = self.getmct()
-                    self.lastOutput = self._total_output
+                    self.lastOutput = self.total_output
             else:
                 raw_data = self.hextoint32(pcshex)
                 if self._status == const.CHG_MOLD:
-                    self._total_output = 0
+                    self.total_output = 0
                     self.lastOutput = raw_data
                 # Calc mct only if the output has changed
-                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self._total_output)
+                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
-            print ('device<{}>'.format(id(self._total_output)), self.mct, self._total_output)
-            return (self.mct, self._total_output)
+            print ('device<{}>'.format(id(self.total_output)), self.mct, self.total_output)
+            return (self.mct, self.total_output)
         else:
             return "fail"
 
@@ -220,15 +220,15 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
-        print 'CALC IN total_output:{} lastOutput:{}'.format(self._total_output, self.lastOutput)
+        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
         if val >= self.lastOutput:
             mod_diff = val - self.lastOutput
-            self._total_output += mod_diff
+            self.total_output += mod_diff
         else:
-            self._total_output += val
+            self.total_output += val
         self.lastOutput = val
-        print 'CALC OUT total_output:{} lastOutput:{}'.format(self._total_output, self.lastOutput)
-        return self._total_output
+        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
+        return self.total_output
 
     def getmct(self):
         """Calculates machine cycle time"""
