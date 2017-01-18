@@ -85,8 +85,3 @@ class AbstractDevice(object):
     def update_output(self, new_val):
         """Updates total output counter to new_val"""
         return
-
-    @abc.abstractmethod
-    def reset_output(self):
-        """Resets the total output counter"""
-        return

@@ -208,11 +208,6 @@ class ModbusDevice(AbstractDevice):
     def update_output(self, new_val):
         self._total_output = new_val
 
-    def reset_output(self):
-        self._total_output = 0
-        print 'RESET total output counter. (id={},val={})'.format(id(self._total_output), self._total_output)
-        print self.__dict__
-
     def calc_output(self, val):
         """
         Calculates how many molds has the machine completed.
