@@ -61,7 +61,7 @@ class ModbusDevice(AbstractDevice):
     @total_output.setter
     def total_output(self, new_val):
         self._counter_param[0] = new_val
-        print 'UPDATED output counter<{}>, val={}'.format(id(self._counter_param), self.total_output)
+        print 'UPDATED output counter<{}>, val={}, {}'.format(id(self.total_output), self.total_output, self._counter_param)
 
     ##############################################
     # Module specific properties and methods
@@ -201,11 +201,11 @@ class ModbusDevice(AbstractDevice):
                     self.total_output = 0
                     self._counter_param[2] = raw_data
                 # Calc mct only if the output has changed
-                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self._counter_param[2], self.total_output)
+                print 'TASK raw_data:{} {}'.format(raw_data, self._counter_param)
                 if raw_data != self._counter_param[2]:
                     self._counter_param[1] = self.getmct()
                     self.calc_output(raw_data)
-            print ('device<{}>'.format(id(self.total_output)), self._counter_param[1], self.total_output)
+            print ('device<{}> {}'.format(id(self.total_output), self._counter_param))
             return (self._counter_param[1], self.total_output)
         else:
             return "fail"
@@ -216,14 +216,14 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
-        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self._counter_param[2])
+        print 'CALC IN {}'.format(self._counter_param)
         if val >= self._counter_param[2]:
             mod_diff = val - self._counter_param[2]
             self.total_output += mod_diff
         else:
             self.total_output += val
         self._counter_param[2] = val
-        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self._counter_param[2])
+        print 'CALC OUT {}'.format(self._counter_param)
         return self.total_output
 
     def getmct(self):
@@ -258,8 +258,6 @@ class ModbusDevice(AbstractDevice):
         self._counter_param = [0, 0, 0] # [total_output, mct, lastOutput]
 
         self.mode = const.OFFLINE
-        self.mct = 0
-        self.lastOutput = 0
         self.tLastUpdate = datetime.now()
 
         if self.connect():
