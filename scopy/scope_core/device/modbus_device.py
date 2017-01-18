@@ -54,6 +54,19 @@ class ModbusDevice(AbstractDevice):
     def is_connected(self):
         return self._is_connected
 
+    @property
+    def total_output(self):
+        return self._total_output
+
+    @total_output.setter
+    def total_output(self, new_val):
+        self._total_output = new_val
+        print 'UPDATED output counter<{}>, val={}'.format(id(self._total_output), self._total_output)
+
+    @total_output.deleter
+    def total_output(self):
+        del self._total_output
+
     ##############################################
     # Module specific properties and methods
     ##############################################
@@ -193,7 +206,6 @@ class ModbusDevice(AbstractDevice):
                     self.lastOutput = raw_data
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self._total_output)
-                print self.__dict__
                 if raw_data != self.lastOutput:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
@@ -201,12 +213,6 @@ class ModbusDevice(AbstractDevice):
             return (self.mct, self._total_output)
         else:
             return "fail"
-
-    def get_output(self):
-        return self._total_output
-
-    def update_output(self, new_val):
-        self._total_output = new_val
 
     def calc_output(self, val):
         """

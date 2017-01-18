@@ -28,7 +28,7 @@ class SocketServer(Thread):
         # Infinite loop so that function do not terminate and thread do not end.
         while True:
             # Receiving from client
-            data = conn.recv(2048)
+            data = conn.recv(4096)
             msg = data.strip(' \t\n\r')
             if len(msg) > 0:
                 print "Socket received:\n{0}".format(msg)
