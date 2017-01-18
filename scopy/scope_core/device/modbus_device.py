@@ -56,16 +56,12 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def total_output(self):
-        return self._total_output
+        return self._counter_param[0]
 
     @total_output.setter
     def total_output(self, new_val):
-        self._total_output = new_val
-        print 'UPDATED output counter<{}>, val={}'.format(id(self._total_output), self._total_output)
-
-    @total_output.deleter
-    def total_output(self):
-        del self._total_output
+        self._counter_param[0] = new_val
+        print 'UPDATED output counter<{}>, val={}'.format(id(self._counter_param), self.total_output)
 
     ##############################################
     # Module specific properties and methods
@@ -89,8 +85,8 @@ class ModbusDevice(AbstractDevice):
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
             if result is not None:
                 numhex = [result[1], result[0]]
-                self.lastOutput = self.hextoint32(numhex)
-                print "Device found, setting adjustment factor={}...".format(self.lastOutput)
+                self._counter_param[2] = self.hextoint32(numhex)
+                print "Device found, setting adjustment factor={}...".format(self._counter_param[2])
                 return True
             else:
                 return False
@@ -196,21 +192,21 @@ class ModbusDevice(AbstractDevice):
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
                 self.total_output += 1 if random.random() < 0.8 else 0
-                if self.total_output != self.lastOutput:
-                    self.mct = self.getmct()
-                    self.lastOutput = self.total_output
+                if self.total_output != self._counter_param[2]:
+                    self._counter_param[1] = self.getmct()
+                    self._counter_param[2] = self.total_output
             else:
                 raw_data = self.hextoint32(pcshex)
                 if self._status == const.CHG_MOLD:
                     self.total_output = 0
-                    self.lastOutput = raw_data
+                    self._counter_param[2] = raw_data
                 # Calc mct only if the output has changed
-                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self.lastOutput, self.total_output)
-                if raw_data != self.lastOutput:
-                    self.mct = self.getmct()
+                print 'TASK raw_data:{} lastOutput:{} total_output:{}'.format(raw_data, self._counter_param[2], self.total_output)
+                if raw_data != self._counter_param[2]:
+                    self._counter_param[1] = self.getmct()
                     self.calc_output(raw_data)
-            print ('device<{}>'.format(id(self.total_output)), self.mct, self.total_output)
-            return (self.mct, self.total_output)
+            print ('device<{}>'.format(id(self.total_output)), self._counter_param[1], self.total_output)
+            return (self._counter_param[1], self.total_output)
         else:
             return "fail"
 
@@ -220,14 +216,14 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
-        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
-        if val >= self.lastOutput:
-            mod_diff = val - self.lastOutput
+        print 'CALC IN total_output:{} lastOutput:{}'.format(self.total_output, self._counter_param[2])
+        if val >= self._counter_param[2]:
+            mod_diff = val - self._counter_param[2]
             self.total_output += mod_diff
         else:
             self.total_output += val
-        self.lastOutput = val
-        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self.lastOutput)
+        self._counter_param[2] = val
+        print 'CALC OUT total_output:{} lastOutput:{}'.format(self.total_output, self._counter_param[2])
         return self.total_output
 
     def getmct(self):
@@ -259,7 +255,7 @@ class ModbusDevice(AbstractDevice):
         self._did = did
         self._is_connected = False
         self._status = const.IDLE
-        self._total_output = 0
+        self._counter_param = [0, 0, 0] # [total_output, mct, lastOutput]
 
         self.mode = const.OFFLINE
         self.mct = 0

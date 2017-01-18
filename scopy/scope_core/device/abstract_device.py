@@ -61,11 +61,6 @@ class AbstractDevice(object):
         """Sets the total output counter value to new_val"""
         return
 
-    @total_output.deleter
-    def total_output(self):
-        """Deletes the total output counter value reference"""
-        return
-
     @abc.abstractmethod
     def getDeviceStatus(self):
         """Retrieve device's operating status"""
