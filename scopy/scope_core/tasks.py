@@ -1,11 +1,11 @@
+"""Celery task definition for scope_core app"""
+
+from datetime import timedelta
 from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
 from django.core.cache import cache
-from datetime import timedelta
-from core import xmlparser
-from core import request_sender
-from core import job_control
+from scope_core.core import job_control
 
 logger = get_task_logger(__name__)
 P_PRIOR_HIGH = 60
@@ -17,6 +17,7 @@ LOCK_ID = "shared-lock"
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_HIGH))
 def pollDeviceStatus():
     global LOCK_ID
+    global logger
     LOCK_ID = '{0}-lock'.format('statustask')
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
@@ -36,6 +37,7 @@ def pollDeviceStatus():
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_LOW))
 def pollAlarmStatus():
     global LOCK_ID
+    global logger
     LOCK_ID = '{0}-lock'.format('alarmtask')
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
@@ -55,6 +57,7 @@ def pollAlarmStatus():
 @periodic_task(run_every=timedelta(seconds=P_PRIOR_MID))
 def pollProdStatus():
     global LOCK_ID
+    global logger
     lock_id = '{0}-lock'.format('infotask')
     acquire_lock = lambda: cache.add(LOCK_ID, 'true', LOCK_EXPIRE)
     release_lock = lambda: cache.delete(LOCK_ID)
