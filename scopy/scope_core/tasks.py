@@ -25,7 +25,7 @@ def pollDeviceStatus():
         logger.info("Polling device status (p={})...".format(P_PRIOR_HIGH))
         try:
             if job_control.device_reference:
-                result = job_control.device_reference.get_instance().getDeviceStatus()
+                result = job_control.device_reference.getDeviceStatus()
                 pTask = PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0]
                 job_control.processQueryResult('opStatus', result, pTask)
         finally:
@@ -44,7 +44,7 @@ def pollAlarmStatus():
         logger.info("Polling alarm status (p={})...".format(P_PRIOR_LOW))
         try:
             if job_control.device_reference:
-                result = job_control.device_reference.get_instance().getAlarmStatus()
+                result = job_control.device_reference.getAlarmStatus()
                 if result is not None:
                     job_control.processQueryResult('alarmStatus', result)
         finally:
@@ -64,7 +64,7 @@ def pollProdStatus():
         logger.info("Polling production data (p={})...".format(pTask.interval.every))
         try:
             if job_control.device_reference:
-                result = job_control.device_reference.get_instance().getProductionStatus()
+                result = job_control.device_reference.getProductionStatus()
                 if result is not None:
                     job_control.processQueryResult('opMetrics', result, pTask)
         finally:

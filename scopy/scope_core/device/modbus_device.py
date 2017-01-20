@@ -67,6 +67,24 @@ class ModbusDevice(AbstractDevice):
     # Module specific properties and methods
     ##############################################
 
+    @property
+    def mct(self):
+        """Alias for the machine cycle time component of _counter_param"""
+        return self._counter_param[1]
+
+    @mct.setter
+    def mct(self, new_val):
+        self._counter_param[1] = new_val
+
+    @property
+    def last_output(self):
+        """Alias for the last output component of _counter_param"""
+        return self._counter_param[2]
+
+    @last_output.setter
+    def last_output(self, new_val):
+        self._counter_param[2] = new_val
+
     def device_id(self):
         return self._did
 
@@ -192,21 +210,21 @@ class ModbusDevice(AbstractDevice):
             if settings.SIMULATE and self.mode == const.AUTO_MODE:
                 # For testing purpose
                 self.total_output += 1 if random.random() < 0.8 else 0
-                if self.total_output != self._counter_param[2]:
-                    self._counter_param[1] = self.getmct()
-                    self._counter_param[2] = self.total_output
+                if self.total_output != self.last_output:
+                    self.mct = self.getmct()
+                    self.last_output = self.total_output
             else:
                 raw_data = self.hextoint32(pcshex)
                 if self._status == const.CHG_MOLD:
                     self.total_output = 0
-                    self._counter_param[2] = raw_data
+                    self.last_output = raw_data
                 # Calc mct only if the output has changed
                 print 'TASK raw_data:{} {}'.format(raw_data, self._counter_param)
-                if raw_data != self._counter_param[2]:
-                    self._counter_param[1] = self.getmct()
+                if raw_data != self.last_output:
+                    self.mct = self.getmct()
                     self.calc_output(raw_data)
             print ('device<{}> {}'.format(id(self.total_output), self._counter_param))
-            return (self._counter_param[1], self.total_output)
+            return (self.mct, self.total_output)
         else:
             return "fail"
 
@@ -217,12 +235,12 @@ class ModbusDevice(AbstractDevice):
         val -- the counter value of completed molds obtained from modbus query.
         """
         print 'CALC IN {}'.format(self._counter_param)
-        if val >= self._counter_param[2]:
-            mod_diff = val - self._counter_param[2]
+        if val >= self.last_output:
+            mod_diff = val - self.last_output
             self.total_output += mod_diff
         else:
             self.total_output += val
-        self._counter_param[2] = val
+        self.last_output = val
         print 'CALC OUT {}'.format(self._counter_param)
         return self.total_output
 
@@ -255,7 +273,7 @@ class ModbusDevice(AbstractDevice):
         self._did = did
         self._is_connected = False
         self._status = const.IDLE
-        self._counter_param = [0, 0, 0] # [total_output, mct, lastOutput]
+        self._counter_param = [0, 0, 0] #[total_output, mct, lastOutput]
 
         self.mode = const.OFFLINE
         self.tLastUpdate = datetime.now()
