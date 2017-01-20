@@ -28,6 +28,31 @@ device_reference = None
 lastOutput = 0
 cycleCount = 0
 
+def poll_device_status():
+    global device_reference
+    if device_reference:
+        processQueryResult(
+            'opStatus',
+            device_reference.getDeviceStatus(),
+            PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0])
+
+def poll_alarm_status():
+    global device_reference
+    result = device_reference.getAlarmStatus()
+    if device_reference and result:
+        processQueryResult(
+            'alarmStatus',
+            result)
+
+def poll_prod_status():
+    global device_reference
+    result = device_reference.getProductionStatus()
+    if device_reference and result:
+        processQueryResult(
+            'opMetrics',
+            result,
+            PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0])
+
 def processQueryResult(source, data, task=None):
     session = SessionManagement.objects.first()
     machine = Machine.objects.first()
@@ -284,7 +309,7 @@ def modelCheck():
     print 'done!'
     print '******************************'
 
-def init(device_ref):
+def setup(device_ref):
     """Initializes system environment:
     1) Set device reference
     2) Notify server node is up
