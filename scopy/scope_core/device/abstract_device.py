@@ -80,8 +80,3 @@ class AbstractDevice(object):
     def device_id(self):
         """Returns device id of the corresponding instance"""
         return
-
-    @abc.abstractmethod
-    def calc_output(self, raw_data):
-        """Calculates the total output according to device setup"""
-        return
