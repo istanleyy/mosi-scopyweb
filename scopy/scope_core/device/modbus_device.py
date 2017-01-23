@@ -225,6 +225,7 @@ class ModbusDevice(AbstractDevice):
                 if raw_data != self.last_output:
                     self.mct = self.getmct()
                     self.total_output = self.calc_output(raw_data)
+                    self.last_output = raw_data
             print ('total_output<{}> {}'.format(id(self.total_output), self.total_output))
             return (self.mct, self.total_output)
         else:
@@ -236,16 +237,15 @@ class ModbusDevice(AbstractDevice):
         Arguments:
         val -- the counter value of completed molds obtained from modbus query.
         """
-        print 'CALC IN total_output:{}'.format(self.total_output)
-        result = self.total_output
+        print 'CALC IN total_output:{} last_output:{}'.format(self.total_output, self.last_output)
+        t_output = self.total_output
         if val >= self.last_output:
             mod_diff = val - self.last_output
-            result += mod_diff
+            t_output += mod_diff
         else:
-            result += val
-        self.last_output = val
-        print 'CALC OUT total_output:{}'.format(result)
-        return result
+            t_output += val
+        print 'CALC OUT total_output:{}'.format(t_output)
+        return t_output
 
     def getmct(self):
         """Calculates machine cycle time"""
