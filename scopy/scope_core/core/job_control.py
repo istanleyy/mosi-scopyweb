@@ -54,6 +54,7 @@ def poll_prod_status():
             PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0])
 
 def processQueryResult(source, data, task=None):
+    global device_reference
     session = SessionManagement.objects.first()
     machine = Machine.objects.first()
 
@@ -110,6 +111,7 @@ def processQueryResult(source, data, task=None):
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         machine.cooverride = False
                         sendEventMsg(6, 'ED')
+                        device_reference.total_output = 0
                     elif (machine.lastHaltReason == const.CHG_MATERIAL or machine.lastHaltReason == const.SETUP):
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
@@ -523,7 +525,6 @@ def processBarcodeActivity(data):
             return 'fail'
 
 def processServerAction(data):
-    global device_reference
     actparam = data.split(',')
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
@@ -534,7 +535,6 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        device_reference.total_output = 0
         return True
     else:
         return False
