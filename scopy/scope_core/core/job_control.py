@@ -525,6 +525,7 @@ def processBarcodeActivity(data):
             return 'fail'
 
 def processServerAction(data):
+    global device_reference
     actparam = data.split(',')
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
@@ -535,6 +536,7 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
+        device_reference.total_output = 0
         return True
     else:
         return False
