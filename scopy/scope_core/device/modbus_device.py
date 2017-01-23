@@ -226,7 +226,7 @@ class ModbusDevice(AbstractDevice):
                 if raw_data != self.last_output:
                     self.mct = self.getmct()
                     self.calc_output(raw_data)
-            print ('total_output<{}> {}'.format(id(self.total_output), self._counter_param))
+            print ('total_output<{}> {}'.format(id(self._counter_param), self._counter_param))
             return (self.mct, self.total_output)
         else:
             return "fail"
