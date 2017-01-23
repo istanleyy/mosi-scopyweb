@@ -106,8 +106,8 @@ class ModbusDevice(AbstractDevice):
             result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
             if result is not None:
                 numhex = [result[1], result[0]]
-                self._counter_param[2] = self.hextoint32(numhex)
-                print "Device found, setting adjustment factor={}...".format(self._counter_param[2])
+                self.last_output = self.hextoint32(numhex)
+                print "Device found, setting adjustment factor={}...".format(self.last_output)
                 return True
             else:
                 return False
@@ -225,7 +225,7 @@ class ModbusDevice(AbstractDevice):
                 print 'TASK raw_data:{} {}'.format(raw_data, self._counter_param)
                 if raw_data != self.last_output:
                     self.mct = self.getmct()
-                    self.calc_output(raw_data)
+                    self._counter_param = self.calc_output(raw_data)
             print ('total_output<{}> {}'.format(id(self._counter_param), self._counter_param))
             return (self.mct, self.total_output)
         else:
@@ -245,6 +245,7 @@ class ModbusDevice(AbstractDevice):
             self.total_output += val
         self.last_output = val
         print 'CALC OUT {}'.format(self._counter_param)
+        return [self.total_output, self.mct, self.last_output]
 
     def getmct(self):
         """Calculates machine cycle time"""
