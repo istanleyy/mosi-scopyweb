@@ -21,7 +21,7 @@ from scope_core.models import Machine
 from scope_core.config import settings
 
 class ModbusDevice(AbstractDevice):
-    """Modbus device driver for ScopePi"""
+    """Modbus device connector for ScopePi"""
     ##############################################
     # Define inherit properties and methods
     ##############################################
@@ -36,7 +36,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.2'
+        return '0.1.3'
 
     @property
     def description(self):
@@ -49,6 +49,10 @@ class ModbusDevice(AbstractDevice):
     @connectionManager.setter
     def connectionManager(self, newObj):
         self._connectionManager = newObj
+
+    @property
+    def device_id(self):
+        return self._did
 
     @property
     def is_connected(self):
@@ -71,7 +75,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def mct(self):
-        """Alias for the machine cycle time component of _counter_param"""
+        """Property to track machine cycle time"""
         return self._mct
 
     @mct.setter
@@ -80,15 +84,12 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def last_output(self):
-        """Alias for the last output component of _counter_param"""
+        """Counter to track last seen output"""
         return self._last_output
 
     @last_output.setter
     def last_output(self, new_val):
         self._last_output = new_val
-
-    def device_id(self):
-        return self._did
 
     def connect(self):
         """Connects to the device data source via connectionManager"""

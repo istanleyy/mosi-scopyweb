@@ -17,23 +17,17 @@ fcs_injection_db.py
 """
 
 import logging
-import device_definition as const
-from abstract_device import AbstractDevice
+import scope_core.device.device_definition as const
+from scope_core.device.abstract_device import AbstractDevice
 from scope_core.device_manager.mysql_manager import MySqlConnectionManager
 from scope_core.models import Machine
 from scope_core.config import settings
 
 class FCSInjectionDevice_db(AbstractDevice):
-
+    """FCS DB server mysql connector for ScopePi"""
     ##############################################
     # Define inherit properties and methods
     ##############################################
-    _connection_manager = MySqlConnectionManager()
-    _logger = None
-    _did = 'not_set'
-    _is_connected = False
-    _total_output = 0
-    _status = const.IDLE
 
     @property
     def name(self):
@@ -45,7 +39,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.1'
+        return '0.1.2'
 
     @property
     def description(self):
@@ -91,13 +85,22 @@ class FCSInjectionDevice_db(AbstractDevice):
         self._connection_manager.disconnect()
         self._is_connected = False
 
+    @property
+    def last_output(self):
+        """Counter to track last seen output"""
+        return self._last_output
+
+    @last_output.setter
+    def last_output(self, new_val):
+        self._last_output = new_val
+
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
         query = ("SELECT ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did))
         result = self._connection_manager.query(query)
         if result is not None:
-            self.last_modnum = result[0]
-            print "Device found, setting adjustment factor={}...".format(self.last_modnum)
+            self.last_output = result[0]
+            print "Device found, setting adjustment factor={}...".format(self.last_output)
             return True
         else:
             return False
@@ -117,9 +120,17 @@ class FCSInjectionDevice_db(AbstractDevice):
             modechange = False
             modestr = result[0].encode('utf-8', 'ignore')
 
-            if machine.opstatus == const.CHG_MOLD:
-                self.last_modnum = modnum
-                self._total_output = 0
+            if machine.cooverride:
+                if self._status != const.CHG_MOLD:
+                    self._status = const.CHG_MOLD
+                    self.last_output = modnum
+            else:
+                if self._status == const.CHG_MOLD:
+                    self._status = const.IDLE
+
+            if machine.opstatus != self._status:
+                machine.opstatus = self._status
+                statuschange = True
 
             if modestr[0] == '1':
                 self.mode = const.MANUAL_MODE
@@ -180,15 +191,17 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connection_manager.query(query)
         print result
         if result is not None:
+            if self._status == const.CHG_MOLD:
+                self.total_output = 0
+                self.last_output = result[1]
+            if result[1] != self.last_output:
+                self.total_output = self.calc_output(result[1])
+                self.last_output = result[1]
             # FCS server updates data every minute.
-            return (60, self.calc_output(result[1]))
+            return (60, self.total_output)
         else:
             self._logger.error('Cannot query production status.')
             return "fail"
-
-    def reset_output(self):
-        """Resets _total_output counter"""
-        self.total_output = 0
 
     def calc_output(self, raw_data):
         """
@@ -196,19 +209,24 @@ class FCSInjectionDevice_db(AbstractDevice):
         Arguments:
         raw_data -- the counter value of completed molds obtained from FCS DB query.
         """
-        if raw_data >= self.last_modnum:
-            mod_diff = raw_data - self.last_modnum
-            self._total_output += mod_diff
+        t_output = self.total_output
+        if raw_data >= self.last_output:
+            mod_diff = raw_data - self.last_output
+            t_output += mod_diff
         else:
-            self._total_output += raw_data
-        self.last_modnum = raw_data
-        return self._total_output
+            t_output += raw_data
+        return t_output
 
     def __init__(self, did):
         self._logger = logging.getLogger('scopepi.debug')
+        self._connection_manager = MySqlConnectionManager()
         self._did = did
+        self._is_connected = False
+        self._status = const.IDLE
+        self._total_output = 0
+        self._last_output = 0
+
         self.mode = const.OFFLINE
-        self.last_modnum = 0
 
         if self.connect():
             print "DB connected. Check device ID={}...".format(did)
