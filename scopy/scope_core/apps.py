@@ -10,6 +10,7 @@ class ScopeCoreConfig(AppConfig):
     verbose_name = 'Scope Device Adapter'
 
     def ready(self):
+        """Post-init script for Django server"""
         import logging
         from .tasks import pollDeviceStatus
         from scope_core.core import job_control
@@ -19,15 +20,15 @@ class ScopeCoreConfig(AppConfig):
         logger = logging.getLogger('scopepi.debug')
 
         job_control.modelCheck()
-        socketServer = SocketServer.getInstance()
-        socketServer.start()
-        scopeDevice = DeviceManager()
-        if scopeDevice.get_instance().is_connected:
-            job_control.setup(scopeDevice)
+        socket_server = SocketServer.getInstance()
+        socket_server.start()
+        scope_device = DeviceManager()
+        if scope_device.get_instance().is_connected:
+            job_control.setup(scope_device)
             pollDeviceStatus.delay()
         else:
-            logger.critical("Unable to connect to device {}".format(scopeDevice.get_did()))
-            print "!!! Unable to connect to device {} !!!".format(scopeDevice.get_did())
+            logger.critical("Unable to connect to device {}".format(scope_device.get_did()))
+            print "!!! Unable to connect to device {} !!!".format(scope_device.get_did())
             job_control.processQueryResult('app', 'fail')
             if not settings.DEBUG:
                 sys.exit(1)

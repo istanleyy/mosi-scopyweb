@@ -46,11 +46,11 @@ class FCSInjectionDevice_db(AbstractDevice):
         return 'A device implementation to collect data from MWeb database for a single FCS injection mold machine.'
 
     @property
-    def connectionManager(self):
+    def connection_manager(self):
         return self._connection_manager
 
-    @connectionManager.setter
-    def connectionManager(self, newObj):
+    @connection_manager.setter
+    def connection_manager(self, newObj):
         self._connection_manager = newObj
 
     @property
@@ -105,7 +105,7 @@ class FCSInjectionDevice_db(AbstractDevice):
         else:
             return False
 
-    def getDeviceStatus(self):
+    def get_device_status(self):
         query = (
             "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
             )
@@ -166,7 +166,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             self._logger.error('Cannot query machine status.')
             return "fail"
 
-    def getAlarmStatus(self):
+    def get_alarm_status(self):
         query = (
             "SELECT alarmid,alarmstatus FROM a_alarm AS A INNER JOIN (SELECT DISTINCT injid FROM cal_data2 WHERE colmachinenum='{}') AS C ON A.injid=C.injid ORDER BY strtime DESC LIMIT 1".format(self._did)
             )
@@ -184,7 +184,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             self._logger.error('Cannot query alarm status.')
             return "fail"
 
-    def getProductionStatus(self):
+    def get_production_status(self):
         query = (
             "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
             )

@@ -14,6 +14,7 @@ abstract_device.py
 import abc
 
 class AbstractDevice(object):
+    """Device interface to define common properties and methods for ScopePi compatible connectors"""
     __metaclass__ = abc.ABCMeta
 
     @abc.abstractproperty
@@ -37,12 +38,12 @@ class AbstractDevice(object):
         return
 
     @abc.abstractproperty
-    def connectionManager(self):
+    def connection_manager(self):
         """Get the connection manager for the concrete device"""
         return
 
-    @connectionManager.setter
-    def connectionManager(self, newObj):
+    @connection_manager.setter
+    def connection_manager(self, conn_obj):
         """Sets the connection manager for the concrete device"""
         return
 
@@ -62,17 +63,17 @@ class AbstractDevice(object):
         return
 
     @abc.abstractmethod
-    def getDeviceStatus(self):
+    def get_device_status(self):
         """Retrieve device's operating status"""
         return
 
     @abc.abstractmethod
-    def getAlarmStatus(self):
+    def get_alarm_status(self):
         """Retrieve device's alarm status"""
         return
 
     @abc.abstractmethod
-    def getProductionStatus(self):
+    def get_production_status(self):
         """Retrieve device's production status"""
         return
 

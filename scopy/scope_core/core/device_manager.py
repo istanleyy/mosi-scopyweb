@@ -38,4 +38,4 @@ class DeviceManager(object):
 
     def get_did(self):
         """Returns the device ID of the corresponding instance"""
-        return self._device_instance.device_id()
+        return self._device_instance.device_id

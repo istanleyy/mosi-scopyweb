@@ -43,12 +43,12 @@ class ModbusDevice(AbstractDevice):
         return 'A device implementation to collect data from a device using Modbus protocol.'
 
     @property
-    def connectionManager(self):
-        return self._connectionManager
+    def connection_manager(self):
+        return self._connection_manager
 
-    @connectionManager.setter
-    def connectionManager(self, newObj):
-        self._connectionManager = newObj
+    @connection_manager.setter
+    def connection_manager(self, newObj):
+        self._connection_manager = newObj
 
     @property
     def device_id(self):
@@ -93,17 +93,17 @@ class ModbusDevice(AbstractDevice):
 
     def connect(self):
         """Connects to the device data source via connectionManager"""
-        return self._connectionManager.connect()
+        return self._connection_manager.connect()
 
     def disconnect(self):
         """Disconnects from the data source via connectionManager"""
-        self._connectionManager.disconnect()
+        self._connection_manager.disconnect()
         self._is_connected = False
 
-    def checkDeviceExists(self):
+    def check_device_exists(self):
         """Check if target device with given ID exists"""
         try:
-            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
+            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 2)
             if result is not None:
                 numhex = [result[1], result[0]]
                 self.last_output = self.hextoint32(numhex)
@@ -115,10 +115,10 @@ class ModbusDevice(AbstractDevice):
             print 'Cannot connect to device!'
             return False
 
-    def getDeviceStatus(self):
+    def get_device_status(self):
         try:
             # Control registers map: [opmode, chovrsw, chmatsw, moldid]
-            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
         except socket_error:
             return 'fail'
 
@@ -132,7 +132,7 @@ class ModbusDevice(AbstractDevice):
             statuschange = False
             modechange = False
 
-            modeval = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
+            modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
 
             if result[0] == 2:
                 self._status = const.CHG_MOLD
@@ -184,9 +184,9 @@ class ModbusDevice(AbstractDevice):
         else:
             return "fail"
 
-    def getAlarmStatus(self):
+    def get_alarm_status(self):
         try:
-            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
+            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
         except socket_error:
             return 'fail'
 
@@ -202,9 +202,9 @@ class ModbusDevice(AbstractDevice):
         else:
             return "fail"
 
-    def getProductionStatus(self):
+    def get_production_status(self):
         try:
-            result = self._connectionManager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
+            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
         except socket_error:
             return 'fail'
 
@@ -227,7 +227,7 @@ class ModbusDevice(AbstractDevice):
                     self.mct = self.getmct()
                     self.total_output = self.calc_output(raw_data)
                     self.last_output = raw_data
-            print ('total_output<{}> {}'.format(id(self.total_output), self.total_output))
+            print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
             return (self.mct, self.total_output)
         else:
             return "fail"
@@ -273,7 +273,7 @@ class ModbusDevice(AbstractDevice):
             return registers[1]
 
     def __init__(self, did):
-        self._connectionManager = ModbusConnectionManager('tcp')
+        self._connection_manager = ModbusConnectionManager('tcp')
         self._did = did
         self._is_connected = False
         self._status = const.IDLE
@@ -286,7 +286,7 @@ class ModbusDevice(AbstractDevice):
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
-            if self.checkDeviceExists():
+            if self.check_device_exists():
                 self._is_connected = True
                 print "Device is {}, Module version {}\n".format(self.name, self.version)
             else:

@@ -23,38 +23,39 @@ from scope_core.device import device_definition as const
 from scope_core.config import settings
 from . import xmlparser, request_sender, socket_server
 
-logger = logging.getLogger('scopepi.debug')
-device_reference = None
-lastOutput = 0
-cycleCount = 0
+LOGGER = logging.getLogger('scopepi.debug')
+DEVICE_REFERENCE = None
+LAST_OUTPUT = 0
+CYCLE_COUNT = 0
 
 def poll_device_status():
-    global device_reference
-    if device_reference:
+    global DEVICE_REFERENCE
+    if DEVICE_REFERENCE:
         processQueryResult(
             'opStatus',
-            device_reference.getDeviceStatus(),
+            DEVICE_REFERENCE.get_device_status(),
             PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0])
 
 def poll_alarm_status():
-    global device_reference
-    result = device_reference.getAlarmStatus()
-    if device_reference and result:
+    global DEVICE_REFERENCE
+    result = DEVICE_REFERENCE.get_alarm_status()
+    if DEVICE_REFERENCE and result:
         processQueryResult(
             'alarmStatus',
             result)
 
 def poll_prod_status():
-    global device_reference
-    result = device_reference.getProductionStatus()
-    if device_reference and result:
+    global DEVICE_REFERENCE
+    result = DEVICE_REFERENCE.get_production_status()
+    if DEVICE_REFERENCE and result:
         processQueryResult(
             'opMetrics',
             result,
             PeriodicTask.objects.filter(name='scope_core.tasks.pollProdStatus')[0])
 
 def processQueryResult(source, data, task=None):
-    global device_reference
+    global LOGGER
+    global DEVICE_REFERENCE
     session = SessionManagement.objects.first()
     machine = Machine.objects.first()
 
@@ -111,7 +112,7 @@ def processQueryResult(source, data, task=None):
                         # If previous machine status is CHG_MOLD, need to send CO end message
                         machine.cooverride = False
                         sendEventMsg(6, 'ED')
-                        device_reference.total_output = 0
+                        DEVICE_REFERENCE.total_output = 0
                     elif (machine.lastHaltReason == const.CHG_MATERIAL or machine.lastHaltReason == const.SETUP):
                         # If previous status is CHG_MATERIAL, need to send DT end message
                         sendEventMsg(1, 'X1')
@@ -191,7 +192,7 @@ def processQueryResult(source, data, task=None):
             # in defined number of cycles, then the machine is idling
             if idleDetect(pcs) and not session.errflag and machine.opstatus != 2:
                 sendEventMsg(2)
-                logger.warning('job_control detect machine idle.')
+                LOGGER.warning('job_control detect machine idle.')
 
             # Log event only when there are actual outputs from the machine
             if ProductionDataTS.objects.last() is None or pcs != ProductionDataTS.objects.last().output:
@@ -261,13 +262,13 @@ def sendRequest(msg):
                 return result
 
 def setMsgBlock():
-    global logger
+    global LOGGER
     SessionManagement.objects.first().set_msg_block()
-    logger.warning('Blocking data transfer due to fail recovery error.')
+    LOGGER.warning('Blocking data transfer due to fail recovery error.')
     print '\033[91m' + '[Scopy] Blocking data transfer to server due to fail recovery error.' + '\033[0m'
 
 def sendMsgBuffer():
-    global logger
+    global LOGGER
     # getUnsyncMsgStr() returns None if there's an error getting the xml string
     result = request_sender.sendPostRequest(xmlparser.getUnsyncMsgStr(), True)
     if result[0]:
@@ -278,12 +279,12 @@ def sendMsgBuffer():
         session.save()
         # Clear unsync message buffer
         xmlparser.flushUnsyncMsg()
-        logger.warning('Resumed data transfer to server.')
+        LOGGER.warning('Resumed data transfer to server.')
         print '\033[91m' + '[Scopy] Resumed data transfer to server.' + '\033[0m'
     else:
         if result[1] == 'ServerError:sync fail':
             setMsgBlock()
-            logger.warning('Message sync failed.')
+            LOGGER.warning('Message sync failed.')
         #print '\033[91m' + '[Scopy] Cannot send message cache to server.' + '\033[0m'
     return result[0]
 
@@ -318,21 +319,21 @@ def setup(device_ref):
     3) Get jobs for this node from server
     4) Check job state, resumer production output counter if necessary
     """
-    global logger
-    global device_reference
-    global lastOutput
+    global LOGGER
+    global DEVICE_REFERENCE
+    global LAST_OUTPUT
 
-    device_reference = device_ref.get_instance()
+    DEVICE_REFERENCE = device_ref.get_instance()
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
 
     job = SessionManagement.objects.last().job
     if (job.jobid == ProductionDataTS.objects.last().job.jobid) and job.active:
-        lastOutput = ProductionDataTS.objects.last().output
-        logger.warning('Resuming job output count at {} pcs.'.format(lastOutput))
-        print 'Resume job output counter at {} pcs.'.format(lastOutput)
-    if lastOutput != 0:
-        device_reference.total_output = lastOutput
+        LAST_OUTPUT = ProductionDataTS.objects.last().output
+        LOGGER.warning('Resuming job output count at {} pcs.'.format(LAST_OUTPUT))
+        print 'Resume job output counter at {} pcs.'.format(LAST_OUTPUT)
+    if LAST_OUTPUT != 0:
+        DEVICE_REFERENCE.total_output = LAST_OUTPUT
 
 def getJobsFromServer():
     # If all jobs in db are done (not active), get new jobs from server
@@ -350,14 +351,14 @@ def getJobsFromServer():
         return True
 
 def idleDetect(pcs):
-    global lastOutput
-    global cycleCount
-    if lastOutput != pcs:
-        lastOutput = pcs
-        cycleCount = 0
+    global LAST_OUTPUT
+    global CYCLE_COUNT
+    if LAST_OUTPUT != pcs:
+        LAST_OUTPUT = pcs
+        CYCLE_COUNT = 0
     else:
-        cycleCount += 1
-        if cycleCount == settings.IDLE_CYCLE:
+        CYCLE_COUNT += 1
+        if CYCLE_COUNT == settings.IDLE_CYCLE:
             return True
     return False
 
@@ -392,7 +393,7 @@ def evalCOCondition(machine, session):
     return 'nochange'
 
 def performChangeOver(session, task, moldserial=None):
-    global logger
+    global LOGGER
     # Set current job inactive
     oldJob = session.job
     oldJob.inprogress = False
@@ -408,7 +409,7 @@ def performChangeOver(session, task, moldserial=None):
             session.job = newJob[0]
             session.save()
             if task is None:
-                logger.error('Cannot update task period of new job.')
+                LOGGER.error('Cannot update task period of new job.')
                 return False
             else:
                 # Compare polling period with retrieved mct value
@@ -438,7 +439,7 @@ def performChangeOver(session, task, moldserial=None):
         return False
 
 def processBarcodeActivity(data):
-    global logger
+    global LOGGER
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -470,10 +471,10 @@ def processBarcodeActivity(data):
                             'PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT')
                             )
             except UserActivity.DoesNotExist:
-                logger.exception('User {0} did not logged in.'.format(uid))
+                LOGGER.exception('User {0} did not logged in.'.format(uid))
                 return 'fail'
             except UserActivity.MultipleObjectsReturned:
-                logger.exception('ScopePi login process error.')
+                LOGGER.exception('ScopePi login process error.')
                 return 'fail'
             finally:
                 print "Users: ", UserActivity.objects.filter(lastLogout=None)
@@ -525,7 +526,7 @@ def processBarcodeActivity(data):
             return 'fail'
 
 def processServerAction(data):
-    global device_reference
+    global DEVICE_REFERENCE
     actparam = data.split(',')
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
@@ -536,12 +537,13 @@ def processServerAction(data):
             machine.save()
         elif result > 0:
             sendEventMsg(6, 'NJ')
-        device_reference.total_output = 0
+        DEVICE_REFERENCE.total_output = 0
         return True
     else:
         return False
 
 def updateMultiplier(multi):
+    global LOGGER
     currJob = SessionManagement.objects.first().job
     oldCT = currJob.ct
     oldMulti = currJob.multiplier
@@ -549,10 +551,10 @@ def updateMultiplier(multi):
     newCT = multi*(oldCT/oldMulti)
     currJob.ct = newCT
     currJob.save()
-    logger.warning('Updated multiplier and CT. ({0},{1})'.format(multi, newCT))
+    LOGGER.warning('Updated multiplier and CT. ({0},{1})'.format(multi, newCT))
 
 def performChangeOverByID(id):
-    global logger
+    global LOGGER
     session = SessionManagement.objects.first()
     # Don't change job if current JobId matches
     if session.job.jobid != int(id):
@@ -572,7 +574,7 @@ def performChangeOverByID(id):
                 session.job = newJob[0]
                 session.save()
                 if task is None:
-                    logger.error('Cannot update task period of new job.')
+                    LOGGER.error('Cannot update task period of new job.')
                     return 1
                 else:
                     # Compare polling period with retrieved mct value
@@ -587,16 +589,16 @@ def performChangeOverByID(id):
                             )
                         task.interval_id = intv.id
                         task.save()
-                    logger.warning('Server forced CO.')
+                    LOGGER.warning('Server forced CO.')
                     print '\033[93m' + '[Scopy] Server force CO.' + '\033[0m'
                     return 0
             else:
-                logger.error('Cannot find job matching id {0}.'.format(id))
+                LOGGER.error('Cannot find job matching id {0}.'.format(id))
                 print '\033[91m' + '[Scopy] Unable to find next job matching ID: ' + id + '\033[0m'
                 return 2
     # Warn unable to find new job
     else:
-        logger.error('Ignore CO request for repeated job ({0}).'.format(id))
+        LOGGER.error('Ignore CO request for repeated job ({0}).'.format(id))
         print '\033[91m' + '[Scopy] Ignoring CO request for repeated job.' + '\033[0m'
         return -1
 
