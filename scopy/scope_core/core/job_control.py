@@ -328,7 +328,8 @@ def setup(device_ref):
     getJobsFromServer()
 
     job = SessionManagement.objects.last().job
-    if (job.jobid == ProductionDataTS.objects.last().job.jobid) and job.active:
+    prod_hist = ProductionDataTS.objects.last()
+    if prod_hist is not None and (job.jobid == prod_hist.job.jobid) and job.active:
         LAST_OUTPUT = ProductionDataTS.objects.last().output
         LOGGER.warning('Resuming job output count at {} pcs.'.format(LAST_OUTPUT))
         print 'Resume job output counter at {} pcs.'.format(LAST_OUTPUT)
