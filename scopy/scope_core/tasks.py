@@ -46,8 +46,7 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
-    init_task = PeriodicTask.objects.filter(task='scope_core.tasks.poll_status_task')[0]
-    init_task.delay()
+    poll_status_task()
 
 def poll_status_task():
     """Task to poll device status"""
