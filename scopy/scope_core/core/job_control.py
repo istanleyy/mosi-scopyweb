@@ -16,7 +16,7 @@ job_control.py
 import pytz
 import logging
 from datetime import datetime
-from djcelery.models import IntervalSchedule, PeriodicTask
+from django_celery_beat.models import IntervalSchedule, PeriodicTask
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
@@ -206,7 +206,7 @@ def processQueryResult(source, data, task=None):
                 session.job.save()
             if task.interval.every != ct:
                 intv, created = IntervalSchedule.objects.get_or_create(
-                    every=ct, period='seconds'
+                    every=ct, period=IntervalSchedule.SECONDS
                     )
                 task.interval_id = intv.id
                 task.save()
@@ -420,7 +420,7 @@ def performChangeOver(session, task, moldserial=None):
                     session.job.save()
                 if ct != task.interval.every:
                     intv, created = IntervalSchedule.objects.get_or_create(
-                        every=ct, period='seconds'
+                        every=ct, period=IntervalSchedule.SECONDS
                         )
                     task.interval_id = intv.id
                     task.save()
@@ -585,7 +585,7 @@ def performChangeOverByID(id):
                         session.job.save()
                     if ct != task.interval.every:
                         intv, created = IntervalSchedule.objects.get_or_create(
-                            every=ct, period='seconds'
+                            every=ct, period=IntervalSchedule.SECONDS
                             )
                         task.interval_id = intv.id
                         task.save()

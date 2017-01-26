@@ -41,8 +41,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_extensions',
     'scope_core.apps.ScopeCoreConfig',
+    'celery',
+    'django_celery_beat',
     'rest_framework',
-    'djcelery',
     'dashing',
 ]
 
@@ -90,8 +91,7 @@ REST_FRAMEWORK = {
 # Celery settings
 
 BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
-CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_IGNORE_RESULT = True
 CELERY_DISABLE_RATE_LIMITS = True
 CELERY_ACCEPT_CONTENT = ['json']
@@ -216,8 +216,3 @@ DASHING = {
         'dashing.permissions.AllowAny',
     )
 }
-
-# Additional djcelery settings
-
-import djcelery
-djcelery.setup_loader()

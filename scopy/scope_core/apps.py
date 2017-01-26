@@ -12,7 +12,7 @@ class ScopeCoreConfig(AppConfig):
     def ready(self):
         """Post-init script for Django server"""
         import logging
-        from .tasks import pollDeviceStatus
+        from . import tasks
         from scope_core.core import job_control
         from scope_core.core.device_manager import DeviceManager
         from scope_core.core.socket_server import SocketServer
@@ -25,7 +25,7 @@ class ScopeCoreConfig(AppConfig):
         scope_device = DeviceManager()
         if scope_device.get_instance().is_connected:
             job_control.setup(scope_device)
-            pollDeviceStatus.delay()
+            tasks.init_tasks()
         else:
             logger.critical("Unable to connect to device {}".format(scope_device.get_did()))
             print "!!! Unable to connect to device {} !!!".format(scope_device.get_did())
