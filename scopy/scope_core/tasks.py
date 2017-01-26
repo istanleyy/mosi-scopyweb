@@ -31,17 +31,17 @@ def init_tasks():
         every=P_PRIOR_MID,
         period=IntervalSchedule.SECONDS,
     )
-    PeriodicTask.objects.create(
+    PeriodicTask.objects.get_or_create(
         interval=schedule_high,
         name='Polling device status',
         task='scope_core.tasks.poll_status_task',
     )
-    PeriodicTask.objects.create(
+    PeriodicTask.objects.get_or_create(
         interval=schedule_low,
         name='Polling alarm status',
         task='scope_core.tasks.poll_alarm_task',
     )
-    PeriodicTask.objects.create(
+    PeriodicTask.objects.get_or_create(
         interval=schedule,
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
