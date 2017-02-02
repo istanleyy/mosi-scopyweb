@@ -34,7 +34,7 @@ def init_tasks():
         every=P_PRIOR_MID,
         period=IntervalSchedule.SECONDS,
     )
-    PeriodicTask.objects.get_or_create(
+    firstTask = PeriodicTask.objects.get_or_create(
         interval=schedule_high,
         name='Polling device status',
         task='scope_core.tasks.poll_status_task',
@@ -49,7 +49,8 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
-
+    firstTask.delay()
+"""
 @app.on_after_configure.connect
 def setup_periodic_tasks(sender, **kwargs):
     # Calls test('hello') every 10 seconds.
@@ -63,7 +64,7 @@ def setup_periodic_tasks(sender, **kwargs):
         crontab(hour=7, minute=30, day_of_week=1),
         test.s('Happy Mondays!'),
     )
-
+"""
 @app.task
 def poll_status_task():
     """Task to poll device status"""
