@@ -49,7 +49,9 @@ def init_tasks():
     )
     PeriodicTask.objects.all().update(last_run_at=None)
     PeriodicTasks.changed()
+    poll_status_task()
 
+@app.task
 def poll_status_task():
     """Task to poll device status"""
     global LOCK_ID
@@ -67,6 +69,7 @@ def poll_status_task():
     else:
         LOGGER.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
+@app.task
 def poll_alarm_task():
     """Task to poll alarm status"""
     global LOCK_ID
@@ -84,6 +87,7 @@ def poll_alarm_task():
     else:
         LOGGER.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
+@app.task
 def poll_metrics_task():
     """Task to poll production metrics"""
     global LOCK_ID
