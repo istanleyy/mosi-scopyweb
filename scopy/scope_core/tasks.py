@@ -1,6 +1,7 @@
 """Celery task definition for scope_core app"""
 from __future__ import absolute_import, unicode_literals
 
+from celery import Celery
 from celery.utils.log import get_task_logger
 from django_celery_beat.models import PeriodicTask, IntervalSchedule
 from django.core.cache import cache
@@ -12,6 +13,8 @@ P_PRIOR_MID = 90
 P_PRIOR_LOW = 120
 LOCK_EXPIRE = 60
 LOCK_ID = "shared-lock"
+
+app = Celery()
 
 def init_tasks():
     """Initialize schedules and tasks
@@ -46,7 +49,20 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
-    poll_status_task()
+
+@app.on_after_configure.connect
+def setup_periodic_tasks(sender, **kwargs):
+    # Calls test('hello') every 10 seconds.
+    sender.add_periodic_task(10.0, test.s('hello'), name='add every 10')
+
+    # Calls test('world') every 30 seconds
+    sender.add_periodic_task(30.0, test.s('world'), expires=10)
+
+    # Executes every Monday morning at 7:30 a.m.
+    sender.add_periodic_task(
+        crontab(hour=7, minute=30, day_of_week=1),
+        test.s('Happy Mondays!'),
+    )
 
 @app.task
 def poll_status_task():
