@@ -90,8 +90,8 @@ REST_FRAMEWORK = {
 
 # Celery settings
 
-BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
-CELERYBEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+CELERY_BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_IGNORE_RESULT = True
 CELERY_DISABLE_RATE_LIMITS = True
 CELERY_ACCEPT_CONTENT = ['json']

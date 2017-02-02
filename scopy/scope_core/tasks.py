@@ -2,9 +2,9 @@
 from __future__ import absolute_import, unicode_literals
 
 from celery.utils.log import get_task_logger
-from django_celery_beat.models import PeriodicTask, IntervalSchedule
+from django_celery_beat.models import PeriodicTask, PeriodicTasks, IntervalSchedule
 from django.core.cache import cache
-#from scopy.celery import app
+from scopy.celery import app
 from scope_core.core import job_control
 
 LOGGER = get_task_logger(__name__)
@@ -47,6 +47,8 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
+    PeriodicTask.objects.all().update(last_run_at=None)
+    PeriodicTasks.changed()
 
 def poll_status_task():
     """Task to poll device status"""
