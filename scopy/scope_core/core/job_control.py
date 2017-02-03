@@ -259,7 +259,7 @@ def sendRequest(msg):
                 return False
             else:
                 # return result of the request True/False
-                return result
+                return result[0]
 
 def setMsgBlock():
     global LOGGER
@@ -521,7 +521,7 @@ def processBarcodeActivity(data):
         if activity == 'MULCHG':
             updateMultiplier(int(params))
 
-        if sendEventMsg(activity, 'WS', uid, params)[0]:
+        if sendEventMsg(activity, 'WS', uid, params):
             return 'ok'
         else:
             return 'fail'
