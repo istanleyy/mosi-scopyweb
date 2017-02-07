@@ -49,7 +49,6 @@ def init_tasks():
     metric_task[0].interval_id = schedule.id
     metric_task[0].save()
     PeriodicTask.objects.all().update(last_run_at=None)
-    PeriodicTasks.changed()
     poll_status_task.delay()
 
 @app.task
