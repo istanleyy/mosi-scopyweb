@@ -139,7 +139,7 @@ class SocketServer(Thread):
         print 'Socket now listening...\n'
         while not self.cancelled:
             # wait to accept a connection - blocking call
-            (conn, addr) = self.sock.accept()
+            conn, addr = self.sock.accept()
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
 
             # start new thread takes 1st argument as a function name to be run,
@@ -182,9 +182,9 @@ class SocketServer(Thread):
             start_new_thread(self.listen_bcast, (self.bsock,))
 
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print 'Message socket created...'
             # Bind socket to local host and port
             self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            print 'Message socket created...'
             try:
                 self.sock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
                 print 'Socket bind complete!'
