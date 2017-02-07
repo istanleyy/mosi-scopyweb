@@ -42,13 +42,17 @@ def init_tasks():
         name='Polling alarm status',
         task='scope_core.tasks.poll_alarm_task',
     )
+    # Don't select interval key in get_or_create method when
+    # checking metric_task to avoid duplicatation error
     metric_task = PeriodicTask.objects.get_or_create(
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
+    # Update (initialize) interval for the correct metric_task
     metric_task[0].interval_id = schedule.id
     metric_task[0].save()
     PeriodicTask.objects.all().update(last_run_at=None)
+    # Check device status when system is up
     poll_status_task.delay()
 
 @app.task

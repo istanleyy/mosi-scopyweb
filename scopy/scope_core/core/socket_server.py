@@ -196,3 +196,6 @@ class SocketServer(Thread):
                     print errmsg
                     self.logger.exception(errmsg)
                     sys.exit(1)
+
+            # Start message socket thread
+            self.start()

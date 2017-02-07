@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 import sys
-from thread import *
 from django.apps import AppConfig
 from scope_core.config import settings
 
@@ -21,7 +20,6 @@ class ScopeCoreConfig(AppConfig):
 
         job_control.modelCheck()
         socket_server = SocketServer.getInstance()
-        socket_server.start()
         scope_device = DeviceManager()
         if scope_device.get_instance().is_connected:
             job_control.setup(scope_device)
