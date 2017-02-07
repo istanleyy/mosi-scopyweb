@@ -46,7 +46,8 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
-    metric_task.interval = schedule
+    metric_task.interval_id = schedule.id
+    metric_task.save()
     PeriodicTask.objects.all().update(last_run_at=None)
     PeriodicTasks.changed()
     poll_status_task.delay()
