@@ -48,6 +48,7 @@ def init_tasks():
         task='scope_core.tasks.poll_metrics_task',
     )
     PeriodicTask.objects.all().update(last_run_at=None)
+    PeriodicTasks.changed()
     poll_status_task.delay()
 
 @app.task
