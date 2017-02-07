@@ -42,11 +42,11 @@ def init_tasks():
         name='Polling alarm status',
         task='scope_core.tasks.poll_alarm_task',
     )
-    PeriodicTask.objects.get_or_create(
-        interval=schedule,
+    metric_task = PeriodicTask.objects.get_or_create(
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
+    metric_task.interval = schedule
     PeriodicTask.objects.all().update(last_run_at=None)
     PeriodicTasks.changed()
     poll_status_task.delay()
