@@ -139,14 +139,14 @@ class SocketServer(Thread):
         print 'Socket now listening...\n'
         while not self.cancelled:
             # wait to accept a connection - blocking call
-            conn, addr = self.sock.accept()
+            conn, addr = self.msock.accept()
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
 
             # start new thread takes 1st argument as a function name to be run,
             # second is the tuple of arguments to the function.
             start_new_thread(self.clientthread, (conn,))
 
-        self.sock.close()
+        self.msock.close()
         self.bsock.close()
 
     # Ends the running server thread
@@ -181,15 +181,15 @@ class SocketServer(Thread):
             self.bsock.setblocking(0)
             start_new_thread(self.listen_bcast, (self.bsock,))
 
-            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Bind socket to local host and port
-            self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             print 'Message socket created...'
             try:
-                self.sock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+                self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
                 print 'Socket bind complete!'
                 # Start listening on socket
-                self.sock.listen(5)
+                self.msock.listen(5)
             except socket.error as msg:
                 if msg[0] != 48 and msg[0] != 98:
                     errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
