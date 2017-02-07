@@ -47,7 +47,6 @@ def init_tasks():
         name='Polling production metrics',
         task='scope_core.tasks.poll_metrics_task',
     )
-    PeriodicTask.objects.all().update(last_run_at=None)
     poll_status_task.delay()
 
 @app.task
