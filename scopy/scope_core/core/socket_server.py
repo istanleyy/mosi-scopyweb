@@ -110,7 +110,7 @@ class SocketServer(Thread):
 
     def listen_bcast(self, sock):
         print 'Broadcast listener created...'
-        while True:
+        while not self.cancelled:
             bmsg = select.select([sock], [], [])
             msg = bmsg[0][0].recv(1024)
             msg = msg.strip(' \t\n\r')
@@ -126,6 +126,7 @@ class SocketServer(Thread):
             else:
                 print 'Received broadcast message: {0}'.format(msg)
                 #self.logger.info('Received broadcast message: ' + msg)
+        sock.close()
 
     def send_bcast(self, msg):
         self.bsock.sendto(
@@ -134,6 +135,17 @@ class SocketServer(Thread):
             )
         print 'Send notification to peers: {}'.format(msg)
 
+    def listen_message(self, sock):
+        print 'Socket now listening...\n'
+        while not self.cancelled:
+            # wait to accept a connection - blocking call
+            conn, addr = sock.accept()
+            print '\nConnected with ' + addr[0] + ':' + str(addr[1])
+            # start new thread takes 1st argument as a function name to be run,
+            # second is the tuple of arguments to the function.
+            start_new_thread(self.clientthread, (conn,))
+        sock.close()
+    """
     # Over-rides Thread.run
     def run(self):
         print 'Socket now listening...\n'
@@ -147,7 +159,7 @@ class SocketServer(Thread):
             start_new_thread(self.clientthread, (conn,))
 
         self.msock.close()
-        self.bsock.close()
+        self.bsock.close()"""
 
     # Ends the running server thread
     def cancel(self):
@@ -184,7 +196,7 @@ class SocketServer(Thread):
             self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Bind socket to local host and port
             self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            print 'Message socket created...'
+            print 'Message socket created...\n'
             try:
                 self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
                 print 'Socket bind complete!'
@@ -198,4 +210,4 @@ class SocketServer(Thread):
                     sys.exit(1)
 
             # Start message socket thread
-            self.start()
+            start_new_thread(self.listen_message, (self.msock,))
