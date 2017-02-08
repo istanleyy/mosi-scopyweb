@@ -196,7 +196,6 @@ class SocketServer(object):
             self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Bind socket to local host and port
             self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.msock.setblocking(0)
             # Start message socket thread
             start_new_thread(self.listen_message, (self.msock,))
             print 'Message socket created...\n'
