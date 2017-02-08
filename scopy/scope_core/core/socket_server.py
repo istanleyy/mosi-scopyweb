@@ -20,7 +20,7 @@ import job_control
 from . import xmlparser
 from . import request_sender
 
-class SocketServer(Thread):
+class SocketServer(object):
     __instance = None
 
     # Function for handling connections. This will be used to create threads
@@ -172,7 +172,7 @@ class SocketServer(Thread):
         return SocketServer.__instance
 
     def __init__(self):
-        super(SocketServer, self).__init__()
+        #super(SocketServer, self).__init__()
         if SocketServer.__instance != None:
             # Throw exception maybe?
             pass
@@ -196,7 +196,11 @@ class SocketServer(Thread):
             self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             # Bind socket to local host and port
             self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            self.msock.setblocking(0)
+            # Start message socket thread
+            start_new_thread(self.listen_message, (self.msock,))
             print 'Message socket created...\n'
+
             try:
                 self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
                 print 'Socket bind complete!'
@@ -208,6 +212,3 @@ class SocketServer(Thread):
                     print errmsg
                     self.logger.exception(errmsg)
                     sys.exit(1)
-
-            # Start message socket thread
-            start_new_thread(self.listen_message, (self.msock,))
