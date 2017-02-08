@@ -22,6 +22,11 @@ from . import request_sender
 
 class SocketServer(object):
     __instance = None
+    __logger = logging.getLogger('scopepi.messaging')
+    __daemon = True
+    __cancelled = False
+    __is_co = False
+    __is_dt = False
 
     # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
@@ -36,21 +41,21 @@ class SocketServer(object):
             if not data:
                 break
             elif msg == 'bye':
-                self.logger.info('Magic word received, closing connection.')
+                SocketServer.__logger.info('Magic word received, closing connection.')
                 break
             elif msg[0] != '<':
                 msgContent = msg.split(':', 1)
                 if msgContent[0] == 'ServerError':
                     #print '\033[91m' + '[ServerError] ' + msgContent[1] + '\033[0m'
                     warnmsg = '[ServerError] {0}'.format(msgContent[1])
-                    self.logger.warning(warnmsg)
+                    SocketServer.__logger.warning(warnmsg)
                     if msgContent[1] == 'msg sync':
                         job_control.setMsgBlock()
                     reply = 'false:errorAck'
                 elif msgContent[0] == 'ServerMsg':
                     #print '\033[93m' + '[ServerMessage] ' + msgContent[1] + '\033[0m'
                     infomsg = '[ServerMessage] {0}'.format(msgContent[1])
-                    self.logger.info(infomsg)
+                    SocketServer.__logger.info(infomsg)
                     if msgContent[1] == 'alive check':
                         job_control.sendUpdateMsg()
                     elif msgContent[1] == 'sync ok':
@@ -59,7 +64,7 @@ class SocketServer(object):
                 elif msgContent[0] == 'ScanManager':
                     #print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
                     warnmsg = '[BarcodeActivity] {0}'.format(msgContent[1])
-                    self.logger.warning(warnmsg)
+                    SocketServer.__logger.warning(warnmsg)
                     if msgContent[1] == 'initiate':
                         reply = 'scan'
                     else:
@@ -67,27 +72,27 @@ class SocketServer(object):
                 elif msgContent[0] == 'ServerAction':
                     #print '\033[93m' + '[ServerAction] ' + msgContent[1] + '\033[0m'
                     warnmsg = '[ServerAction] {0}'.format(msgContent[1])
-                    self.logger.warning(warnmsg)
+                    SocketServer.__logger.warning(warnmsg)
                     if job_control.processServerAction(msgContent[1]):
                         reply = 'false:ok'
                     else:
                         reply = 'true:cannot perform server action'
                 elif msgContent[0] == 'test-toggleco':
                     # For testing, should remove this elif block in production!
-                    if not self.isCO:
+                    if not SocketServer.__is_co:
                         # Send job-terminating change-over msg
                         job_control.sendEventMsg(6, 'NJ')
-                    self.isCO = not self.isCO
+                    SocketServer.__is_co = not SocketServer.__is_co
                     reply = 'false:test'
                 elif msgContent[0] == 'test-toggledt':
                     # For testing, should remove this elif block in production!
-                    if not self.isDT:
+                    if not SocketServer.__is_dt:
                         # Downtime begins
                         job_control.sendEventMsg(4)
                     else:
                         # Downtime ends
                         job_control.sendEventMsg(1, 'X2')
-                    self.isDT = not self.isDT
+                    SocketServer.__is_dt = not SocketServer.__is_dt
                     reply = 'false:test'
                 elif msgContent[0] == 'test-jobstart':
                     # For testing, should remove this elif block in production!
@@ -97,10 +102,10 @@ class SocketServer(object):
                 else:
                     #print 'Received unknown message: ' + msg
                     errmsg = 'Socket server received unknown message: {0}'.format(msg)
-                    self.logger.error(errmsg)
+                    SocketServer.__logger.error(errmsg)
             elif xmlparser.isScopeXml(msg):
                 #print 'Received Scope message.'
-                self.logger.info('Received Scope message.')
+                SocketServer.__logger.info('Received Scope message.')
                 reply = 'false:ok'
             else:
                 break
@@ -110,7 +115,7 @@ class SocketServer(object):
 
     def listen_bcast(self, sock):
         print 'Broadcast listener created...'
-        while not self.cancelled:
+        while not SocketServer.__cancelled:
             bmsg = select.select([sock], [], [])
             msg = bmsg[0][0].recv(1024)
             msg = msg.strip(' \t\n\r')
@@ -137,7 +142,7 @@ class SocketServer(object):
 
     def listen_message(self, sock):
         print 'Socket now listening...\n'
-        while not self.cancelled:
+        while not SocketServer.__cancelled:
             # wait to accept a connection - blocking call
             conn, addr = sock.accept()
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
@@ -163,22 +168,15 @@ class SocketServer(object):
 
     # Ends the running server thread
     def cancel(self):
-        self.cancelled = True
+        SocketServer.__cancelled = True
 
     @staticmethod
     def getInstance():
         if SocketServer.__instance is None:
             SocketServer.__instance = SocketServer()
-            SocketServer.__instance.init()
         return SocketServer.__instance
 
-    def init(self):
-        self.logger = logging.getLogger('scopepi.messaging')
-        self.daemon = True
-        self.cancelled = False
-        self.isCO = False
-        self.isDT = False
-
+    def __init__(self):
         self.bsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
@@ -201,7 +199,7 @@ class SocketServer(object):
             if msg[0] != 48 and msg[0] != 98:
                 errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
                 print errmsg
-                self.logger.exception(errmsg)
+                SocketServer.__logger.exception(errmsg)
                 sys.exit(1)
         # Start message socket thread
         start_new_thread(self.listen_message, (self.msock,))
