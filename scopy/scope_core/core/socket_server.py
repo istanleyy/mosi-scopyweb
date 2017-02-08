@@ -168,46 +168,40 @@ class SocketServer(object):
     @staticmethod
     def getInstance():
         if SocketServer.__instance is None:
-            SocketServer()
+            SocketServer.__instance = SocketServer()
+            SocketServer.__instance.init()
         return SocketServer.__instance
 
-    def __init__(self):
-        #super(SocketServer, self).__init__()
-        if SocketServer.__instance != None:
-            # Throw exception maybe?
-            pass
-        else:
-            SocketServer.__instance = self
-            self.logger = logging.getLogger('scopepi.messaging')
-            self.daemon = True
-            self.cancelled = False
-            self.isCO = False
-            self.isDT = False
+    def init(self):
+        self.logger = logging.getLogger('scopepi.messaging')
+        self.daemon = True
+        self.cancelled = False
+        self.isCO = False
+        self.isDT = False
 
-            self.bsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            self.bsock.bind(
-                (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT'])
-                )
-            self.bsock.setblocking(0)
-            start_new_thread(self.listen_bcast, (self.bsock,))
+        self.bsock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.bsock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.bsock.bind(
+            (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT'])
+            )
+        self.bsock.setblocking(0)
+        start_new_thread(self.listen_bcast, (self.bsock,))
 
-            self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            # Bind socket to local host and port
-            self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            # Start message socket thread
-            start_new_thread(self.listen_message, (self.msock,))
-            print 'Message socket created...\n'
-
-            try:
-                self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
-                print 'Socket bind complete!'
-                # Start listening on socket
-                self.msock.listen(5)
-            except socket.error as msg:
-                if msg[0] != 48 and msg[0] != 98:
-                    errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
-                    print errmsg
-                    self.logger.exception(errmsg)
-                    sys.exit(1)
+        self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Bind socket to local host and port
+        self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        print 'Message socket created...\n'
+        try:
+            self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+            print 'Socket bind complete!'
+            # Start listening on socket
+            self.msock.listen(5)
+        except socket.error as msg:
+            if msg[0] != 48 and msg[0] != 98:
+                errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
+                print errmsg
+                self.logger.exception(errmsg)
+                sys.exit(1)
+        # Start message socket thread
+        start_new_thread(self.listen_message, (self.msock,))
