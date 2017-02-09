@@ -196,7 +196,6 @@ class SocketServer(object):
             print 'Socket bind complete!'
             # Start listening on socket
             self.msg_socket.listen(1)
-            print self.msg_socket.getsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR)
         except socket.error as msg:
             if msg[0] != 48 and msg[0] != 98:
                 errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
@@ -205,4 +204,4 @@ class SocketServer(object):
                 sys.exit(1)
         print 'Message socket created...\n'
         # Start message socket thread
-        start_new_thread(self.listen_message, (self.msg_socket,))
+        #start_new_thread(self.listen_message, (self.msg_socket,))
