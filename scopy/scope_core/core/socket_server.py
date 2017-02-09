@@ -27,6 +27,7 @@ class SocketServer(object):
     __cancelled = False
     __is_co = False
     __is_dt = False
+    __msg_socket = None
 
     # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
@@ -140,16 +141,16 @@ class SocketServer(object):
             )
         print 'Send notification to peers: {}'.format(msg)
 
-    def listen_message(self, sock):
+    def listen_message(self):
         print 'Socket now listening...\n'
         while not SocketServer.__cancelled:
             # wait to accept a connection - blocking call
-            conn, addr = sock.accept()
+            conn, addr = SocketServer.__msg_socket.accept()
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
             # start new thread takes 1st argument as a function name to be run,
             # second is the tuple of arguments to the function.
             start_new_thread(self.clientthread, (conn,))
-        sock.close()
+        SocketServer.__msg_socket.close()
     """
     # Over-rides Thread.run
     def run(self):
@@ -186,20 +187,19 @@ class SocketServer(object):
         self.bsock.setblocking(0)
         start_new_thread(self.listen_bcast, (self.bsock,))
 
-        self.msock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # Bind socket to local host and port
-        self.msock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        print 'Message socket created...\n'
+        SocketServer.__msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        SocketServer.__msg_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            self.msock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+            SocketServer.__msg_socket.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
             print 'Socket bind complete!'
             # Start listening on socket
-            self.msock.listen(0)
+            SocketServer.__msg_socket.listen(1)
         except socket.error as msg:
             if msg[0] != 48 and msg[0] != 98:
                 errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
                 print errmsg
                 SocketServer.__logger.exception(errmsg)
                 sys.exit(1)
+        print 'Message socket created...\n'
         # Start message socket thread
-        start_new_thread(self.listen_message, (self.msock,))
+        start_new_thread(self.listen_message, ())
