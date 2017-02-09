@@ -196,6 +196,7 @@ class SocketServer(object):
             print 'Socket bind complete!'
             # Start listening on socket
             self.msg_socket.listen(1)
+            print self.msg_socket.getsockopt()
         except socket.error as msg:
             if msg[0] != 48 and msg[0] != 98:
                 errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
