@@ -205,3 +205,15 @@ class SocketServer(object):
         print 'Message socket created...\n'
         # Start message socket thread
         #start_new_thread(self.listen_message, (self.msg_socket,))
+
+        print 'Socket now listening...\n'
+        while not SocketServer.__cancelled:
+            read_sockets, write_sockets, error_sockets = select.select([self.msg_socket], [], [])
+            for sock in read_sockets:
+                if sock == self.msg_socket:
+                    conn, addr = self.msg_socket.accept()
+                    print '\nConnected with ' + addr[0] + ':' + str(addr[1])
+                    # start new thread takes 1st argument as a function name to be run,
+                    # second is the tuple of arguments to the function.
+                    start_new_thread(self.clientthread, (conn,))
+        self.msg_socket.close()

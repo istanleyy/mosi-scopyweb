@@ -53,7 +53,7 @@ def init_tasks():
     metric_task[0].save()
     PeriodicTask.objects.all().update(last_run_at=None)
     # Check device status when system is up
-    poll_status_task.delay()
+    #poll_status_task.delay()
 
 @app.task
 def poll_status_task():
