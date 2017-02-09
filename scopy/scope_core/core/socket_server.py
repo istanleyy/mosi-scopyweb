@@ -20,7 +20,7 @@ import job_control
 from . import xmlparser
 from . import request_sender
 
-class SocketServer(object):
+class SocketServer(Thread):
     __instance = None
     __logger = logging.getLogger('scopepi.messaging')
     __daemon = True
@@ -141,33 +141,18 @@ class SocketServer(object):
             )
         print 'Send notification to peers: {}'.format(msg)
 
-    def listen_message(self, m_sock):
-        print 'Socket now listening...\n'
-        while not SocketServer.__cancelled:
-            read_sockets, write_sockets, error_sockets = select.select([m_sock], [], [])
-            for sock in read_sockets:
-                if sock == m_sock:
-                    conn, addr = m_sock.accept()
-                    print '\nConnected with ' + addr[0] + ':' + str(addr[1])
-                    # start new thread takes 1st argument as a function name to be run,
-                    # second is the tuple of arguments to the function.
-                    start_new_thread(self.clientthread, (conn,))
-        m_sock.close()
-    """
     # Over-rides Thread.run
     def run(self):
         print 'Socket now listening...\n'
-        while not self.cancelled:
+        while not SocketServer.__cancelled:
             # wait to accept a connection - blocking call
-            conn, addr = self.msock.accept()
+            conn, addr = self.msg_socket.accept()
             print '\nConnected with ' + addr[0] + ':' + str(addr[1])
 
             # start new thread takes 1st argument as a function name to be run,
             # second is the tuple of arguments to the function.
             start_new_thread(self.clientthread, (conn,))
-
-        self.msock.close()
-        self.bsock.close()"""
+        self.msg_socket.close()
 
     # Ends the running server thread
     def cancel(self):
@@ -204,16 +189,4 @@ class SocketServer(object):
                 sys.exit(1)
         print 'Message socket created...\n'
         # Start message socket thread
-        #start_new_thread(self.listen_message, (self.msg_socket,))
-
-        print 'Socket now listening...\n'
-        while not SocketServer.__cancelled:
-            read_sockets, write_sockets, error_sockets = select.select([self.msg_socket], [], [])
-            for sock in read_sockets:
-                if sock == self.msg_socket:
-                    conn, addr = self.msg_socket.accept()
-                    print '\nConnected with ' + addr[0] + ':' + str(addr[1])
-                    # start new thread takes 1st argument as a function name to be run,
-                    # second is the tuple of arguments to the function.
-                    start_new_thread(self.clientthread, (conn,))
-        self.msg_socket.close()
+        self.start()
