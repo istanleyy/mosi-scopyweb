@@ -27,10 +27,9 @@ class SocketServer(object):
     __cancelled = False
     __is_co = False
     __is_dt = False
-    __msg_socket = None
 
-    # Function for handling connections. This will be used to create threads
     def clientthread(self, conn):
+        """Function for handling connections. This will be used to create threads"""
         # Infinite loop so that function do not terminate and thread do not end.
         while True:
             # Receiving from client
@@ -114,10 +113,11 @@ class SocketServer(object):
             conn.sendall(reply)
             #print 'Local reply: ' + reply
 
-    def listen_bcast(self, sock):
+    def listen_bcast(self, b_sock):
+        """Listen anf process broadcast message"""
         print 'Broadcast listener created...'
         while not SocketServer.__cancelled:
-            bmsg = select.select([sock], [], [])
+            bmsg = select.select([b_sock], [], [])
             msg = bmsg[0][0].recv(1024)
             msg = msg.strip(' \t\n\r')
             if msg == 'ServerMsg:alive check':
@@ -131,26 +131,28 @@ class SocketServer(object):
                     job_control.processBarcodeActivity(body)
             else:
                 print 'Received broadcast message: {0}'.format(msg)
-                #self.logger.info('Received broadcast message: ' + msg)
-        sock.close()
+        b_sock.close()
 
     def send_bcast(self, msg):
+        """Send broadcast message"""
         self.bsock.sendto(
             msg,
             (settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT'])
             )
         print 'Send notification to peers: {}'.format(msg)
 
-    def listen_message(self):
+    def listen_message(self, m_sock):
         print 'Socket now listening...\n'
         while not SocketServer.__cancelled:
-            # wait to accept a connection - blocking call
-            conn, addr = SocketServer.__msg_socket.accept()
-            print '\nConnected with ' + addr[0] + ':' + str(addr[1])
-            # start new thread takes 1st argument as a function name to be run,
-            # second is the tuple of arguments to the function.
-            start_new_thread(self.clientthread, (conn,))
-        SocketServer.__msg_socket.close()
+            read_sockets, write_sockets, error_sockets = select.select([m_sock], [], [])
+            for sock in read_sockets:
+                if sock == m_sock:
+                    conn, addr = m_sock.accept()
+                    print '\nConnected with ' + addr[0] + ':' + str(addr[1])
+                    # start new thread takes 1st argument as a function name to be run,
+                    # second is the tuple of arguments to the function.
+                    start_new_thread(self.clientthread, (conn,))
+        m_sock.close()
     """
     # Over-rides Thread.run
     def run(self):
@@ -187,13 +189,13 @@ class SocketServer(object):
         self.bsock.setblocking(0)
         start_new_thread(self.listen_bcast, (self.bsock,))
 
-        SocketServer.__msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        SocketServer.__msg_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        self.msg_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.msg_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            SocketServer.__msg_socket.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
+            self.msg_socket.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
             print 'Socket bind complete!'
             # Start listening on socket
-            SocketServer.__msg_socket.listen(1)
+            self.msg_socket.listen(1)
         except socket.error as msg:
             if msg[0] != 48 and msg[0] != 98:
                 errmsg = 'Bind failed. Error Code: ' + str(msg[0]) + ' Message: ' + msg[1]
@@ -202,4 +204,4 @@ class SocketServer(object):
                 sys.exit(1)
         print 'Message socket created...\n'
         # Start message socket thread
-        start_new_thread(self.listen_message, ())
+        start_new_thread(self.listen_message, (self.msg_socket,))
