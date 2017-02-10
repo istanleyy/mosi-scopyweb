@@ -19,7 +19,7 @@ class ScopeCoreConfig(AppConfig):
         logger = logging.getLogger('scopepi.debug')
 
         job_control.modelCheck()
-        SocketServer.getInstance()
+        SocketServer.get_instance()
         scope_device = DeviceManager()
         if scope_device.get_instance().is_connected:
             job_control.setup(scope_device)
