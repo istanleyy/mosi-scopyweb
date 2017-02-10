@@ -188,3 +188,4 @@ class SocketServer(Thread):
             print 'Socket bind complete!'
             # Start listening on socket
             self.s.listen(5)
+            self.start()
