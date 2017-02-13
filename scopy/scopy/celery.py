@@ -9,7 +9,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'scopy.settings')
 app = Celery('scopy')
 
 # If using Windows... worker don't have to pickle the objects
-app.config_from_object('django.conf:settings', namespace='CELERY')
+app.config_from_object('django.conf:settings')
 app.autodiscover_tasks()
 
 @app.task(bind=True)
