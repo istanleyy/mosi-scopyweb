@@ -34,7 +34,7 @@ def poll_device_status():
         processQueryResult(
             'opStatus',
             DEVICE_REFERENCE.get_device_status(),
-            PeriodicTask.objects.filter(name='scope_core.tasks.poll_status_task')[0]
+            PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
             )
 
 def poll_alarm_status():
@@ -52,7 +52,8 @@ def poll_prod_status():
         processQueryResult(
             'opMetrics',
             result,
-            PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0])
+            PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
+            )
 
 def processQueryResult(source, data, task=None):
     global LOGGER
@@ -568,7 +569,7 @@ def performChangeOverByID(id):
 
         # Load new job information only if we can find executable jobs in the db
         if getJobsFromServer():
-            task = PeriodicTask.objects.filter(task='scope_core.tasks.poll_metrics_task')[0]
+            task = PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
             # If the mold id of the production data has changed,
             # need to update session reference to the job using the new mold.
             newJob = Job.objects.filter(jobid=int(id), active=True)
