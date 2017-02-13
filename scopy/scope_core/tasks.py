@@ -65,7 +65,7 @@ def poll_metrics_task():
     release_lock = lambda: cache.delete(LOCK_ID)
 
     if acquire_lock():
-        p_task = PeriodicTask.objects.filter(task='scope_core.tasks.poll_metrics_task')[0]
+        p_task = PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
         LOGGER.info("Polling production data (p={})...".format(p_task.interval.every))
         try:
             job_control.poll_prod_status()

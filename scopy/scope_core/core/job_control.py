@@ -34,7 +34,8 @@ def poll_device_status():
         processQueryResult(
             'opStatus',
             DEVICE_REFERENCE.get_device_status(),
-            PeriodicTask.objects.filter(task='scope_core.tasks.poll_status_task')[0])
+            PeriodicTask.objects.filter(name='scope_core.tasks.poll_status_task')[0]
+            )
 
 def poll_alarm_status():
     global DEVICE_REFERENCE
@@ -51,7 +52,7 @@ def poll_prod_status():
         processQueryResult(
             'opMetrics',
             result,
-            PeriodicTask.objects.filter(task='scope_core.tasks.poll_metrics_task')[0])
+            PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0])
 
 def processQueryResult(source, data, task=None):
     global LOGGER
