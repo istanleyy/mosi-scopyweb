@@ -16,7 +16,7 @@ job_control.py
 import pytz
 import logging
 from datetime import datetime
-from django_celery_beat.models import IntervalSchedule, PeriodicTask
+from django_celery_beat.models import IntervalSchedule, PeriodicTask, PeriodicTasks
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
@@ -210,6 +210,7 @@ def processQueryResult(source, data, task=None):
                     )
                 task.interval_id = intv.id
                 task.save()
+                PeriodicTasks.changed()
 
     elif source == 'alarmStatus' and data != 'fail':
         print (data, machine.opstatus)
@@ -425,6 +426,7 @@ def performChangeOver(session, task, moldserial=None):
                         )
                     task.interval_id = intv.id
                     task.save()
+                    PeriodicTasks.changed()
                 return True
         else:
             print '\033[91m' + '[Scopy] No scheduled jobs for this machine.' + '\033[0m'
@@ -590,6 +592,7 @@ def performChangeOverByID(id):
                             )
                         task.interval_id = intv.id
                         task.save()
+                        PeriodicTasks.changed()
                     LOGGER.warning('Server forced CO.')
                     print '\033[93m' + '[Scopy] Server force CO.' + '\033[0m'
                     return 0
