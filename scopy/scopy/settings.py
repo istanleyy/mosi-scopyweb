@@ -91,7 +91,7 @@ REST_FRAMEWORK = {
 # Celery settings
 
 CELERY_BROKER_URL = 'amqp://mosi-dev:mosi-dev@localhost:5672/devhost'
-CELERY_BEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
+CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_IGNORE_RESULT = True
 CELERY_DISABLE_RATE_LIMITS = True
