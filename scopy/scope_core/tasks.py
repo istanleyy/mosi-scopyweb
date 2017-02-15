@@ -17,7 +17,8 @@ LOCK_ID = "shared-lock"
 
 def init_tasks():
     """Performs the initial execution of tasks when system is up."""
-    poll_status_task.delay()
+    #poll_status_task.delay()
+    pass
 
 @periodic_task(run_every=(timedelta(seconds=P_PRIOR_HIGH)))
 def poll_status_task():

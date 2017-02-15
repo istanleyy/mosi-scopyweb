@@ -338,12 +338,12 @@ def setup(device_ref):
     if LAST_OUTPUT != 0:
         DEVICE_REFERENCE.total_output = LAST_OUTPUT
 
-def getJobsFromServer():
+def getJobsFromServer(job_id="", user_id=""):
     # If all jobs in db are done (not active), get new jobs from server
     # Function returns True if there are executable jobs, False otherwise
     activeJobs = Job.objects.filter(active=True)
     if not activeJobs:
-        result = request_sender.sendGetRequest()
+        result = request_sender.sendGetRequest(job_id, user_id)
         if result is not None:
             if result == 'ServerMsg:no more job':
                 return False
@@ -493,6 +493,10 @@ def processBarcodeActivity(data):
                     return str(job.multiplier)
                 else:
                     return str(0)
+            if params[3] == 'P1B':
+                msgdata = params.split('-')
+                # Received job initiation request
+                return getJobsFromServer(msgdata[0], msgdata[1])
             else:
                 return 'unknown'
 

@@ -17,6 +17,7 @@ from scope_core.config import settings
 logger = logging.getLogger('scopepi.messaging')
 
 def sendPostRequest(msg, errHandle=False):
+    """Sends a POST message to the server. Used for Scope job event and update messages."""
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
@@ -43,7 +44,12 @@ def sendPostRequest(msg, errHandle=False):
         #print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
         return (None, 'RequestException')
 
-def sendGetRequest():
+def sendGetRequest(job="", user=""):
+    """Get request is used to get job information from server.
+
+    job - the serial number of the job that we want the information for.
+    user - the id of the user initiated this request.
+    """
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
@@ -60,6 +66,7 @@ def sendGetRequest():
         return None
 
 def sendBcastReply():
+    """Send reply as a broadcast message."""
     if settings.DEBUG:
         url = settings.DEBUG_SERVER['IP'] + settings.DEBUG_SERVER['PATH']
     else:
