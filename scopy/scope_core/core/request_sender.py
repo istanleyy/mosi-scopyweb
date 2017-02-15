@@ -55,7 +55,11 @@ def sendGetRequest(job="", user=""):
     else:
         url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['PATH']
 
-    param = {'station': settings.DEVICE_INFO['NAME']}
+    param = {
+        'station': settings.DEVICE_INFO['NAME'],
+        'job': job,
+        'user': user
+    }
     try:
         logger.info('-----> sending request to {0}'.format(url))
         r = requests.get(url, params=param, timeout=15)
