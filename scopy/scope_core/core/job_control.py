@@ -494,7 +494,7 @@ def processBarcodeActivity(data):
                 else:
                     return str(0)
             if params[3] == 'P1B':
-                msgdata = params.split('-')
+                msgdata = params.split(';')
                 # Received job initiation request
                 return getJobsFromServer(msgdata[0], msgdata[1])
             else:
