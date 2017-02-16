@@ -493,7 +493,7 @@ def processBarcodeActivity(data):
                     return str(job.multiplier)
                 else:
                     return str(0)
-            if params[:3] == 'P1B':
+            elif params[:3] == 'P1B':
                 msgdata = params.split(';')
                 # Received job initiation request
                 if getJobsFromServer(msgdata[0], msgdata[1]):
