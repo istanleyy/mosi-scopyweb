@@ -341,6 +341,7 @@ def setup(device_ref):
 def getJobsFromServer(job_id="", user_id=""):
     # If all jobs in db are done (not active), get new jobs from server
     # Function returns True if there are executable jobs, False otherwise
+    """
     activeJobs = Job.objects.filter(active=True)
     if not activeJobs:
         result = request_sender.sendGetRequest(job_id, user_id)
@@ -352,6 +353,16 @@ def getJobsFromServer(job_id="", user_id=""):
                 return xmlparser.isScopeXml(result)
     else:
         return True
+    """
+    result = request_sender.sendGetRequest(job_id, user_id)
+    if result is not None:
+        if result == 'ServerMsg:no more job':
+            return False
+        else:
+            print result
+            return xmlparser.isScopeXml(result)
+    else:
+        return False
 
 def idleDetect(pcs):
     global LAST_OUTPUT
