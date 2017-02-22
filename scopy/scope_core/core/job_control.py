@@ -443,6 +443,7 @@ def performChangeOver(session, task, moldserial=None):
 
 def processBarcodeActivity(data):
     global LOGGER
+    global DEVICE_REFERENCE
     barcodes = data.split(',')
     uid = barcodes[0]
     activity = barcodes[1]
@@ -522,8 +523,10 @@ def processBarcodeActivity(data):
         # If received TERM message during CO, end CO
         if activity == 'TERM':
             machine = Machine.objects.first()
-            if machine.cooverride or machine.lastHaltReason == const.CHG_MOLD:
+            if machine.lastHaltReason == const.CHG_MOLD:
                 machine.cooverride = False
+                sendEventMsg(6, 'ED')
+                DEVICE_REFERENCE.total_output = 0
                 machine.save()
 
         # If recieved multiplier change event, need to update job multiplier and CT
