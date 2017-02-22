@@ -520,9 +520,9 @@ def processBarcodeActivity(data):
             machine.save()
 
         # If received TERM message during CO, end CO
-        if activity == 'TERM' and Machine.objects.first().opstatus == 2:
+        if activity == 'TERM':
             machine = Machine.objects.first()
-            if machine.cooverride:
+            if machine.cooverride or machine.opstatus == 2:
                 machine.cooverride = False
                 machine.save()
 
