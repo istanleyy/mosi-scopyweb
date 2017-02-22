@@ -525,6 +525,7 @@ def processBarcodeActivity(data):
             machine = Machine.objects.first()
             if machine.lastHaltReason == const.CHG_MOLD:
                 machine.cooverride = False
+                machine.lastHaltReason = 0
                 sendEventMsg(6, 'ED')
                 DEVICE_REFERENCE.total_output = 0
                 machine.save()
