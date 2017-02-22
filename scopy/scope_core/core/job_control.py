@@ -522,7 +522,7 @@ def processBarcodeActivity(data):
         # If received TERM message during CO, end CO
         if activity == 'TERM':
             machine = Machine.objects.first()
-            if machine.cooverride or machine.opstatus == 2:
+            if machine.cooverride or machine.lastHaltReason = const.CHG_MOLD:
                 machine.cooverride = False
                 machine.save()
 
