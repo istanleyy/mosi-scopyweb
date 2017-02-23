@@ -329,7 +329,7 @@ def setup(device_ref):
     request_sender.sendPostRequest('false:up')
     getJobsFromServer()
 
-    job = SessionManagement.objects.last().job
+    job = SessionManagement.objects.first().job
     prod_hist = ProductionDataTS.objects.last()
     if prod_hist is not None and (job.jobid == prod_hist.job.jobid) and job.active:
         LAST_OUTPUT = ProductionDataTS.objects.last().output
@@ -352,6 +352,10 @@ def getJobsFromServer(job_id="", user_id=""):
                 return xmlparser.isScopeXml(result)
     else:
         return True
+
+def getCurrentJobName():
+    """Return current running job's productid"""
+    return SessionManagement.objects.first().job.productid
 
 def idleDetect(pcs):
     global LAST_OUTPUT

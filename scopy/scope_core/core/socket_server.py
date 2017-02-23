@@ -61,7 +61,7 @@ class SocketServer(Thread):
                     #print '\033[93m' + '[BarcodeActivity] ' + msgContent[1] + '\033[0m'
                     SocketServer._logger.warning('[BarcodeActivity] {0}'.format(msgContent[1]))
                     if msgContent[1] == 'initiate':
-                        reply = 'scan'
+                        reply = job_control.getCurrentJobName()
                     else:
                         reply = job_control.processBarcodeActivity(msgContent[1])
                 elif msgContent[0] == 'ServerAction':
