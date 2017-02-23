@@ -346,12 +346,17 @@ def getJobsFromServer(job_id="", user_id=""):
         result = request_sender.sendGetRequest(job_id, user_id)
         if result is not None:
             if result == 'ServerMsg:no more job':
-                return False
+                return 'no more job'
+            elif result[:11] == 'ServerError':
+                return 'job error'
             else:
-                print result
-                return xmlparser.isScopeXml(result)
+                #print result
+                if xmlparser.isScopeXml(result):
+                    return 'ok'
+                else:
+                    return 'job definition error'
     else:
-        return True
+        return 'ok'
 
 def getCurrentJobName():
     """Return current running job's productid"""
@@ -408,7 +413,7 @@ def performChangeOver(session, task, moldserial=None):
     oldJob.save()
 
     # Load new job information only if we can find executable jobs in the db
-    if getJobsFromServer():
+    if getJobsFromServer() == 'ok':
         # If the mold id of the production data has changed,
         # need to update session reference to the job using the new mold.
         newJob = Job.objects.filter(active=True)
@@ -501,10 +506,7 @@ def processBarcodeActivity(data):
             elif params[:3] == 'P1B':
                 msgdata = params.split(';')
                 # Received job initiation request
-                if getJobsFromServer(msgdata[0], msgdata[1]):
-                    return 'ok'
-                else:
-                    return 'fail'
+                return getJobsFromServer(msgdata[0], msgdata[1])
             else:
                 return 'unknown'
 
@@ -583,7 +585,7 @@ def performChangeOverByID(id):
         oldJob.save()
 
         # Load new job information only if we can find executable jobs in the db
-        if getJobsFromServer():
+        if getJobsFromServer() == 'ok':
             task = PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
             # If the mold id of the production data has changed,
             # need to update session reference to the job using the new mold.
