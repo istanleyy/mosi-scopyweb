@@ -15,6 +15,7 @@ job_control.py
 
 import pytz
 import logging
+import time
 from datetime import datetime
 from djcelery.models import IntervalSchedule, PeriodicTask
 from lxml import etree
@@ -504,9 +505,18 @@ def processBarcodeActivity(data):
                 else:
                     return str(0)
             elif params[:3] == 'P1B':
+                # Received job initiation request:
+                # Wait for ScopePi to enter manual mode, timeout is 1 min.
+                # If ScopePi cannot enter manual mode within 1 min., need
+                # to return an error indicator string.
                 msgdata = params.split(';')
-                # Received job initiation request
-                return getJobsFromServer(msgdata[0], msgdata[1])
+                reply = 'mode error'
+                timeout_start = time.time()
+                while time.time() < timeout_start + 60:
+                    if Machine.objects.first().opmode < 2:
+                        reply = getJobsFromServer(msgdata[0], msgdata[1])
+                        break
+                return reply
             else:
                 return 'unknown'
 

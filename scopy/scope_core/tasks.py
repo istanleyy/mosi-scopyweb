@@ -9,9 +9,9 @@ from django.core.cache import cache
 from scope_core.core import job_control
 
 LOGGER = get_task_logger(__name__)
-P_PRIOR_HIGH = 60
-P_PRIOR_MID = 90
-P_PRIOR_LOW = 120
+P_PRIOR_HIGH = 20
+P_PRIOR_MID = 60
+P_PRIOR_LOW = 90
 LOCK_EXPIRE = 60
 LOCK_ID = "shared-lock"
 
