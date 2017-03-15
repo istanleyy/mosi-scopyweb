@@ -481,7 +481,7 @@ def processBarcodeActivity(data):
                     user.save()
                     sendEventMsg(uid, 'LOGOUT')
                     if activity == 'ALLOUT':
-                        socket_server.SocketServer.getInstance().send_bcast(
+                        socket_server.SocketServer.get_instance().send_bcast(
                             'PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT')
                             )
             except UserActivity.DoesNotExist:
