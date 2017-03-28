@@ -18,14 +18,19 @@ from abstract_manager import AbstractConnectionManager
 from scope_core.config import settings
 
 class MySqlConnectionManager(AbstractConnectionManager):
+    """The conneciton manager maintains a connection pool to execute queries from other modules."""
     logger = None
     cnxpool = None
-    connection = None    
-    
+    connection = None
+
     def __init__(self):
         self.logger = logging.getLogger('scopepi.debug')
         try:
-            self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(pool_name="fcsdb", pool_size=3, **settings.MYSQL_CONFIG)
+            self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(
+                pool_name="fcsdb",
+                pool_size=3,
+                pool_reset_session=True,
+                **settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
             self.logger.exception(err.message)
 
@@ -40,37 +45,35 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 cursor.execute('SET CHARACTER SET utf8;')
                 cursor.execute('SET character_set_connection=utf8;')
                 cursor.close()
+                self.connection.close()
                 result = True
+            return result
         except mysql.connector.Error as err:
             self.logger.exception(err.message)
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print("Invalid username or password!")
+                print "Invalid username or password!"
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print("Database doesn't exist!")
+                print "Database doesn't exist!"
             else:
-                print(err)
-        finally:
-            return result
-            
+                print err
+
     def disconnect(self):
         if self.connection:
             self.connection.close()
-        
+
     def query(self, queryString):
+        """Executes the query defined by queryString."""
         result = None
         try:
-            cursor = None
-            if self.connection:
-                self.connect()
+            self.connection = self.cnxpool.get_connection()
             cursor = self.connection.cursor()
-        except mysql.connector.Error:
-            if self.cnxpool:
-                self.connection = self.cnxpool.get_connection()
-                cursor = self.connection.cursor()
-        finally:
             if cursor:
                 cursor.execute(queryString)
                 result = cursor.fetchone()
                 cursor.close()
-                self.disconnect()
+                self.connection.close()
             return result
+        except mysql.connector.Error:
+            if self.cnxpool:
+                self.connection = self.cnxpool.get_connection()
+                cursor = self.connection.cursor()

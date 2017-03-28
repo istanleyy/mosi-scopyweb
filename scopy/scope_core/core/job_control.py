@@ -86,16 +86,9 @@ def processQueryResult(source, data, task=None):
         job = SessionManagement.objects.first().job
 
         print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
-        # If the machine is detected to be OFFLINE (FCS DB device),
-        # send corresponding message to server
-        if machine.opmode == 0:
-            if job.inprogress:
-                job.inprogress = False
-                job.save()
-                request_sender.sendPostRequest('false:bye')
 
         # If the machine has been switched to AUTO_MODE or SEMI_AUTO_MODE
-        elif machine.opmode > 1:
+        if machine.opmode > 1:
             # Machine is in ready-to-produce status (RUNNING)
             if machine.opstatus == const.RUNNING or machine.opstatus == const.IDLE:
                 # Check job status for current session
@@ -138,7 +131,7 @@ def processQueryResult(source, data, task=None):
                 # material, so the system should ignore such mode-status combinations
                 pass
 
-        # Machine is in MANUAL mode
+        # Machine is in OFFLINE or MANUAL mode
         else:
             # Machine enters line change (change mold)
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
@@ -181,6 +174,14 @@ def processQueryResult(source, data, task=None):
             # Machine in RUNNING or IDLE state
             else:
                 pass
+
+            # If the machine is detected to be OFFLINE (FCS DB device),
+            # send corresponding message to server
+            if machine.opmode == 0:
+                if job.inprogress:
+                    job.inprogress = False
+                    job.save()
+                    request_sender.sendPostRequest('false:bye')
 
     elif source == 'opMetrics' and data != 'fail':
         mct = data[0]
