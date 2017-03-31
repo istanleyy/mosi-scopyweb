@@ -66,6 +66,7 @@ def processQueryResult(source, data, task=None):
         print 'Communication error...'
         if not machine.commerr:
             machine.commerr = True
+            machine.opmode = 0
             machine.save()
             if session.job.inprogress and source != 'app':
                 # If communication error is detected when a job is in progress,

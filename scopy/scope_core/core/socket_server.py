@@ -173,15 +173,13 @@ class SocketServer(Thread):
             self.bcast_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             self.bcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
             self.bcast_sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
-            self.bcast_sock.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
             self.bcast_sock.setblocking(0)
-            start_new_thread(self.listen_bcast, (self.bcast_sock,))
 
             self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            print 'Message socket created...'
-            # Bind socket to local host and port
             self.msg_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            
             try:
+                self.bcast_sock.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
                 self.msg_sock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
             except socket.error as msg:
                 if msg[0] != 48 and msg[0] != 98:
@@ -191,6 +189,7 @@ class SocketServer(Thread):
                     sys.exit()
 
             print 'Socket bind complete!'
-            # Start listening on socket
+            # Start listening on SocketServers
+            start_new_thread(self.listen_bcast, (self.bcast_sock,))
             self.msg_sock.listen(5)
             self.start()

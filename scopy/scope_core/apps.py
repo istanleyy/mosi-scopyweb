@@ -19,10 +19,10 @@ class ScopeCoreConfig(AppConfig):
         logger = logging.getLogger('scopepi.debug')
 
         job_control.modelCheck()
-        SocketServer.get_instance()
         scope_device = DeviceManager()
         if scope_device.get_instance().is_connected:
             job_control.setup(scope_device)
+            SocketServer.get_instance()
             tasks.init_tasks()
         else:
             logger.critical("Unable to connect to device {}".format(scope_device.get_did()))

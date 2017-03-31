@@ -39,7 +39,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.2'
+        return '0.1.3'
 
     @property
     def description(self):
