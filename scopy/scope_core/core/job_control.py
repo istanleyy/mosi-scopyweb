@@ -62,6 +62,12 @@ def processQueryResult(source, data, task=None):
     session = SessionManagement.objects.first()
     machine = Machine.objects.first()
 
+    ############################################
+    # When the system failed to get machine
+    # data, notify server of the error. If any
+    # job change is issued during downtime,
+    # should still proceed line change.
+    ############################################
     if data == 'fail':
         print 'Communication error...'
         if not machine.commerr:
@@ -76,6 +82,25 @@ def processQueryResult(source, data, task=None):
                 # If communication error is detected when a job is not running,
                 # send 'bye' message to server to hang up the job
                 request_sender.sendPostRequest('false:bye')
+
+        if machine.opstatus == const.CHG_MOLD or machine.cooverride:
+            if machine.lastHaltReason != const.CHG_MOLD:
+                print 'CO_OVERRIDE: ' + str(machine.cooverride)
+                # perform change-over
+                if performChangeOver(session, task, str(data[2])):
+                    # Successfully enter CO state, send message to server
+                    sendEventMsg(6, 'BG')
+                    machine.lastHaltReason = const.CHG_MOLD
+                    machine.save()
+                else:
+                    if machine.lastHaltReason != const.NOJOB:
+                        # Error in CO procedure, send message to server to
+                        # end current job without next job
+                        sendEventMsg(6, 'NJ')
+                        machine.lastHaltReason = const.NOJOB
+                        if machine.cooverride:
+                            machine.cooverride = False
+                        machine.save()
     else:
         if machine.commerr:
             machine.commerr = False
@@ -83,6 +108,9 @@ def processQueryResult(source, data, task=None):
             if session.job.inprogress:
                 sendEventMsg(1, 'X5')
 
+    ############################################
+    # Processing data on machine status
+    ############################################
     if source == 'opStatus' and data != 'fail':
         job = SessionManagement.objects.first().job
 
@@ -184,6 +212,9 @@ def processQueryResult(source, data, task=None):
                     job.save()
                     request_sender.sendPostRequest('false:bye')
 
+    ############################################
+    # Processing data on machine metrics
+    ############################################
     elif source == 'opMetrics' and data != 'fail':
         mct = data[0]
         pcs = data[1]
@@ -216,6 +247,9 @@ def processQueryResult(source, data, task=None):
                 task.interval_id = intv.id
                 task.save()
 
+    ############################################
+    # Processing data on machine alarms
+    ############################################
     elif source == 'alarmStatus' and data != 'fail':
         print (data, machine.opstatus)
         if machine.opmode != 0:
@@ -358,6 +392,8 @@ def getJobsFromServer(job_id="", user_id=""):
                     return 'ok'
                 else:
                     return 'job definition error'
+        else:
+            return 'network error'
     else:
         return 'ok'
 
