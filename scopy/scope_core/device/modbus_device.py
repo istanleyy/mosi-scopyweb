@@ -148,26 +148,26 @@ class ModbusDevice(AbstractDevice):
                 machine.opstatus = self._status
                 statuschange = True
 
-            if modeval[0] == 1024:
+            if 1024 <= modeval[0] < 2048:
                 print 'Device offline!'
                 self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
                     machine.opstatus = 0
                     modechange = True
-            elif modeval[0] == 2048:
+            elif 2048 <= modeval[0] < 4096:
                 self.mode = const.MANUAL_MODE
                 if machine.opmode != 1:
                     machine.opmode = 1
                     modechange = True
                     print 'Device in manual mode.'
-            elif modeval[0] == 4096:
+            elif 4096 <= modeval[0] < 8192:
                 self.mode = const.SEMI_AUTO_MODE
                 if machine.opmode != 2:
                     machine.opmode = 2
                     modechange = True
                     print 'Device in semi-auto mode.'
-            elif modeval[0] == 8192:
+            elif modeval[0] >= 8192:
                 self.mode = const.AUTO_MODE
                 if machine.opmode != 3:
                     machine.opmode = 3

@@ -554,6 +554,7 @@ def processBarcodeActivity(data):
                     if Machine.objects.first().opmode < 2:
                         reply = getJobsFromServer(msgdata[0], msgdata[1])
                         break
+                    time.sleep(3)
                 return reply
             else:
                 return 'unknown'
