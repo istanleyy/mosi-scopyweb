@@ -555,10 +555,32 @@ def processBarcodeActivity(data):
                         reply = getJobsFromServer(msgdata[0], msgdata[1])
                         break
                     time.sleep(3)
-                return reply
+
+                if reply == 'ok':
+                    co_success = False
+                    machine = Machine.objects.first()
+                    if performChangeOver(SessionManagement.objects.first(), PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]):
+                        # Successfully enter CO state, send message to server
+                        co_success = sendEventMsg(6, 'BG')
+                        machine.lastHaltReason = const.CHG_MOLD
+                        machine.save()
+                    else:
+                        if machine.lastHaltReason != const.NOJOB:
+                            # Error in CO procedure, send message to server to
+                            # end current job without next job
+                            co_success = sendEventMsg(6, 'NJ')
+                            machine.lastHaltReason = const.NOJOB
+                            machine.save()
+                    if co_success:
+                        return reply
+                    else:
+                        return 'job error'
+                else:
+                    return reply
             else:
                 return 'unknown'
 
+        """
         # If performing change-over procedure
         if activity == 'CHGOVR':
             machine = Machine.objects.first()
@@ -567,6 +589,7 @@ def processBarcodeActivity(data):
                 machine.cooverride = True
                 machine.save()
                 #print '***** barcode CO *****'
+        """
 
         # If performing mold trial, need to quit CO procedure without machine
         # switching to auto mode
