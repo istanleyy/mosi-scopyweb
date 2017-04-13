@@ -92,7 +92,11 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     @last_output.setter
     def last_output(self, new_val):
-        self._last_output = new_val
+        try:
+            val = int(new_val)
+            self._last_output = val
+        except ValueError:
+            self._logger.error('Invalid value when updating last_output.')
 
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
@@ -191,12 +195,15 @@ class FCSInjectionDevice_db(AbstractDevice):
         result = self._connection_manager.query(query)
         print result
         if result is not None:
+            modnum = 0
+            if result[1] is not None:
+                modnum = result[1]
             if self._status == const.CHG_MOLD:
                 self.total_output = 0
-                self.last_output = result[1]
-            if result[1] != self.last_output:
-                self.total_output = self.calc_output(result[1])
-                self.last_output = result[1]
+                self.last_output = modnum
+            if modnum != self.last_output:
+                self.total_output = self.calc_output(modnum)
+                self.last_output = modnum
             # FCS server updates data every minute.
             return (60, self.total_output)
         else:
