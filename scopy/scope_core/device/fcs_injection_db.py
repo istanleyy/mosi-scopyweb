@@ -92,11 +92,12 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     @last_output.setter
     def last_output(self, new_val):
-        try:
-            val = int(new_val)
-            self._last_output = val
-        except ValueError:
-            self._logger.error('Invalid value when updating last_output.')
+        if new_val:
+            try:
+                val = int(new_val)
+                self._last_output = val
+            except ValueError:
+                self._logger.error('Invalid value when updating last_output.')
 
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""

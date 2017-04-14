@@ -177,7 +177,7 @@ class SocketServer(Thread):
 
             self.msg_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.msg_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-            
+
             try:
                 self.bcast_sock.bind((settings.SOCKET_SERVER['BCAST_ADDR'], settings.SOCKET_SERVER['BCAST_PORT']))
                 self.msg_sock.bind((settings.SOCKET_SERVER['HOST'], settings.SOCKET_SERVER['PORT']))
