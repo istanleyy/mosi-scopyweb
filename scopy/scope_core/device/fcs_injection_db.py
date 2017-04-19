@@ -195,21 +195,22 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connection_manager.query(query)
         print result
-        if result is not None:
-            modnum = 0
-            if result[1] is not None:
-                modnum = result[1]
-            if self._status == const.CHG_MOLD:
-                self.total_output = 0
-                self.last_output = modnum
-            if modnum != self.last_output:
-                self.total_output = self.calc_output(modnum)
-                self.last_output = modnum
-            # FCS server updates data every minute.
-            return (60, self.total_output)
-        else:
-            self._logger.error('Cannot query production status.')
-            return "fail"
+        if self.mode != const.OFFLINE:
+            if result is not None:
+                modnum = 0
+                if result[1] is not None:
+                    modnum = result[1]
+                if self._status == const.CHG_MOLD:
+                    self.total_output = 0
+                    self.last_output = modnum
+                if modnum != self.last_output:
+                    self.total_output = self.calc_output(modnum)
+                    self.last_output = modnum
+                # FCS server updates data every minute.
+                return (60, self.total_output)
+            else:
+                self._logger.error('Cannot query production status.')
+                return "fail"
 
     def calc_output(self, raw_data):
         """
