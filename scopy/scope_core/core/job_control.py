@@ -542,7 +542,7 @@ def processBarcodeActivity(data):
                     return str(job.multiplier)
                 else:
                     return str(0)
-            elif params[:3] == 'P1B':
+            elif params[1:4] == 'P1B':
                 # Received job initiation request:
                 # Wait for ScopePi to enter manual mode, timeout is 1 min.
                 # If ScopePi cannot enter manual mode within 1 min., need
