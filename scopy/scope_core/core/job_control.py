@@ -399,7 +399,10 @@ def getJobsFromServer(job_id="", user_id=""):
 
 def getCurrentJobName():
     """Return current running job's productid"""
-    return SessionManagement.objects.first().job.productid
+    pid = 'NO WORK'
+    if Job.objects.last().active:
+        pid = Job.objects.last().productid
+    return pid
 
 def idleDetect(pcs):
     global LAST_OUTPUT
@@ -517,7 +520,7 @@ def processBarcodeActivity(data):
                 if user and user.lastLogout is None:
                     user.lastLogout = datetime.now()
                     user.save()
-                    sendEventMsg(uid, 'LOGOUT')
+                sendEventMsg(uid, 'LOGOUT')
                 if activity == 'ALLOUT':
                     socket_server.SocketServer.get_instance().send_bcast(
                         'PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT')
