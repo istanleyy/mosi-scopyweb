@@ -33,7 +33,7 @@ def sendPostRequest(msg, errHandle=False):
     }
     try:
         logger.info('-----> sending request to {0}'.format(url))
-        r = requests.post(url, json=payload, headers=headers, timeout=15)
+        r = requests.post(url, json=payload, headers=headers, timeout=60)
         logger.info('<----- remote response: {0}'.format(r.content))
         if r.content == 'ServerMsg:no' or r.content == 'ServerMsg:fail' or r.content[:11] == 'ServerError':
             return (False, r.content)
@@ -62,7 +62,7 @@ def sendGetRequest(job="", user=""):
     }
     try:
         logger.info('-----> sending request to {0}'.format(url))
-        r = requests.get(url, params=param, timeout=15)
+        r = requests.get(url, params=param, timeout=60)
         logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
     except requests.exceptions.RequestException as e:
@@ -78,7 +78,7 @@ def sendBcastReply():
 
     try:
         logger.info('-----> sending request to {0}'.format(url))
-        r = requests.get(url, timeout=15)
+        r = requests.get(url, timeout=60)
         logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
     except requests.exceptions.RequestException:
