@@ -468,8 +468,8 @@ def performChangeOver(session, task, moldserial=None):
             else:
                 # Compare polling period with retrieved mct value
                 ct = int(session.job.ct)
-                if ct == 0:
-                    ct = 60
+                if ct < 15:
+                    ct = 15
                     session.job.ct = ct
                     session.job.save()
                 if ct != task.interval.every:
@@ -674,8 +674,8 @@ def performChangeOverByID(id):
                 else:
                     # Compare polling period with retrieved mct value
                     ct = int(session.job.ct)
-                    if ct == 0:
-                        ct = 60
+                    if ct < 15:
+                        ct = 15
                         session.job.ct = ct
                         session.job.save()
                     if ct != task.interval.every:
