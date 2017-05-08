@@ -45,7 +45,6 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 cursor.execute('SET CHARACTER SET utf8;')
                 cursor.execute('SET character_set_connection=utf8;')
                 cursor.close()
-                self.connection.close()
                 result = True
             return result
         except mysql.connector.Error as err:
@@ -56,6 +55,8 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 print "Database doesn't exist!"
             else:
                 print err
+        finally:
+            self.disconnect()
 
     def disconnect(self):
         if self.connection:
@@ -71,9 +72,8 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 cursor.execute(queryString)
                 result = cursor.fetchone()
                 cursor.close()
-                self.connection.close()
             return result
         except mysql.connector.Error:
-            if self.cnxpool:
-                self.connection = self.cnxpool.get_connection()
-                cursor = self.connection.cursor()
+            print "MySQL connection error in query."
+        finally:
+            self.disconnect()
