@@ -62,7 +62,7 @@ def sendGetRequest(job="", user=""):
     }
     try:
         logger.info('-----> sending request to {0}'.format(url))
-        r = requests.get(url, params=param, timeout=60)
+        r = requests.get(url, params=param, timeout=15)
         logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
     except requests.exceptions.RequestException as e:
