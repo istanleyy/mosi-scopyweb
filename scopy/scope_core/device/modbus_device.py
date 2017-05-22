@@ -101,7 +101,6 @@ class ModbusDevice(AbstractDevice):
     def disconnect(self):
         """Disconnects from the data source via connectionManager"""
         self._connection_manager.disconnect()
-        self._is_connected = False
         self.endpoint_available = False
 
     def check_device_exists(self):
