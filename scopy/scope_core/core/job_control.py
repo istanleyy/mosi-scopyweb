@@ -626,6 +626,8 @@ def processServerAction(data):
     if actparam[0] == 'co':
         result = performChangeOverByID(actparam[1])
         if result == 0:
+            if len(actparam) > 2:
+                sendEventMsg('CHGOVR', 'WS', actparam[2])
             sendEventMsg(6, 'BG')
             machine = Machine.objects.first()
             machine.lastHaltReason = const.CHG_MOLD
