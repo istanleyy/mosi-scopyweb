@@ -25,7 +25,7 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def __init__(self, prtcl):
         self.logger = modbus_tk.utils.create_logger("console")
         self.protocol = prtcl
-        
+
     def connect(self):
         try:
             self.mbmaster = modbus_tcp.TcpMaster(host=settings.MODBUS_CONFIG['slaveAddr'], port=settings.MODBUS_CONFIG['port'])
@@ -33,20 +33,23 @@ class ModbusConnectionManager(AbstractConnectionManager):
             return True
         except modbus_tk.modbus.ModbusError as error:
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
-            
+            return False
+
     def disconnect(self):
         pass
-        
+
     def readHoldingReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_HOLDING_REGISTERS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
-    
+            return None
+
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)
             return result
         except modbus_tk.modbus.ModbusError as error:
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            return None

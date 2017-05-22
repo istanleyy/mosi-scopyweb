@@ -36,7 +36,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.3'
+        return '0.1.4'
 
     @property
     def description(self):
@@ -93,12 +93,16 @@ class ModbusDevice(AbstractDevice):
 
     def connect(self):
         """Connects to the device data source via connectionManager"""
-        return self._connection_manager.connect()
+        connected = self._connection_manager.connect()
+        if connected:
+            self.endpoint_available = True
+        return connected
 
     def disconnect(self):
         """Disconnects from the data source via connectionManager"""
         self._connection_manager.disconnect()
         self._is_connected = False
+        self.endpoint_available = False
 
     def check_device_exists(self):
         """Check if target device with given ID exists"""
@@ -116,121 +120,127 @@ class ModbusDevice(AbstractDevice):
             return False
 
     def get_device_status(self):
-        try:
-            # Control registers map: [opmode, chovrsw, chmatsw, moldid]
-            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
-        except socket_error:
-            return 'fail'
-
-        if result is not None:
-            if settings.DEBUG:
-                print result
-            machine = Machine.objects.first()
-            jobserial = self.hextostr(result[10:16])
-            moldid = self.hextostr(result[20:26])
-            print 'jobserial: ' + jobserial + ' moldid: ' + moldid
-            statuschange = False
-            modechange = False
-
-            modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
-
-            if result[0] == 2:
-                self._status = const.CHG_MOLD
-                self.total_output = 0
-            elif result[0] == 3:
-                self._status = const.CHG_MATERIAL
-            elif result[0] == 4:
-                self._status = const.SETUP
-            else:
-                self._status = const.RUNNING if result[0] == 1 else const.IDLE
-
-            if machine.opstatus != self._status:
-                machine.opstatus = self._status
-                statuschange = True
-
-            if 1024 <= modeval[0] < 2048:
-                print 'Device offline!'
-                self.mode = const.OFFLINE
-                if machine.opmode != 0:
-                    machine.opmode = 0
-                    machine.opstatus = 0
-                    modechange = True
-            elif 2048 <= modeval[0] < 4096:
-                self.mode = const.MANUAL_MODE
-                if machine.opmode != 1:
-                    machine.opmode = 1
-                    modechange = True
-                    print 'Device in manual mode.'
-            elif 4096 <= modeval[0] < 8192:
-                self.mode = const.SEMI_AUTO_MODE
-                if machine.opmode != 2:
-                    machine.opmode = 2
-                    modechange = True
-                    print 'Device in semi-auto mode.'
-            elif modeval[0] >= 8192:
-                self.mode = const.AUTO_MODE
-                if machine.opmode != 3:
-                    machine.opmode = 3
-                    modechange = True
-                    self.tLastUpdate = datetime.now()
-                    print 'Device in auto mode.'
-            else:
-                pass
-
-            if statuschange or modechange:
-                machine.save()
-                print (self.mode, self._status)
-            return (self.mode, self._status, moldid)
+        if not self.endpoint_available:
+            print "Device was not available. Retry connection..."
+            self.connect()
         else:
-            return "fail"
+            try:
+                # Control registers map: [opmode, chovrsw, chmatsw, moldid]
+                result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+            except socket_error:
+                return 'fail'
+
+            if result is not None:
+                if settings.DEBUG:
+                    print result
+                machine = Machine.objects.first()
+                jobserial = self.hextostr(result[10:16])
+                moldid = self.hextostr(result[20:26])
+                print 'jobserial: ' + jobserial + ' moldid: ' + moldid
+                statuschange = False
+                modechange = False
+
+                modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
+
+                if result[0] == 2:
+                    self._status = const.CHG_MOLD
+                    self.total_output = 0
+                elif result[0] == 3:
+                    self._status = const.CHG_MATERIAL
+                elif result[0] == 4:
+                    self._status = const.SETUP
+                else:
+                    self._status = const.RUNNING if result[0] == 1 else const.IDLE
+
+                if machine.opstatus != self._status:
+                    machine.opstatus = self._status
+                    statuschange = True
+
+                if 1024 <= modeval[0] < 2048:
+                    print 'Device offline!'
+                    self.mode = const.OFFLINE
+                    if machine.opmode != 0:
+                        machine.opmode = 0
+                        machine.opstatus = 0
+                        modechange = True
+                elif 2048 <= modeval[0] < 4096:
+                    self.mode = const.MANUAL_MODE
+                    if machine.opmode != 1:
+                        machine.opmode = 1
+                        modechange = True
+                        print 'Device in manual mode.'
+                elif 4096 <= modeval[0] < 8192:
+                    self.mode = const.SEMI_AUTO_MODE
+                    if machine.opmode != 2:
+                        machine.opmode = 2
+                        modechange = True
+                        print 'Device in semi-auto mode.'
+                elif modeval[0] >= 8192:
+                    self.mode = const.AUTO_MODE
+                    if machine.opmode != 3:
+                        machine.opmode = 3
+                        modechange = True
+                        self.tLastUpdate = datetime.now()
+                        print 'Device in auto mode.'
+                else:
+                    pass
+
+                if statuschange or modechange:
+                    machine.save()
+                    print (self.mode, self._status)
+                return (self.mode, self._status, moldid)
+            else:
+                return "fail"
 
     def get_alarm_status(self):
-        try:
-            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
-        except socket_error:
-            return 'fail'
+        if self.endpoint_available:
+            try:
+                result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 4)
+            except socket_error:
+                return 'fail'
 
-        print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
-        if result is not None:
-            errid_1 = int(result[2])
-            errid_2 = int(result[3])
-            if errid_1 != 0 or errid_2 != 0:
-                for errtag, errcode in const.ERROR_LIST.iteritems():
-                    if errid_1 == errcode or errid_2 == errcode:
-                        return (errtag, True)
-            return ('', False)
-        else:
-            return "fail"
+            print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
+            if result is not None:
+                errid_1 = int(result[2])
+                errid_2 = int(result[3])
+                if errid_1 != 0 or errid_2 != 0:
+                    for errtag, errcode in const.ERROR_LIST.iteritems():
+                        if errid_1 == errcode or errid_2 == errcode:
+                            return (errtag, True)
+                return ('', False)
+            else:
+                return "fail"
 
     def get_production_status(self):
-        try:
-            result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
-        except socket_error:
-            return 'fail'
+        if self.endpoint_available:
+            try:
+                result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['dataRegAddr'], 4)
+            except socket_error:
+                return 'fail'
 
-        if result is not None:
-            pcshex = [result[1], result[0]]
-            if settings.SIMULATE and self.mode == const.AUTO_MODE:
-                # For testing purpose
-                self.total_output += 1 if random.random() < 0.8 else 0
-                if self.total_output != self.last_output:
-                    self.mct = self.getmct()
-                    self.last_output = self.total_output
+            if result is not None:
+                pcshex = [result[1], result[0]]
+                if settings.SIMULATE and self.mode == const.AUTO_MODE:
+                    # For testing purpose
+                    self.total_output += 1 if random.random() < 0.8 else 0
+                    if self.total_output != self.last_output:
+                        self.mct = self.getmct()
+                        self.last_output = self.total_output
+                else:
+                    raw_data = self.hextoint32(pcshex)
+                    if self._status == const.CHG_MOLD:
+                        self.total_output = 0
+                        self.last_output = raw_data
+                    # Calc mct only if the output has changed
+                    print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
+                    if raw_data != self.last_output:
+                        self.mct = self.getmct()
+                        self.total_output = self.calc_output(raw_data)
+                        self.last_output = raw_data
+                print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
+                return (self.mct, self.total_output)
             else:
-                raw_data = self.hextoint32(pcshex)
-                if self._status == const.CHG_MOLD:
-                    self.total_output = 0
-                    self.last_output = raw_data
-                # Calc mct only if the output has changed
-                print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
-                if raw_data != self.last_output:
-                    self.mct = self.getmct()
-                    self.total_output = self.calc_output(raw_data)
-                    self.last_output = raw_data
-            print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
-            return (self.mct, self.total_output)
-        else:
-            return "fail"
+                return "fail"
 
     def calc_output(self, val):
         """
@@ -275,7 +285,7 @@ class ModbusDevice(AbstractDevice):
     def __init__(self, did):
         self._connection_manager = ModbusConnectionManager('tcp')
         self._did = did
-        self._is_connected = False
+        self._is_connected = True
         self._status = const.IDLE
         self._total_output = 0
         self._mct = 0
@@ -283,14 +293,14 @@ class ModbusDevice(AbstractDevice):
 
         self.mode = const.OFFLINE
         self.tLastUpdate = datetime.now()
+        self.endpoint_available = False
 
         if self.connect():
             print "Host connected. Check device ID={}...".format(did)
             if self.check_device_exists():
-                self._is_connected = True
                 print "Device is {}, Module version {}\n".format(self.name, self.version)
             else:
-                print "Device doesn't exist!"
+                print "Device not found!"
                 self.disconnect()
         else:
             print "Connection failed!"
