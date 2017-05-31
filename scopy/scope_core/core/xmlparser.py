@@ -269,7 +269,7 @@ def logUnsyncMsg(xmlstring):
             file.close()
         else:
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
-
+        print dom
         # Log only event or update messages
         if dom[0].tag == 'job_event':
             insertpos = xmltree.find('.//unsync_messages')
@@ -288,7 +288,7 @@ def logUnsyncMsg(xmlstring):
         else:
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
-
+        print dom
         timeval = dom[0].findtext('.//time')
         if timeval != '00000000000000':
             timetags = xmltree.xpath('.//time[text()="00000000000000"]')
