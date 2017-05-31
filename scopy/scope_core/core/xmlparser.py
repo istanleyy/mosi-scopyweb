@@ -296,8 +296,7 @@ def logUnsyncMsg(xmlstring):
                 for time in timetags:
                     time.text = timeval
 
-        logger.debug(
-            etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+        print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
         file = open(settings.UNSYNC_MSG_PATH, "w")
         file.write(
             etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
