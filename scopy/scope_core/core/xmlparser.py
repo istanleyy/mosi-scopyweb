@@ -289,7 +289,7 @@ def logUnsyncMsg(xmlstring):
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
 
-        timeval = dom[0].find('.//time').text
+        timeval = dom.find('.//time').text
         if timeval != '00000000000000':
             timetags = xmltree.xpath('.//time[text()="00000000000000"]')
             if timetags:
