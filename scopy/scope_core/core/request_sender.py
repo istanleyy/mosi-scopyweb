@@ -39,7 +39,7 @@ def sendPostRequest(msg, errHandle=False):
             return (False, r.content)
         else:
             return (True, r.content)
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
         logger.exception('request_handler cannot send POST request to server.')
         #print '\033[91m' + '[Scopy] Cannot send request to server!' + '\033[0m'
         return (None, 'RequestException')
@@ -65,7 +65,7 @@ def sendGetRequest(job="", user=""):
         r = requests.get(url, params=param, timeout=15)
         logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
-    except requests.exceptions.RequestException as e:
+    except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
         logger.exception('request_handler cannot send GET request to server.')
         return None
 
@@ -81,6 +81,6 @@ def sendBcastReply():
         r = requests.get(url, timeout=30)
         logger.info('<----- remote response: {0}'.format(r.content))
         return r.content
-    except requests.exceptions.RequestException:
+    except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
         logger.exception('request_handler cannot reply to broadcast.')
         return None
