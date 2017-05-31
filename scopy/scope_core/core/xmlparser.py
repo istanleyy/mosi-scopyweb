@@ -271,17 +271,36 @@ def logUnsyncMsg(xmlstring):
             xmltree = etree.parse(settings.UNSYNC_MSG_PATH, parser)
 
         # Log only event or update messages
-        if dom[0].tag == 'job_event' or dom[0].tag == 'job_update':
-            insertpos = xmltree.find(".//unsync_messages")
+        if dom[0].tag == 'job_event':
+            insertpos = xmltree.find('.//unsync_messages')
+            insertmsg = insertpos.append(dom[0])
+        elif dom[0].tag == 'job_update':
+            jobid = dom.find('.//job_id').text
+            updatemsg = xmltree.findall('.//job_update')
+            if updatemsg:
+                for msg in updatemsg:
+                    id = msg.find('.//job_id').text
+                    if id == jobid:
+                        msg.getparent().remove(msg)
+
+            insertpos = xmltree.find('.//unsync_messages')
+            insertmsg = insertpos.append(dom[0])
         else:
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
 
-        insertmsg = insertpos.append(dom[0])
-        #print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
+        timeval = dom.find('.//time').text
+        if timeval != '00000000000000':
+            timetags = xmltree.xpath('.//time[text()="00000000000000"]')
+            if timetags:
+                for time in timetags:
+                    time.text = timeval
 
+        logger.debug(
+            etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file = open(settings.UNSYNC_MSG_PATH, "w")
-        file.write(etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
+        file.write(
+            etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
         file.close()
         return True
 
