@@ -288,15 +288,15 @@ def logUnsyncMsg(xmlstring):
         else:
             print '\033[91m' + '[Scopy] Unknown message content in logUnsyncMsg()' + '\033[0m'
             return False
-        '''
-        timeval = dom.find('.//time').text
+
+        timeval = dom[0].find('.//time').text
         if timeval != '00000000000000':
             timetags = xmltree.xpath('.//time[text()="00000000000000"]')
             if timetags:
                 for time in timetags:
                     time.text = timeval
-        '''
-        print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
+
+        #print etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8')
         file = open(settings.UNSYNC_MSG_PATH, "w")
         file.write(
             etree.tostring(xmltree, pretty_print=True, xml_declaration=True, encoding='utf-8'))
