@@ -579,6 +579,12 @@ def processBarcodeActivity(data):
                     else:
                         return 'job error'
                 else:
+                    if machine.lastHaltReason != const.NOJOB:
+                        # Error in CO procedure, send message to server to
+                        # end current job without next job
+                        co_success = sendEventMsg(6, 'NJ')
+                        machine.lastHaltReason = const.NOJOB
+                        machine.save()
                     return reply
             else:
                 return 'unknown'
