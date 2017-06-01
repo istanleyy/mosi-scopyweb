@@ -555,7 +555,7 @@ def processBarcodeActivity(data):
                 timeout_start = time.time()
                 machine = Machine.objects.first()
                 while time.time() < timeout_start + 60:
-                    if machine.opmode < 2:
+                    if Machine.objects.first().opmode < 2:
                         reply = getJobsFromServer(msgdata[0], msgdata[1])
                         break
                     time.sleep(3)
