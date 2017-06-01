@@ -579,6 +579,7 @@ def processBarcodeActivity(data):
                     else:
                         return 'job error'
                 else:
+                    performChangeOver(SessionManagement.objects.first(), PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0])
                     if machine.lastHaltReason != const.NOJOB:
                         # Error in CO procedure, send message to server to
                         # end current job without next job
