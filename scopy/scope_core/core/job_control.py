@@ -553,15 +553,15 @@ def processBarcodeActivity(data):
                 msgdata = params.split(';')
                 reply = 'mode error'
                 timeout_start = time.time()
+                machine = Machine.objects.first()
                 while time.time() < timeout_start + 60:
-                    if Machine.objects.first().opmode < 2:
+                    if machine.opmode < 2:
                         reply = getJobsFromServer(msgdata[0], msgdata[1])
                         break
                     time.sleep(3)
 
                 if reply == 'ok':
                     co_success = False
-                    machine = Machine.objects.first()
                     if performChangeOver(SessionManagement.objects.first(), PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]):
                         # Successfully enter CO state, send message to server
                         co_success = sendEventMsg(6, 'BG')
@@ -582,7 +582,7 @@ def processBarcodeActivity(data):
                     if machine.lastHaltReason != const.NOJOB:
                         # Error in CO procedure, send message to server to
                         # end current job without next job
-                        co_success = sendEventMsg(6, 'NJ')
+                        sendEventMsg(6, 'NJ')
                         machine.lastHaltReason = const.NOJOB
                         machine.save()
                     return reply
