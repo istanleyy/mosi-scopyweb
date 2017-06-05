@@ -217,29 +217,31 @@ class ModbusDevice(AbstractDevice):
             except socket_error:
                 return 'fail'
 
-            if result is not None:
-                pcshex = [result[1], result[0]]
-                if settings.SIMULATE and self.mode == const.AUTO_MODE:
-                    # For testing purpose
-                    self.total_output += 1 if random.random() < 0.8 else 0
-                    if self.total_output != self.last_output:
-                        self.mct = self.getmct()
-                        self.last_output = self.total_output
+            if self.mode != const.OFFLINE:
+                if result is not None:
+                    pcshex = [result[1], result[0]]
+                    if settings.SIMULATE and self.mode == const.AUTO_MODE:
+                        # For testing purpose
+                        self.total_output += 1 if random.random() < 0.8 else 0
+                        if self.total_output != self.last_output:
+                            self.mct = self.getmct()
+                            self.last_output = self.total_output
+                    else:
+                        raw_data = self.hextoint32(pcshex)
+                        if self._status == const.CHG_MOLD:
+                            self.total_output = 0
+                            self.last_output = raw_data
+                        # Calc mct only if the output has changed
+                        print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
+                        if raw_data != self.last_output:
+                            if self.mode != const.MANUAL_MODE:
+                                self.mct = self.getmct()
+                                self.total_output = self.calc_output(raw_data)
+                            self.last_output = raw_data
+                    print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
+                    return (self.mct, self.total_output)
                 else:
-                    raw_data = self.hextoint32(pcshex)
-                    if self._status == const.CHG_MOLD:
-                        self.total_output = 0
-                        self.last_output = raw_data
-                    # Calc mct only if the output has changed
-                    print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
-                    if raw_data != self.last_output:
-                        self.mct = self.getmct()
-                        self.total_output = self.calc_output(raw_data)
-                        self.last_output = raw_data
-                print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
-                return (self.mct, self.total_output)
-            else:
-                return "fail"
+                    return "fail"
 
     def calc_output(self, val):
         """
