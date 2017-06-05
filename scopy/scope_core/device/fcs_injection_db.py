@@ -206,7 +206,7 @@ class FCSInjectionDevice_db(AbstractDevice):
                 if modnum != self.last_output:
                     # Update output counter when in semi-auto and auto mode.
                     # If in manual mode, just keep track of machine's last modnum.
-                    if self._status != const.MANUAL_MODE:
+                    if self.mode != const.MANUAL_MODE:
                         self.total_output = self.calc_output(modnum)
                     self.last_output = modnum
                 # FCS server updates data every minute.
