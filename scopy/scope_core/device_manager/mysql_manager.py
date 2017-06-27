@@ -25,6 +25,9 @@ class MySqlConnectionManager(AbstractConnectionManager):
 
     def __init__(self):
         self.logger = logging.getLogger('scopepi.debug')
+        self.create_cxnpool()
+
+    def create_cxnpool(self):
         try:
             self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(
                 pool_name="fcsdb",
