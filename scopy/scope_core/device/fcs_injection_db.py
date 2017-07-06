@@ -177,7 +177,6 @@ class FCSInjectionDevice_db(AbstractDevice):
             )
         result = self._connection_manager.query(query)
         if result is not None:
-            print result
             if result[1] == 1:
                 for errtag, errcode in const.ERROR_LIST.iteritems():
                     if result[0] == errcode:
@@ -194,7 +193,7 @@ class FCSInjectionDevice_db(AbstractDevice):
             "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
             )
         result = self._connection_manager.query(query)
-        print result
+        #print result
         if self.mode != const.OFFLINE:
             if result is not None:
                 modnum = 0

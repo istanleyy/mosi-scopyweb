@@ -135,7 +135,7 @@ class ModbusDevice(AbstractDevice):
                 machine = Machine.objects.first()
                 jobserial = self.hextostr(result[10:16])
                 moldid = self.hextostr(result[20:26])
-                print 'jobserial: ' + jobserial + ' moldid: ' + moldid
+                #print 'jobserial: ' + jobserial + ' moldid: ' + moldid
                 statuschange = False
                 modechange = False
 
@@ -186,7 +186,7 @@ class ModbusDevice(AbstractDevice):
 
                 if statuschange or modechange:
                     machine.save()
-                    print (self.mode, self._status)
+                    #print (self.mode, self._status)
                 return (self.mode, self._status, moldid)
             else:
                 return "fail"
@@ -198,7 +198,7 @@ class ModbusDevice(AbstractDevice):
             except socket_error:
                 return 'fail'
 
-            print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
+            #print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
             if result is not None:
                 errid_1 = int(result[2])
                 errid_2 = int(result[3])
@@ -232,13 +232,13 @@ class ModbusDevice(AbstractDevice):
                             self.total_output = 0
                             self.last_output = raw_data
                         # Calc mct only if the output has changed
-                        print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
+                        #print 'TASK raw_data:{} {}'.format(raw_data, self.total_output)
                         if raw_data != self.last_output:
                             if self.mode != const.MANUAL_MODE:
                                 self.mct = self.getmct()
                                 self.total_output = self.calc_output(raw_data)
                             self.last_output = raw_data
-                    print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
+                    #print 'total_output<{}> {}'.format(id(self.total_output), self.total_output)
                     return (self.mct, self.total_output)
                 else:
                     return "fail"

@@ -113,8 +113,8 @@ def processQueryResult(source, data, task=None):
     ############################################
     if source == 'opStatus' and data != 'fail':
         job = SessionManagement.objects.first().job
-
-        print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
+        if settings.DEBUG:
+            print(data, machine.opmode, machine.opstatus, machine.lastHaltReason)
 
         # If the machine has been switched to AUTO_MODE or SEMI_AUTO_MODE
         if machine.opmode > 1:
@@ -165,7 +165,7 @@ def processQueryResult(source, data, task=None):
             # Machine enters line change (change mold)
             if machine.opstatus == const.CHG_MOLD or machine.cooverride:
                 if machine.lastHaltReason != const.CHG_MOLD:
-                    print 'CO_OVERRIDE: ' + str(machine.cooverride)
+                    #print 'CO_OVERRIDE: ' + str(machine.cooverride)
                     # perform change-over
                     if performChangeOver(session, task, str(data[2])):
                         # Successfully enter CO state, send message to server
@@ -251,7 +251,7 @@ def processQueryResult(source, data, task=None):
     # Processing data on machine alarms
     ############################################
     elif source == 'alarmStatus' and data != 'fail':
-        print (data, machine.opstatus)
+        #print (data, machine.opstatus)
         if machine.opmode != 0:
             if data[1]:
                 print 'Machine error...'
