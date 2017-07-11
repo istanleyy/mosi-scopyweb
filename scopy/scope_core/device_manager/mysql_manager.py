@@ -32,7 +32,6 @@ class MySqlConnectionManager(AbstractConnectionManager):
             self.cnxpool = mysql.connector.pooling.MySQLConnectionPool(
                 pool_name="fcsdb",
                 pool_size=3,
-                pool_reset_session=False,
                 **settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
             self.logger.exception(err.message)

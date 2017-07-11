@@ -504,6 +504,8 @@ def processBarcodeActivity(data):
 
     if activity == 'LOGIN' or activity == 'LOGOUT' or activity == 'ALLOUT':
         if activity == 'LOGIN':
+            if settings.SINGLE_USER:
+                logoutAll()
             tLogin = datetime.now()
             user = UserActivity.objects.filter(uid=uid)
             if not user:
@@ -705,6 +707,15 @@ def performChangeOverByID(id):
         LOGGER.error('Ignore CO request for repeated job ({0}).'.format(id))
         print '\033[91m' + '[Scopy] Ignoring CO request for repeated job.' + '\033[0m'
         return -1
+
+def logoutAll():
+    users = UserActivity.objects.filter(lastLogout=None)
+    if users:
+        for user in users:
+            user.lastLogout = datetime.now()
+            user.save()
+            sendEventMsg(user.uid, 'LOGOUT')
+            time.sleep(1)
 
 """
 def test_epoch_sec():
