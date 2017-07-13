@@ -53,3 +53,11 @@ class ModbusConnectionManager(AbstractConnectionManager):
         except modbus_tk.modbus.ModbusError as error:
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
+
+    def writeCoil(self, addr, val):
+        try:
+            result = self.mbmaster.execute(51, const.WRITE_SINGLE_COIL, addr, output_value=val)
+            return result
+        except modbus_tk.modbus.ModbusError as error:
+            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            return None

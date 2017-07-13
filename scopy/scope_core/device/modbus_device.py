@@ -36,7 +36,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def version(self):
-        return '0.1.4'
+        return '0.2.0'
 
     @property
     def description(self):
@@ -125,64 +125,88 @@ class ModbusDevice(AbstractDevice):
         else:
             try:
                 # Control registers map: [opmode, chovrsw, chmatsw, moldid]
-                result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+                #result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
+                modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)
             except socket_error:
                 return 'fail'
 
-            if result is not None:
+            if modeval is not None:
                 if settings.DEBUG:
-                    print result
+                    print modeval
                 machine = Machine.objects.first()
-                jobserial = self.hextostr(result[10:16])
-                moldid = self.hextostr(result[20:26])
-                #print 'jobserial: ' + jobserial + ' moldid: ' + moldid
+                #jobserial = self.hextostr(result[10:16])
+                #moldid = self.hextostr(result[20:26])
                 statuschange = False
                 modechange = False
-
-                modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)	   
-
-                if result[0] == 2:
-                    self._status = const.CHG_MOLD
-                    self.total_output = 0
-                elif result[0] == 3:
-                    self._status = const.CHG_MATERIAL
-                elif result[0] == 4:
-                    self._status = const.SETUP
+                
+                if machine.cooverride:
+                    if self._status != const.CHG_MOLD:
+                        self._status = const.CHG_MOLD
+                        self.last_output = modnum
                 else:
-                    self._status = const.RUNNING if result[0] == 1 else const.IDLE
+                    if self._status == const.CHG_MOLD:
+                        self._status = const.IDLE
 
                 if machine.opstatus != self._status:
                     machine.opstatus = self._status
                     statuschange = True
 
-                if 1024 <= modeval[0] < 2048:
-                    print 'Device offline!'
-                    self.mode = const.OFFLINE
-                    if machine.opmode != 0:
-                        machine.opmode = 0
-                        machine.opstatus = 0
-                        modechange = True
-                elif 2048 <= modeval[0] < 4096:
-                    self.mode = const.MANUAL_MODE
-                    if machine.opmode != 1:
-                        machine.opmode = 1
-                        modechange = True
-                        print 'Device in manual mode.'
-                elif 4096 <= modeval[0] < 8192:
-                    self.mode = const.SEMI_AUTO_MODE
-                    if machine.opmode != 2:
-                        machine.opmode = 2
-                        modechange = True
-                        print 'Device in semi-auto mode.'
-                elif modeval[0] >= 8192:
-                    self.mode = const.AUTO_MODE
-                    if machine.opmode != 3:
-                        machine.opmode = 3
-                        modechange = True
-                        self.tLastUpdate = datetime.now()
-                        print 'Device in auto mode.'
+                if settings.MODBUS_CONFIG["vendor"] == "kwt":
+                    if 1024 <= modeval[0] < 2048:
+                        print 'Device offline!'
+                        self.mode = const.OFFLINE
+                        if machine.opmode != 0:
+                            machine.opmode = 0
+                            machine.opstatus = const.IDLE
+                            modechange = True
+                    elif 2048 <= modeval[0] < 4096:
+                        self.mode = const.MANUAL_MODE
+                        if machine.opmode != 1:
+                            machine.opmode = 1
+                            modechange = True
+                            print 'Device in manual mode.'
+                    elif 4096 <= modeval[0] < 8192:
+                        self.mode = const.SEMI_AUTO_MODE
+                        if machine.opmode != 2:
+                            machine.opmode = 2
+                            machine.opstatus = const.RUNNING
+                            modechange = True
+                            print 'Device in semi-auto mode.'
+                    elif modeval[0] >= 8192:
+                        self.mode = const.AUTO_MODE
+                        if machine.opmode != 3:
+                            machine.opmode = 3
+                            machine.opstatus = const.RUNNING
+                            modechange = True
+                            self.tLastUpdate = datetime.now()
+                            print 'Device in auto mode.'
+                    else:
+                        pass
                 else:
-                    pass
+                    # modeval[0] - 1:auto, 2:semi
+                    # modeval[1] - 0:manual off, 1:manual on
+                    if modeval[1] == 0:
+                        if modeval[0] == 0:
+                            self.mode = const.SEMI_AUTO_MODE
+                            if machine.opmode != 2:
+                                machine.opmode = 2
+                                machine.opstatus = const.RUNNING
+                                modechange = True
+                                print 'Device in semi-auto mode.'
+                        else:
+                            self.mode = const.AUTO_MODE
+                            if machine.opmode != 3:
+                                machine.opmode = 3
+                                machine.opstatus = const.RUNNING
+                                modechange = True
+                                self.tLastUpdate = datetime.now()
+                                print 'Device in auto mode.'
+                    else:
+                        self.mode = const.MANUAL_MODE
+                        if machine.opmode != 1:
+                            machine.opmode = 1
+                            modechange = True
+                            print 'Device in manual mode.'
 
                 if statuschange or modechange:
                     machine.save()
@@ -242,6 +266,13 @@ class ModbusDevice(AbstractDevice):
                     return (self.mct, self.total_output)
                 else:
                     return "fail"
+
+    def resetMbCounter(self):
+        if self.endpoint_available:
+            try:
+                result = self._connection_manager.writeCoil(settings.MODBUS_CONFIG['ctrlRegAddr'], 1)
+            except socket_error:
+                return 'fail'
 
     def calc_output(self, val):
         """
