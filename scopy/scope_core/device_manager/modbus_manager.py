@@ -46,6 +46,14 @@ class ModbusConnectionManager(AbstractConnectionManager):
             self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
 
+    def readInputReg(self, startadd, quantity):
+        try:
+            result = self.mbmaster.execute(51, const.READ_INPUT_REGISTERS, startadd, quantity)
+            return result
+        except modbus_tk.modbus.ModbusError as error:
+            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            return None
+
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)

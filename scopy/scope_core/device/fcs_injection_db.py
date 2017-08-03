@@ -101,7 +101,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def check_device_exists(self):
         """Check if the FCS injection mold machine with the given device ID exists in remote DB."""
-        query = ("SELECT ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did))
+        query = ("SELECT ModNum FROM cal_data2 WHERE colmachinenum='{}' AND datetime=(select max(datetime) from cal_data2 where colmachinenum='{}')".format(self._did, self._did))
         result = self._connection_manager.query(query)
         if result is not None:
             self.last_output = result[0]
@@ -112,7 +112,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def get_device_status(self):
         query = (
-            "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
+            "SELECT MachineStatus,ModNum,MO FROM cal_data2 WHERE colmachinenum='{}' AND datetime=(select max(datetime) from cal_data2 where colmachinenum='{}')".format(self._did, self._did)
             )
         result = self._connection_manager.query(query)
         if result is not None:
@@ -190,7 +190,7 @@ class FCSInjectionDevice_db(AbstractDevice):
 
     def get_production_status(self):
         query = (
-            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' ORDER BY DateTime DESC LIMIT 1".format(self._did)
+            "SELECT CycleTime,ModNum FROM cal_data2 WHERE colmachinenum='{}' AND datetime=(select max(datetime) from cal_data2 where colmachinenum='{}')".format(self._did, self._did)
             )
         result = self._connection_manager.query(query)
         #print result

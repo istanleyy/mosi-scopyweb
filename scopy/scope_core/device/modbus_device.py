@@ -126,7 +126,10 @@ class ModbusDevice(AbstractDevice):
             try:
                 # Control registers map: [opmode, chovrsw, chmatsw, moldid]
                 #result = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['ctrlRegAddr'], 30)
-                modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)
+                if settings.MODBUS_CONFIG["vendor"] == "kwt":
+                    modeval = self._connection_manager.readHoldingReg(settings.MODBUS_CONFIG['alarmRegAddr'], 1)
+                else:
+                    modeval = self._connection_manager.readCoil(settings.MODBUS_CONFIG['statusRegAddr'], 4)
             except socket_error:
                 return 'fail'
 
@@ -183,10 +186,17 @@ class ModbusDevice(AbstractDevice):
                     else:
                         pass
                 else:
-                    # modeval[0] - 1:auto, 2:semi
-                    # modeval[1] - 0:manual off, 1:manual on
-                    if modeval[1] == 0:
-                        if modeval[0] == 0:
+                    # Vendor=CH
+                    # modeval[1] - 0:semi-auto, 1:auto
+                    # modeval[2] - 0:manual off, 1:manual on
+                    if modeval[2] == 1:
+                        self.mode = const.MANUAL_MODE
+                        if machine.opmode != 1:
+                            machine.opmode = 1
+                            modechange = True
+                            print 'Device in manual mode.'
+                    else:
+                        if modeval[1] == 0:
                             self.mode = const.SEMI_AUTO_MODE
                             if machine.opmode != 2:
                                 machine.opmode = 2
@@ -201,12 +211,6 @@ class ModbusDevice(AbstractDevice):
                                 modechange = True
                                 self.tLastUpdate = datetime.now()
                                 print 'Device in auto mode.'
-                    else:
-                        self.mode = const.MANUAL_MODE
-                        if machine.opmode != 1:
-                            machine.opmode = 1
-                            modechange = True
-                            print 'Device in manual mode.'
 
                 if statuschange or modechange:
                     machine.save()
@@ -224,12 +228,13 @@ class ModbusDevice(AbstractDevice):
 
             #print "{0:b}, {1:b}, {2:b}, {3:b}".format(result[0], result[1], result[2], result[3])
             if result is not None:
-                errid_1 = int(result[2])
-                errid_2 = int(result[3])
-                if errid_1 != 0 or errid_2 != 0:
-                    for errtag, errcode in const.ERROR_LIST.iteritems():
-                        if errid_1 == errcode or errid_2 == errcode:
-                            return (errtag, True)
+                if settings.MODBUS_CONFIG["vendor"] == "kwt":
+                    errid_1 = int(result[2])
+                    errid_2 = int(result[3])
+                    if errid_1 != 0 or errid_2 != 0:
+                        for errtag, errcode in const.ERROR_LIST.iteritems():
+                            if errid_1 == errcode or errid_2 == errcode:
+                                return (errtag, True)
                 return ('', False)
             else:
                 return "fail"
