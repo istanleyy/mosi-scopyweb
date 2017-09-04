@@ -145,7 +145,7 @@ class ModbusDevice(AbstractDevice):
                 if machine.cooverride:
                     if self._status != const.CHG_MOLD:
                         self._status = const.CHG_MOLD
-                        self.last_output = modnum
+                        self.last_output = self.total_output
                 else:
                     if self._status == const.CHG_MOLD:
                         self._status = const.IDLE
