@@ -20,6 +20,7 @@ class ModbusConnectionManager(AbstractConnectionManager):
     logger = None
     protocol = None
     mbmaster = None
+    lastError = None
 
     # Valid protocol are 'tcp', 'rtu'
     def __init__(self, prtcl):
@@ -41,31 +42,43 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def readHoldingReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_HOLDING_REGISTERS, startadd, quantity)
+            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            if error != self.lastError:
+                self.lastError = error
+                self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
 
     def readInputReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_INPUT_REGISTERS, startadd, quantity)
+            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            if error != self.lastError:
+                self.lastError = error
+                self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
 
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)
+            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            if error != self.lastError:
+                self.lastError = error
+                self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
 
     def writeCoil(self, addr, val):
         try:
             result = self.mbmaster.execute(51, const.WRITE_SINGLE_COIL, addr, output_value=val)
+            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            if error != self.lastError:
+                self.lastError = error
+                self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None

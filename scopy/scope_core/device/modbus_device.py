@@ -156,12 +156,12 @@ class ModbusDevice(AbstractDevice):
 
                 if settings.MODBUS_CONFIG["vendor"] == "kwt":
                     if 1024 <= modeval[0] < 2048:
-                        print 'Device offline!'
                         self.mode = const.OFFLINE
                         if machine.opmode != 0:
                             machine.opmode = 0
                             machine.opstatus = const.IDLE
                             modechange = True
+                            print 'Device offline!'
                     elif 2048 <= modeval[0] < 4096:
                         self.mode = const.MANUAL_MODE
                         if machine.opmode != 1:

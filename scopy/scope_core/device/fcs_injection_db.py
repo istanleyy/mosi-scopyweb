@@ -157,12 +157,12 @@ class FCSInjectionDevice_db(AbstractDevice):
                     modechange = True
                     print 'Device in auto mode.'
             else:
-                print 'Device is offline!'
                 self.mode = const.OFFLINE
                 if machine.opmode != 0:
                     machine.opmode = 0
                     machine.opstatus = const.IDLE
                     modechange = True
+                    print 'Device is offline!'
 
             if statuschange or modechange:
                 machine.save()
