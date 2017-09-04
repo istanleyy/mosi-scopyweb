@@ -69,8 +69,8 @@ def processQueryResult(source, data, task=None):
     # should still proceed line change.
     ############################################
     if data == 'fail':
-        print 'Communication error...'
         if not machine.commerr:
+            print 'Communication error...'
             machine.commerr = True
             machine.opmode = 0
             machine.save()
