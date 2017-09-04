@@ -36,7 +36,7 @@ class ModbusDevice(AbstractDevice):
 
     @property
     def version(self):
-        return '0.2.0'
+        return '0.2.1'
 
     @property
     def description(self):

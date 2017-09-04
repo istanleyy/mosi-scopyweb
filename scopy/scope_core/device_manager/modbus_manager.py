@@ -49,9 +49,9 @@ class ModbusConnectionManager(AbstractConnectionManager):
                 self.lastError = error
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
-        except Exception:
-            if error != self.lastError:
-                self.lastError = error
+        except Exception as e:
+            if e != self.lastError:
+                self.lastError = e
             return None
 
     def readInputReg(self, startadd, quantity):
@@ -64,9 +64,9 @@ class ModbusConnectionManager(AbstractConnectionManager):
                 self.lastError = error
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
-        except Exception:
-            if error != self.lastError:
-                self.lastError = error
+        except Exception as e:
+            if e != self.lastError:
+                self.lastError = e
             return None
 
     def readCoil(self, startadd, quantity):
@@ -79,9 +79,9 @@ class ModbusConnectionManager(AbstractConnectionManager):
                 self.lastError = error
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
-        except Exception:
-            if error != self.lastError:
-                self.lastError = error
+        except Exception as e:
+            if e != self.lastError:
+                self.lastError = e
             return None
 
     def writeCoil(self, addr, val):
@@ -94,7 +94,7 @@ class ModbusConnectionManager(AbstractConnectionManager):
                 self.lastError = error
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
-        except Exception:
-            if error != self.lastError:
-                self.lastError = error
+        except Exception as e:
+            if e != self.lastError:
+                self.lastError = e
             return None
