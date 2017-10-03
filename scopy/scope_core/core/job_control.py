@@ -16,6 +16,7 @@ job_control.py
 import pytz
 import logging
 import time
+import json
 from datetime import datetime
 from djcelery.models import CrontabSchedule, IntervalSchedule, PeriodicTask
 from lxml import etree
@@ -34,12 +35,13 @@ def update_auto_logout():
     result = request_sender.rawGet(url)
     #print('SCHED: ' + result)
     if result is not None and result != 404:
-        m_hour = int(result['data']['m'][:-2])
-        m_minute = int(result['data']['m'][2:])
-        n_hour = int(result['data']['n'][:-2])
-        n_minute = int(result['data']['n'][2:])
-        s_hour = int(result['data']['s'][:-2])
-        s_minute = int(result['data']['s'][2:])
+        result_dict = json.loads(result)
+        m_hour = int(result_dict['data']['m'][:-2])
+        m_minute = int(result_dict['data']['m'][2:])
+        n_hour = int(result_dict['data']['n'][:-2])
+        n_minute = int(result_dict['data']['n'][2:])
+        s_hour = int(result_dict['data']['s'][:-2])
+        s_minute = int(result_dict['data']['s'][2:])
 
     auto_m = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_morning')[0]
     auto_n = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_night')[0]
