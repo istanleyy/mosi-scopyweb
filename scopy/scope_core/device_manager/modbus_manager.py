@@ -33,7 +33,9 @@ class ModbusConnectionManager(AbstractConnectionManager):
             self.mbmaster.set_timeout(5.0)
             return True
         except modbus_tk.modbus.ModbusError as error:
-            self.logger.error("%s- Code=%d", error, error.get_exception_code())
+            if error.get_exception_code() != self.lastError:
+                self.lastError = error.get_exception_code()
+                self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return False
 
     def disconnect(self):
@@ -42,11 +44,10 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def readHoldingReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_HOLDING_REGISTERS, startadd, quantity)
-            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            if error != self.lastError:
-                self.lastError = error
+            if error.get_exception_code() != self.lastError:
+                self.lastError = error.get_exception_code()
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
         except Exception as e:
@@ -57,11 +58,10 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def readInputReg(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_INPUT_REGISTERS, startadd, quantity)
-            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            if error != self.lastError:
-                self.lastError = error
+            if error.get_exception_code() != self.lastError:
+                self.lastError = error.get_exception_code()
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
         except Exception as e:
@@ -72,11 +72,10 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def readCoil(self, startadd, quantity):
         try:
             result = self.mbmaster.execute(51, const.READ_COILS, startadd, quantity)
-            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            if error != self.lastError:
-                self.lastError = error
+            if error.get_exception_code() != self.lastError:
+                self.lastError = error.get_exception_code()
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
         except Exception as e:
@@ -87,11 +86,10 @@ class ModbusConnectionManager(AbstractConnectionManager):
     def writeCoil(self, addr, val):
         try:
             result = self.mbmaster.execute(51, const.WRITE_SINGLE_COIL, addr, output_value=val)
-            self.lastError = None
             return result
         except modbus_tk.modbus.ModbusError as error:
-            if error != self.lastError:
-                self.lastError = error
+            if error.get_exception_code() != self.lastError:
+                self.lastError = error.get_exception_code()
                 self.logger.error("%s- Code=%d", error, error.get_exception_code())
             return None
         except Exception as e:

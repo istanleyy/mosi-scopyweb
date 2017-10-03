@@ -48,7 +48,7 @@ def poll_alarm_task():
     release_lock = lambda: cache.delete(LOCK_ID)
 
     if acquire_lock():
-        LOGGER.info("Polling alarm status (p={})...".format(P_PRIOR_LOW))
+        LOGGER.debug("Polling alarm status (p={})...".format(P_PRIOR_LOW))
         try:
             job_control.poll_alarm_status()
         finally:
@@ -67,10 +67,13 @@ def poll_metrics_task():
 
     if acquire_lock():
         p_task = PeriodicTask.objects.filter(name='scope_core.tasks.poll_metrics_task')[0]
-        LOGGER.info("Polling production data (p={})...".format(p_task.interval.every))
+        LOGGER.debug("Polling production data (p={})...".format(p_task.interval.every))
         try:
             job_control.poll_prod_status()
         finally:
             release_lock()
     else:
         LOGGER.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
+
+def update_logout_time():
+    print '========== CRON TASK =========='

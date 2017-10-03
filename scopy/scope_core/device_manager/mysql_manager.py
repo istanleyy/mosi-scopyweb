@@ -22,6 +22,7 @@ class MySqlConnectionManager(AbstractConnectionManager):
     logger = None
     cnxpool = None
     connection = None
+    lastError = None
 
     def __init__(self):
         self.logger = logging.getLogger('scopepi.debug')
@@ -34,7 +35,9 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 pool_size=3,
                 **settings.MYSQL_CONFIG)
         except mysql.connector.Error as err:
-            self.logger.exception(err.message)
+            if err.errno != self.lastError:
+                self.lastError = err.errno
+                self.logger.exception(err.message)
 
     def connect(self):
         result = False
@@ -50,13 +53,15 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 result = True
             return result
         except mysql.connector.Error as err:
-            self.logger.exception(err.message)
-            if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                print "Invalid username or password!"
-            elif err.errno == errorcode.ER_BAD_DB_ERROR:
-                print "Database doesn't exist!"
-            else:
-                print err
+            if err.errno != self.lastError:
+                self.lastError = err.errno
+                self.logger.exception(err.message)
+                if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+                    print "Invalid username or password!"
+                elif err.errno == errorcode.ER_BAD_DB_ERROR:
+                    print "Database doesn't exist!"
+                else:
+                    print err
         finally:
             self.disconnect()
 
@@ -76,6 +81,6 @@ class MySqlConnectionManager(AbstractConnectionManager):
                 cursor.close()
             return result
         except mysql.connector.Error:
-            print "MySQL connection error in query."
+            self.logger.warning("MySQL connection error in query.")
         finally:
             self.disconnect()
