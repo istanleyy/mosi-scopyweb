@@ -34,7 +34,7 @@ def update_auto_logout():
     result = request_sender.rawGet(url)
     print('SCHED: ' + result)
 
-def get_use_list(param={}):
+def get_use_list(param):
     url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['KICK_USER_LIST']
     result = request_sender.rawGet(url, param)
     print('USERS: ' + result)

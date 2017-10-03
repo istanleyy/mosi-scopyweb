@@ -80,4 +80,5 @@ def poll_metrics_task():
 def update_logout_time():
     LOGGER.info('========== AUTO-LOGOUT UPDATE SCHEDULE ==========')
     job_control.update_auto_logout()
-    job_control.get_use_list({'type':'s'})
+    kwargs = {'type':'s'}
+    job_control.get_use_list(**kwargs)
