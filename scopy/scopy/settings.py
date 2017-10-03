@@ -104,7 +104,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Asia/Taipei'
 CELERYBEAT_SCHEDULE = {
     'update-logout-time': {
-        'task': 'tasks.update_logout_time',
+        'task': 'scope_core.tasks.update_logout_time',
         'schedule': crontab(minute=0, hour=0),
     },
 }
