@@ -2,8 +2,8 @@
 from __future__ import absolute_import, unicode_literals
 
 from datetime import timedelta
-from celery.decorators import task
-from celery.decorators import periodic_task
+from celery.decorators import task, periodic_task
+from celery.schedules import crontab
 from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
 from django.core.cache import cache
@@ -80,5 +80,21 @@ def poll_metrics_task():
 def update_logout_time():
     LOGGER.info('========== AUTO-LOGOUT UPDATE SCHEDULE ==========')
     job_control.update_auto_logout()
+
+@periodic_task(run_every=crontab(hour=19, minute=0))
+def autologout_morning():
+    LOGGER.info('========== AUTO-LOGOUT morning shift ==========')
+    kwargs = {'type':'m'}
+    job_control.do_auto_logout(**kwargs)
+
+@periodic_task(run_every=crontab(hour=8, minute=10))
+def autologout_night():
+    LOGGER.info('========== AUTO-LOGOUT night shift ==========')
+    kwargs = {'type':'n'}
+    job_control.do_auto_logout(**kwargs)
+
+@periodic_task(run_every=crontab(hour=21, minute=0))
+def autologout_stamping():
+    LOGGER.info('========== AUTO-LOGOUT stamping ==========')
     kwargs = {'type':'s'}
-    job_control.get_use_list(**kwargs)
+    job_control.do_auto_logout(**kwargs)

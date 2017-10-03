@@ -31,6 +31,8 @@ def rawGet(dest="", **kwargs):
         logger.info('-----> sending request to {0}'.format(url))
         r = requests.get(url, params=param, timeout=15)
         logger.info('<----- remote response: {0}'.format(r.content))
+        if r.status_code == 404:
+            return r.status_code
         return r.content
     except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
         logger.exception('request_handler cannot send GET request to server.')

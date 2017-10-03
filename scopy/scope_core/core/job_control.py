@@ -17,7 +17,7 @@ import pytz
 import logging
 import time
 from datetime import datetime
-from djcelery.models import IntervalSchedule, PeriodicTask
+from djcelery.models import CrontabSchedule, IntervalSchedule, PeriodicTask
 from lxml import etree
 from scope_core.models import Machine, Job, ProductionDataTS, SessionManagement, UserActivity
 from scope_core.device import device_definition as const
@@ -32,12 +32,50 @@ CYCLE_COUNT = 0
 def update_auto_logout():
     url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['SHIFT_API']
     result = request_sender.rawGet(url)
-    print('SCHED: ' + result)
+    #print('SCHED: ' + result)
+    if result is not None and result != 404:
+        m_hour = int(result['data']['m'][:-2])
+        m_minute = int(result['data']['m'][2:])
+        n_hour = int(result['data']['n'][:-2])
+        n_minute = int(result['data']['n'][2:])
+        s_hour = int(result['data']['s'][:-2])
+        s_minute = int(result['data']['s'][2:])
 
-def get_use_list(**kwargs):
+    auto_m = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_morning')[0]
+    auto_n = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_night')[0]
+    auto_s = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_stamping')[0]
+
+    if auto_m.crontab.hour != m_hour or auto_m.crontab.minute != m_minute:
+        cron, created = CrontabSchedule.objects.get_or_create(hour=m_hour, minute=m_minute)
+        auto_m.crontab_id = cron.id
+        auto_m.save()
+    
+    if auto_n.crontab.hour != n_hour or auto_n.crontab.minute != n_minute:
+        cron, created = CrontabSchedule.objects.get_or_create(hour=n_hour, minute=n_minute)
+        auto_n.crontab_id = cron.id
+        auto_n.save()
+
+    if auto_s.crontab.hour != s_hour or auto_s.crontab.minute != s_minute:
+        cron, created = CrontabSchedule.objects.get_or_create(hour=s_hour, minute=s_minute)
+        auto_s.crontab_id = cron.id
+        auto_s.save()
+
+def do_auto_logout(**kwargs):
     url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['KICK_USER_LIST']
     result = request_sender.rawGet(url, **kwargs)
-    print('USERS: ' + result)
+    if 'data' in result and len(result['data']) > 0:
+        #print('USERS: ' + result)
+        for user in result['data']:
+            try:
+                match = UserActivity.objects.get(uid=user)
+                if match and match.lastLogout is None:
+                    match.lastLogout = datetime.now()
+                    match.save()
+                sendEventMsg(user, 'LOGOUT')
+            except UserActivity.DoesNotExist:
+                pass
+            except UserActivity.MultipleObjectsReturned:
+                LOGGER.exception('ScopePi auto logout error.')
 
 def poll_device_status():
     global DEVICE_REFERENCE
@@ -538,7 +576,7 @@ def processBarcodeActivity(data):
                         'PeerMsg-{0}:{1},{2}'.format(settings.DEVICE_INFO['ID'], uid, 'LOGOUT')
                     )
             except UserActivity.DoesNotExist:
-                LOGGER.exception('User {0} did not logged in.'.format(uid))
+                #LOGGER.exception('User {0} did not logged in.'.format(uid))
                 return 'fail'
             except UserActivity.MultipleObjectsReturned:
                 LOGGER.exception('ScopePi login process error.')
