@@ -103,7 +103,7 @@ CELERY_TIMEZONE = 'Asia/Taipei'
 CELERYBEAT_SCHEDULE = {
     'update-logout-time': {
         'task': 'tasks.update_logout_time',
-        'schedule': crontab(minute=45, hour=11),
+        'schedule': crontab(minute=0, hour=0),
     },
 }
 
