@@ -51,23 +51,27 @@ def update_auto_logout():
         cron, created = CrontabSchedule.objects.get_or_create(hour=m_hour, minute=m_minute)
         auto_m.crontab_id = cron.id
         auto_m.save()
+        LOGGER.warning('auto logout schedule (morning) changed.')
     
     if auto_n.crontab.hour != n_hour or auto_n.crontab.minute != n_minute:
         cron, created = CrontabSchedule.objects.get_or_create(hour=n_hour, minute=n_minute)
         auto_n.crontab_id = cron.id
         auto_n.save()
+        LOGGER.warning('auto logout schedule (night) changed.')
 
     if auto_s.crontab.hour != s_hour or auto_s.crontab.minute != s_minute:
         cron, created = CrontabSchedule.objects.get_or_create(hour=s_hour, minute=s_minute)
         auto_s.crontab_id = cron.id
         auto_s.save()
+        LOGGER.warning('auto logout schedule (stamping) changed.')
 
 def do_auto_logout(**kwargs):
     url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['KICK_USER_LIST']
     result = request_sender.rawGet(url, **kwargs)
-    if 'data' in result and len(result['data']) > 0:
+    result_dict = json.loads(result)
+    if 'data' in result_dict and len(result_dict['data']) > 0:
         #print('USERS: ' + result)
-        for user in result['data']:
+        for user in result_dict['data']:
             try:
                 match = UserActivity.objects.get(uid=user)
                 if match and match.lastLogout is None:

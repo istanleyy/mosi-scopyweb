@@ -18,8 +18,7 @@ LOCK_ID = "shared-lock"
 
 def init_tasks():
     """Performs the initial execution of tasks when system is up."""
-    #poll_status_task.delay()
-    pass
+    update_logout_time.delay()
 
 @periodic_task(run_every=(timedelta(seconds=P_PRIOR_HIGH)))
 def poll_status_task():
@@ -81,13 +80,13 @@ def update_logout_time():
     LOGGER.info('========== AUTO-LOGOUT UPDATE SCHEDULE ==========')
     job_control.update_auto_logout()
 
-@periodic_task(run_every=crontab(hour=19, minute=0))
+@periodic_task(run_every=crontab(hour=20, minute=0))
 def autologout_morning():
     LOGGER.info('========== AUTO-LOGOUT morning shift ==========')
     kwargs = {'type':'m'}
     job_control.do_auto_logout(**kwargs)
 
-@periodic_task(run_every=crontab(hour=8, minute=10))
+@periodic_task(run_every=crontab(hour=8, minute=0))
 def autologout_night():
     LOGGER.info('========== AUTO-LOGOUT night shift ==========')
     kwargs = {'type':'n'}
