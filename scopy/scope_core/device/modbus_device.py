@@ -134,8 +134,6 @@ class ModbusDevice(AbstractDevice):
                 return 'fail'
 
             if modeval is not None:
-                if settings.DEBUG:
-                    print modeval
                 machine = Machine.objects.first()
                 #jobserial = self.hextostr(result[10:16])
                 #moldid = self.hextostr(result[20:26])

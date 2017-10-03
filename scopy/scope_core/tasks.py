@@ -2,6 +2,7 @@
 from __future__ import absolute_import, unicode_literals
 
 from datetime import timedelta
+from celery.decorators import task
 from celery.decorators import periodic_task
 from celery.utils.log import get_task_logger
 from djcelery.models import PeriodicTask
@@ -75,5 +76,6 @@ def poll_metrics_task():
     else:
         LOGGER.info("Blocked: previous task not finished yet! ({})".format(LOCK_ID))
 
+@task()
 def update_logout_time():
     print '========== CRON TASK =========='
