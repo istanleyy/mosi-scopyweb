@@ -78,4 +78,6 @@ def poll_metrics_task():
 
 @task()
 def update_logout_time():
-    print '========== CRON TASK =========='
+    LOGGER.info('========== AUTO-LOGOUT UPDATE SCHEDULE ==========')
+    job_control.update_auto_logout()
+    job_control.get_use_list({'type':'s'})

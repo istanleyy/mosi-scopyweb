@@ -29,6 +29,16 @@ DEVICE_REFERENCE = None
 LAST_OUTPUT = 0
 CYCLE_COUNT = 0
 
+def update_auto_logout():
+    url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['SHIFT_API']
+    result = request_sender.rawGet(url)
+    print('SCHED: ' + result)
+
+def get_use_list(param={}):
+    url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['KICK_USER_LIST']
+    result = request_sender.rawGet(url, param)
+    print('USERS: ' + result)
+
 def poll_device_status():
     global DEVICE_REFERENCE
     if DEVICE_REFERENCE:

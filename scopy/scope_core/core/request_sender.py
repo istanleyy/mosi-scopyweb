@@ -16,6 +16,26 @@ from scope_core.config import settings
 
 logger = logging.getLogger('scopepi.messaging')
 
+def rawGet(dest="", **kwargs):
+    """rawGet function is used to send generic get request to server.
+
+    dest - where to send the request.
+    kwargs - provided key value pairs will be the parameters of the request.
+    """
+    url = dest
+    param = {}
+    for key in kwargs:
+        param[key] = kwargs[key]
+
+    try:
+        logger.info('-----> sending request to {0}'.format(url))
+        r = requests.get(url, params=param, timeout=15)
+        logger.info('<----- remote response: {0}'.format(r.content))
+        return r.content
+    except (requests.exceptions.RequestException, requests.exceptions.ConnectionError):
+        logger.exception('request_handler cannot send GET request to server.')
+        return None
+
 def sendPostRequest(msg, errHandle=False):
     """Sends a POST message to the server. Used for Scope job event and update messages."""
     if settings.DEBUG:
