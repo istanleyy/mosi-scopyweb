@@ -92,9 +92,15 @@ def getJobEventXml(eventType, eventCode, user="", data=""):
     stationTag.text = settings.DEVICE_INFO['NAME']
     timeTag.text = timeText
     typeTag.text = str(eventType)
-    if user != "":
-        userTag = etree.SubElement(jobEvent, "user")
-        userTag.text = user
+    if typeTag == '6':
+        workers = UserActivity.objects.filter(lastLogout=None)
+        for worker in workers:
+            userTag = etree.SubElement(jobEvent, "user")
+            userTag.text = worker.uid
+    else:
+        if user != "":
+            userTag = etree.SubElement(jobEvent, "user")
+            userTag.text = user
     if data != "":
         if data[0] == 'C':
             refList = data.split('-')
