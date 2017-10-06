@@ -31,7 +31,7 @@ LAST_OUTPUT = 0
 CYCLE_COUNT = 0
 
 def update_auto_logout():
-    url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['SHIFT_API']
+    url = settings.SCOPE_SERVER['SHIFT_API']
     result = request_sender.rawGet(url)
     #print('SCHED: ' + result)
     if result is not None and result != 404:
@@ -66,7 +66,7 @@ def update_auto_logout():
         LOGGER.warning('auto logout schedule (stamping) changed.')
 
 def do_auto_logout(**kwargs):
-    url = settings.SCOPE_SERVER['MSG_REPLY'] + settings.SCOPE_SERVER['KICK_USER_LIST']
+    url = settings.SCOPE_SERVER['KICK_USER_LIST']
     result = request_sender.rawGet(url, **kwargs)
     result_dict = json.loads(result)
     if 'data' in result_dict and len(result_dict['data']) > 0:
