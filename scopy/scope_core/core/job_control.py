@@ -558,11 +558,11 @@ def processBarcodeActivity(data):
 
     if activity == 'LOGIN' or activity == 'LOGOUT' or activity == 'ALLOUT':
         if activity == 'LOGIN':
-            if settings.SINGLE_USER:
-                logoutAll()
             tLogin = datetime.now()
             user = UserActivity.objects.filter(uid=uid)
             if not user:
+                if settings.SINGLE_USER:
+                    logoutAll()
                 UserActivity.objects.create(uid=uid, lastLogin=tLogin, lastLogout=None)
             else:
                 user[0].lastLogin = tLogin
