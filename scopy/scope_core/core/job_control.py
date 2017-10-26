@@ -42,6 +42,13 @@ def update_auto_logout():
         n_minute = int(result_dict['data']['n'][2:])
         s_hour = int(result_dict['data']['s'][:-2])
         s_minute = int(result_dict['data']['s'][2:])
+    else:
+        m_hour = 20
+        m_minute = 0
+        n_hour = 8
+        n_minute = 0
+        s_hour = 21
+        s_minute = 0
 
     auto_m = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_morning')[0]
     auto_n = PeriodicTask.objects.filter(name='scope_core.tasks.autologout_night')[0]
