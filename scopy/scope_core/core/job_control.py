@@ -461,8 +461,9 @@ def getJobsFromServer(job_id="", user_id=""):
 def getCurrentJobName():
     """Return current running job's productid"""
     pid = 'NO WORK'
-    if Job.objects.last().active:
-        pid = Job.objects.last().productid
+    thejob = Job.objects.last()
+    if thejob and thejob.active:
+        pid = thejob.productid
     return pid
 
 def idleDetect(pcs):
