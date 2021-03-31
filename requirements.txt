@@ -10,7 +10,7 @@ django-filter==0.13.0
 djangorestframework==3.3.3
 gunicorn==19.5.0
 kombu==3.0.34
-lxml==3.6.0
+lxml==4.6.3
 Markdown==2.6.5
 modbus-tk==0.5.0
 pyserial==2.7
